@@ -27,6 +27,8 @@
 
 	<?php the_title( '<h1>', '</h1>' ); ?>
 
+	<?php lawrence_the_subheading( '<h2>', '</h2>' ); ?>
+
 	<?php
 	// The author(s) of the article.
 	foreach ( get_coauthors() as $author ) :
