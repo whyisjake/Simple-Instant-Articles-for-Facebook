@@ -31,7 +31,7 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @return Simple_FB_Instant_Articles
 	 */
-	public static function instance( $file, $version ) {
+	public static function instance( $file = null, $version = '' ) {
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self( $file, $version );
 		}
