@@ -14,25 +14,33 @@
  */
 ?>
 <header>
-	<figure>
-		<?php the_post_thumbnail( 'medium' ); ?>
-		<figcaption><?php echo simple_fb_thumbnail_caption(); ?></figcaption>
-	</figure>
+
+	<?php
+	// Post featured image as FB IA cover image.
+	if ( $thumb_id = get_post_thumbnail_id() ) :
+	?>
+		<figure>
+			<?php echo wp_get_attachment_image( $thumb_id, array( 2048, 2048 ) ); ?>
+		</figure>
+
+	<?php endif; ?>
 
 	<?php the_title( '<h1>', '</h1>' ); ?>
 
-	<?php // Kickers aren't really a universal thing on WordPress, so let's just add a filter here for people to hook onto. ?>
-	<?php $kicker = apply_filters( 'simple_fb_kicker', '' ); ?>
-	<?php if ( ! empty( $kicker ) ) : ?>
-		<details>
-			<summary><?php echo esc_html( $kicker ); ?></summary>
-		</details>
-	<?php endif; ?>
+	<?php
+	// The author(s) of the article.
+	foreach ( get_coauthors() as $author ) :
+		$author = get_user_by( 'id', $author->ID );
+		?>
 
-	<address>
-		<?php the_author_posts_link(); ?>
-	</address>
+		<address>
+			<a><?php echo esc_html( $author->display_name ); ?></a>
+		</address>
 
-	<time class="op-published" dateTime="<?php echo esc_attr( get_post_time( 'Y-m-d\TH:i:s\Z' ) ); ?>"><?php echo esc_html( get_post_time( get_option( 'date_format' ) ) ); ?></time>
-	<time class="op-modified" dateTime="<?php echo esc_attr( get_the_modified_date('Y-m-d\TH:i:s\Z') ); ?>"><?php echo esc_html( get_the_modified_date( get_option( 'date_format' ) ) ); ?></time>
-</header>
+	<?php endforeach; ?>
+
+	<!-- The published and last modified time stamps -->
+	<time class="op-published" dateTime="<?php echo esc_attr( get_the_time( 'c' ) ); ?>"><?php echo esc_html( lawrence_display_date() ); ?></time>
+	<time class="op-modified" dateTime="<?php echo esc_attr( get_the_modified_time( 'c' ) ); ?>"><?php echo esc_html( lawrence_display_date() ); ?></time>
+
+<header>
