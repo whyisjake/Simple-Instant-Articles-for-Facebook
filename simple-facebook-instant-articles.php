@@ -26,6 +26,13 @@ class Simple_FB_Instant_Articles {
 	 */
 	private $endpoint = 'fb-instant';
 
+
+	/**
+	 * Image Size - 2048x2048 recommended resolution.
+	 * @see https://developers.facebook.com/docs/instant-articles/reference/image
+	 */
+	public $image_size = array( 2048, 2048 );
+
 	/**
 	 * Instantiate or return the one Simple_FB_Instant_Articles instance.
 	 *
@@ -171,7 +178,7 @@ class Simple_FB_Instant_Articles {
 		ob_start(); ?>
 		<figure class="op-slideshow">
 			<?php foreach ( $ids as $id ) : ?>
-				<?php $image = wp_get_attachment_image_src( $id, 'large' ); ?>
+				<?php $image = wp_get_attachment_image_src( $id, $this->image_size ); ?>
 				<?php $url   = ( $image[0] ); ?>
 				<figure>
 					<img src="<?php echo esc_url( $url ); ?>" alt="<?php echo esc_attr( get_the_title( $id ) ); ?>">

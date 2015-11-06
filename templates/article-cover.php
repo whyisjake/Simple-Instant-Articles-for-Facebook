@@ -20,7 +20,7 @@
 	if ( $thumb_id = get_post_thumbnail_id() ) :
 	?>
 		<figure>
-			<?php echo wp_get_attachment_image( $thumb_id, array( 2048, 2048 ) ); ?>
+			<?php echo wp_get_attachment_image( $thumb_id, Simple_FB_Instant_Articles::instance()->image_size ); ?>
 		</figure>
 
 	<?php endif; ?>
