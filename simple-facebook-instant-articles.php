@@ -61,8 +61,13 @@ class Simple_FB_Instant_Articles {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'add_feed' ) );
 		add_action( 'wp', array( $this, 'add_actions' ) );
-		add_filter( 'simple_fb_pre_render', array( $this, 'register_shortcodes' ) );
-		add_filter( 'simple_fb_before_feed', array( $this, 'register_shortcodes' ) );
+
+		// Render post content into FB AI format.
+		// Shortcodes.
+		add_action( 'simple_fb_pre_render', array( $this, 'register_shortcodes' ) );
+		add_action( 'simple_fb_before_feed', array( $this, 'register_shortcodes' ) );
+
+		// Post URL for the feed.
 		add_filter( 'simple_fb_before_feed', array( $this, 'update_rss_permalink' ) );
 
 		// Setup the props.
