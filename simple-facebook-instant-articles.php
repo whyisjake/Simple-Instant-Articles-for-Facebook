@@ -61,8 +61,20 @@ class Simple_FB_Instant_Articles {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'add_feed' ) );
 		add_action( 'wp', array( $this, 'add_actions' ) );
-		add_filter( 'simple_fb_pre_render', array( $this, 'register_shortcodes' ) );
-		add_filter( 'simple_fb_before_feed', array( $this, 'register_shortcodes' ) );
+
+		// Render post content into FB AI format.
+		// Shortcodes.
+		add_action( 'simple_fb_pre_render', array( $this, 'register_shortcodes' ) );
+		add_action( 'simple_fb_before_feed', array( $this, 'register_shortcodes' ) );
+
+		// Post content - use the_content filter.
+		add_action( 'simple_fb_pre_render', array( $this, 'render_post_content' ) );
+		add_action( 'simple_fb_before_feed', array( $this, 'render_post_content' ) );
+
+		// Pull quotes.
+		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
+
+		// Post URL for the feed.
 		add_filter( 'simple_fb_before_feed', array( $this, 'update_rss_permalink' ) );
 
 		// Setup the props.
@@ -190,6 +202,103 @@ class Simple_FB_Instant_Articles {
 			<?php endforeach; ?>
 		</figure>
 		<?php return ob_get_clean();
+	}
+
+	/**
+	 * Hook into the_content filter, so the post content
+	 * can be rendered into FB IA format.
+	 */
+	public function render_post_content() {
+		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ) );
+	}
+
+	/**
+	 * Setup dom and xpath objects for formatting post content.
+	 * Introduces `simple_fb_formatted_post_content` filter, so that post content
+	 * can be formatted as necessary and dom/xpath objects re-used.
+	 *
+	 * @param $post_content Post content that needs to be formatted into FB IA format.
+	 *
+	 * @return string|void  Post content in FB IA format if dom is generated for post content,
+	 *                      Otherwise, nothing.
+	 */
+	public function fb_formatted_post_content( $post_content ) {
+
+		$dom = new \DOMDocument();
+
+		// Parse post content to generate DOM document.
+		// Use loadHTML as it doesn't need to be well-formed to load.
+		@$dom->loadHTML( '<html><body>' . $post_content . '</body></html>' );
+
+		// Stop - if dom isn't generated.
+		if ( ! $dom ) {
+			return;
+		}
+
+		$xpath = new \DOMXPath( $dom );
+
+		// Allow to render post content via action.
+		do_action_ref_array( 'simple_fb_formatted_post_content', array( &$dom, &$xpath ) );
+
+		// Get the FB formatted post content HTML.
+		$body_node = $dom->getElementsByTagName( 'body' )->item( 0 );
+		return $this->get_html_for_node( $body_node );
+	}
+
+	/**
+	 * Renders pull quotes into FB AI format.
+	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/pullquote
+	 *
+	 * @param DOMDocument $dom   Dom object generated for post content.
+	 * @param DOMXPath    $xpath Xpath object generated for post content.
+	 */
+	public function render_pull_quotes( \DOMDocument &$dom, \DOMXPath &$xpath ) {
+
+		// Pull quotes - with <cite> element.
+		foreach ( $xpath->query( '//blockquote[descendant::cite]' ) as $node ) {
+
+			// Get and remove <cite> element.
+			$cite = $node->getElementsByTagName( 'cite' )->item( 0 );
+			@$cite->parentNode->removeChild( $cite );
+
+			$pull_quote_html = $this->get_html_for_node( $node );
+
+			// FB AI pull quote format.
+			$fb_pull_quote = sprintf(
+				'<aside>%s<cite>%s</cite></aside>',
+				wp_kses( $pull_quote_html,
+					array(
+						'em'     => array(),
+						'i'      => array(),
+						'b'      => array(),
+						'strong' => array()
+					)
+				),
+				esc_html( $cite->nodeValue )
+			);
+
+			// Replace original pull quotes with FB AI marked up ones.
+			$new_node = $dom->createDocumentFragment();
+			$new_node->appendXML( $fb_pull_quote );
+			$node->parentNode->replaceChild( $new_node, $node );
+		}
+	}
+
+	/**
+	 * Generates HTML string for DOM node object.
+	 *
+	 * @param DOMNode $node Node object to generate the HTML string for.
+	 *
+	 * @return string       HTML string/markup for supplied DOM node.
+	 */
+	protected function get_html_for_node( \DOMNode $node ) {
+
+		$node_html  = '';
+		foreach ( $node->childNodes as $child_node ) {
+			$node_html .= $child_node->ownerDocument->saveXML( $child_node );
+		}
+
+		return $node_html;
 	}
 
 }
