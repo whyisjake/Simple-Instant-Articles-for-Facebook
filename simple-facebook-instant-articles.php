@@ -73,7 +73,6 @@ class Simple_FB_Instant_Articles {
 
 		// Pull quotes.
 		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
-		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 
 		// Post URL for the feed.
 		add_filter( 'simple_fb_before_feed', array( $this, 'update_rss_permalink' ) );
