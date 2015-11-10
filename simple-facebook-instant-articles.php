@@ -195,10 +195,7 @@ class Simple_FB_Instant_Articles {
 				<?php $url   = ( $image[0] ); ?>
 				<figure>
 					<img src="<?php echo esc_url( $url ); ?>" alt="<?php echo esc_attr( get_the_title( $id ) ); ?>">
-					<?php $caption = get_post_field( 'post_content', $id ); ?>
-					<?php if ( ! empty( $caption ) ) : ?>
-						<figcaption><?php echo esc_html( $caption ); ?></figcaption>
-					<?php endif; ?>
+					<?php echo wp_kses_post( get_simple_fb_image_caption( $id ) ); ?>
 				</figure>
 			<?php endforeach; ?>
 		</figure>
