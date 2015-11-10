@@ -167,7 +167,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	public function register_shortcodes() {
-		add_shortcode( 'gallery', array( $this, 'gallery' ) );
+		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
 	}
 
 	public function update_rss_permalink() {
@@ -184,7 +184,7 @@ class Simple_FB_Instant_Articles {
 	 * @param  string    $content    The content passed to the shortcode.
 	 * @return string                The generated content.
 	 */
-	public function gallery( $atts, $content = '' ) {
+	public function gallery_shortcode( $atts, $content = '' ) {
 		// Get the IDs
 		$ids = explode( ',', $atts['ids'] );
 
