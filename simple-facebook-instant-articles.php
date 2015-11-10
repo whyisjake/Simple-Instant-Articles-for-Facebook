@@ -234,6 +234,7 @@ class Simple_FB_Instant_Articles {
 		ob_start(); ?>
 		<figure>
 			<img src="<?php echo esc_url( $image_url ); ?>" />
+			<?php echo wp_kses_post( get_simple_fb_image_caption( $attachment_id ) ); ?>
 		</figure>
 		<?php return ob_get_clean();
 	}
