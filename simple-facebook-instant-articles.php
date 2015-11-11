@@ -326,7 +326,7 @@ class Simple_FB_Instant_Articles {
 
 		$node_html  = '';
 		foreach ( $node->childNodes as $child_node ) {
-			$node_html .= $child_node->ownerDocument->saveXML( $child_node );
+			$node_html .= $child_node->ownerDocument->saveHTML( $child_node );
 		}
 
 		return $node_html;
