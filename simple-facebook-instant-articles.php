@@ -166,7 +166,8 @@ class Simple_FB_Instant_Articles {
 	}
 
 	public function register_shortcodes() {
-		add_shortcode( 'gallery', array( $this, 'gallery' ) );
+		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
+		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
 	}
 
 	public function update_rss_permalink() {
@@ -183,7 +184,7 @@ class Simple_FB_Instant_Articles {
 	 * @param  string    $content    The content passed to the shortcode.
 	 * @return string                The generated content.
 	 */
-	public function gallery( $atts, $content = '' ) {
+	public function gallery_shortcode( $atts, $content = '' ) {
 		// Get the IDs
 		$ids = explode( ',', $atts['ids'] );
 
@@ -194,12 +195,42 @@ class Simple_FB_Instant_Articles {
 				<?php $url   = ( $image[0] ); ?>
 				<figure>
 					<img src="<?php echo esc_url( $url ); ?>" alt="<?php echo esc_attr( get_the_title( $id ) ); ?>">
-					<?php $caption = get_post_field( 'post_content', $id ); ?>
-					<?php if ( ! empty( $caption ) ) : ?>
-						<figcaption><?php echo esc_html( $caption ); ?></figcaption>
-					<?php endif; ?>
+					<?php simple_fb_image_caption( $id ); ?>
 				</figure>
 			<?php endforeach; ?>
+		</figure>
+		<?php return ob_get_clean();
+	}
+
+	/**
+	 * Caption shortcode - overwrite WP native shortcode.
+	 * Format caption of inserted images into post content into
+	 * FB IA format.
+	 *
+	 * @param $atts           Array of attributes passed to shortcode.
+	 * @param string $content The content passed to the shortcode.
+	 *
+	 * @return string|void    FB IA formatted images markup.
+	 */
+	public function image_shortcode( $atts, $content = '' ) {
+
+		// Get attachment ID from the shortcode attribute.
+		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : '';
+
+		// Get image info.
+		$image     = wp_get_attachment_image_src( $attachment_id, $this->image_size );
+		$image_url = isset( $image[0] ) ? $image[0] : '';
+
+		// Stop - if image URL is empty.
+		if ( ! $image_url ) {
+			return;
+		}
+
+		// FB IA image format.
+		ob_start(); ?>
+		<figure>
+			<img src="<?php echo esc_url( $image_url ); ?>" />
+			<?php simple_fb_image_caption( $attachment_id ); ?>
 		</figure>
 		<?php return ob_get_clean();
 	}
