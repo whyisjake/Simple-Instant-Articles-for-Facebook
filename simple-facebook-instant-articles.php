@@ -67,6 +67,10 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_pre_render', array( $this, 'register_shortcodes' ) );
 		add_action( 'simple_fb_before_feed', array( $this, 'register_shortcodes' ) );
 
+		// Social embeds: https://developers.facebook.com/docs/instant-articles/reference/social
+		add_action( 'simple_fb_pre_render', array( $this, 'render_social_embeds' ) );
+		add_action( 'simple_fb_before_feed', array( $this, 'render_social_embeds' ) );
+
 		// Post content - use the_content filter.
 		add_action( 'simple_fb_pre_render', array( $this, 'render_post_content' ) );
 		add_action( 'simple_fb_before_feed', array( $this, 'render_post_content' ) );
@@ -313,6 +317,32 @@ class Simple_FB_Instant_Articles {
 			$new_node->appendXML( $fb_pull_quote );
 			$node->parentNode->replaceChild( $new_node, $node );
 		}
+	}
+
+	/**
+	 * Hook into embed related filters, so the embeds in post content
+	 * can be rendered into FB IA format.
+	 */
+	public function render_social_embeds() {
+		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
+		add_filter( 'embed_oembed_html', array( $this, 'fb_formatted_social_embeds' ), 10, 4 );
+	}
+
+	/**
+	 * Render social embeds into FB IA format.
+	 *
+	 * Social embeds Ref: https://developers.facebook.com/docs/instant-articles/reference/social
+	 *
+	 * @param string   $html    HTML markup to be embeded into post sontent.
+	 * @param string   $url     The attempted embed URL.
+	 * @param array    $attr    An array of shortcode attributes.
+	 * @param int|null $post_ID Post ID for which embeded URLs are processed.
+	 *
+	 * @return string           FB IA formatted markup for social embeds.
+	 */
+	public function fb_formatted_social_embeds( $html, $url, $attr, $post_ID = null ) {
+
+		return '<figure class="op-social"><iframe>' . $html . '</iframe></figure>';
 	}
 
 	/**
