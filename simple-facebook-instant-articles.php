@@ -98,7 +98,7 @@ class Simple_FB_Instant_Articles {
 	/**
 	 * Add the template redirect, and maybe more!
 	 */
-	function add_actions() {
+	public function add_actions() {
 		if ( ! is_singular() ) {
 			return;
 		}
