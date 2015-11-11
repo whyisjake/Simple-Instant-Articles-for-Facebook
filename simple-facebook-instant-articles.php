@@ -195,7 +195,7 @@ class Simple_FB_Instant_Articles {
 				<?php $url   = ( $image[0] ); ?>
 				<figure>
 					<img src="<?php echo esc_url( $url ); ?>" alt="<?php echo esc_attr( get_the_title( $id ) ); ?>">
-					<?php echo wp_kses_post( get_simple_fb_image_caption( $id ) ); ?>
+					<?php simple_fb_image_caption( $id ); ?>
 				</figure>
 			<?php endforeach; ?>
 		</figure>
@@ -230,7 +230,7 @@ class Simple_FB_Instant_Articles {
 		ob_start(); ?>
 		<figure>
 			<img src="<?php echo esc_url( $image_url ); ?>" />
-			<?php echo wp_kses_post( get_simple_fb_image_caption( $attachment_id ) ); ?>
+			<?php simple_fb_image_caption( $attachment_id ); ?>
 		</figure>
 		<?php return ob_get_clean();
 	}
