@@ -242,7 +242,7 @@ class Simple_FB_Instant_Articles {
 
 		// Render post content via DOM - to format it into FB IA format.
 		// DO it last, so content was altered via WP native hooks as much as possible.
-		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ) );
+		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ), 1000 );
 	}
 
 	/**
