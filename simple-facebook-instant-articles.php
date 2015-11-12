@@ -68,11 +68,11 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_before_feed', array( $this, 'setup_content_mods' ) );
 
 		// Setup the props.
-		$this->version = $version;
-		$this->dir = dirname( $file );
-		$this->file = $file;
+		$this->version       = $version;
+		$this->dir           = dirname( $file );
+		$this->file          = $file;
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
-		$this->home_url = trailingslashit( home_url() );
+		$this->home_url      = trailingslashit( home_url() );
 	}
 
 	/**
