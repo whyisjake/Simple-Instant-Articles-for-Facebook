@@ -66,6 +66,7 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_pre_render', array( $this, 'render_post_content' ) );
 		add_action( 'simple_fb_before_feed', array( $this, 'render_post_content' ) );
 
+		// Render post content into FB IA format - via DOM.
 		// Pull quotes.
 		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 
