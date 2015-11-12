@@ -191,6 +191,9 @@ class Simple_FB_Instant_Articles {
 
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
+
+		add_action( 'the_content', array( $this, 'append_analytics_code' ) );
+
 	}
 
 	public function rss_permalink( $link ) {
@@ -388,6 +391,42 @@ class Simple_FB_Instant_Articles {
 			$new_node->appendXML( $fb_pull_quote );
 			$node->parentNode->replaceChild( $new_node, $node );
 		}
+	}
+
+	/**
+	 * Append analytics script in the format ready for FB IA.
+	 *
+	 * @param string $html HTML markup for the content.
+	 *
+	 * @return string Content HTML.
+	 */
+	public function append_analytics_code( $html ) {
+		$html .= $this->get_analytics_code();
+		return $html;
+	}
+
+	/**
+	 * Get analytics script in the format ready for FB IA.
+	 *
+	 * Analytics Docs: https://developers.facebook.com/docs/instant-articles/reference/analytics
+	 *
+	 * @return string Content HTML.
+	 */
+	public function get_analytics_code() {
+
+		$analytics_template_file = trailingslashit( $this->template_path ) . 'script-ga.php';
+		$ga_profile_id           = get_option( 'lawrence_ga_tracking_id' );
+
+		if ( ! $ga_profile_id ) {
+			return;
+		}
+
+		ob_start();
+		require( $analytics_template_file );
+		return ob_get_clean();
+
+		return $html;
+
 	}
 
 	/**
