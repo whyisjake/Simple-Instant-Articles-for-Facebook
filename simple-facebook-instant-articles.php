@@ -18,12 +18,12 @@ class Simple_FB_Instant_Articles {
 	private static $instance;
 
 	/**
-	 * Endpoint query var
+	 * Endpoint query var.
 	 */
 	private $token = 'fb';
 
 	/**
-	 * Endpoint query var
+	 * Endpoint query var.
 	 */
 	private $endpoint = 'fb-instant';
 
@@ -48,7 +48,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Template Path
+	 * Template Path.
 	 */
 	private $template_path;
 
@@ -76,7 +76,8 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Kickoff method
+	 * Kickoff method.
+	 *
 	 * @return void
 	 */
 	public function init() {
@@ -86,7 +87,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Add the template redirect, and maybe more!
+	 * Add the template redirect.
 	 */
 	public function add_actions() {
 		if ( ! is_singular() ) {
@@ -100,7 +101,6 @@ class Simple_FB_Instant_Articles {
 
 	/**
 	 * Redirect the template for the Instant Article post.
-	 * @return [type] [description]
 	 */
 	public function template_redirect() {
 		$this->render( get_queried_object_id() );
@@ -109,7 +109,9 @@ class Simple_FB_Instant_Articles {
 
 	/**
 	 * Based on the post ID, render the Instant Articles page.
-	 * @param  int   $post_id Post ID
+	 *
+	 * @param  int   $post_id Post ID.
+	 *
 	 * @return void
 	 */
 	public function render( $post_id ) {
@@ -118,7 +120,8 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Register FB feed
+	 * Register FB feed.
+	 *
 	 * @return void
 	 */
 	public function add_feed() {
@@ -127,7 +130,8 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Load feed template
+	 * Load feed template.
+	 *
 	 * @return void
 	 */
 	public function feed_template() {
@@ -141,17 +145,17 @@ class Simple_FB_Instant_Articles {
 
 		$user_template_file = apply_filters( 'simple_fb_feed_template_file', trailingslashit( get_template_directory() ) . $file_name );
 
-		// Any functions hooked in here must NOT output any data or else feed will break
+		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_before_feed' );
 
-		// Load user feed template if it exists, otherwise use plugin template
+		// Load user feed template if it exists, otherwise use plugin template.
 		if ( file_exists( $user_template_file ) ) {
 			require( $user_template_file );
 		} else {
 			require( $this->template_path . $file_name );
 		}
 
-		// Any functions hooked in here must NOT output any data or else feed will break
+		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_after_feed' );
 	}
 
@@ -191,13 +195,16 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Gallery Shortcode
+	 * Gallery Shortcode.
+	 *
 	 * @param  array     $atts       Array of attributes passed to shortcode.
 	 * @param  string    $content    The content passed to the shortcode.
+	 *
 	 * @return string                The generated content.
 	 */
 	public function gallery_shortcode( $atts, $content = '' ) {
-		// Get the IDs
+
+		// Get the IDs.
 		$ids = explode( ',', $atts['ids'] );
 
 		ob_start(); ?>
@@ -364,5 +371,5 @@ function simple_fb_instant_articles( $file, $version ) {
 	return Simple_FB_Instant_Articles::instance( $file, $version );
 }
 
-// Kick off the plugin on init
+// Kick off the plugin on init.
 simple_fb_instant_articles( __FILE__, '0.5.0' );
