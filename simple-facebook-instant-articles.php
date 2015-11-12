@@ -64,8 +64,8 @@ class Simple_FB_Instant_Articles {
 		add_action( 'wp', array( $this, 'add_actions' ) );
 
 		// Render post content into FB IA format.
-		add_action( 'simple_fb_pre_render', array( $this, 'setup_content_filters' ) );
-		add_action( 'simple_fb_before_feed', array( $this, 'setup_content_filters' ) );
+		add_action( 'simple_fb_pre_render', array( $this, 'setup_content_mods' ) );
+		add_action( 'simple_fb_before_feed', array( $this, 'setup_content_mods' ) );
 
 		// Setup the props.
 		$this->version = $version;
@@ -161,7 +161,7 @@ class Simple_FB_Instant_Articles {
 	 * Hooked in just before we the content is rendered in both feeds and single post view.
 	 * uses actions simple_fb_pre_render & simple_fb_before_feed
 	 */
-	public function setup_content_filters() {
+	public function setup_content_mods() {
 
 		// Shortcodes - overwrite WP native ones with FB IA format.
 		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
