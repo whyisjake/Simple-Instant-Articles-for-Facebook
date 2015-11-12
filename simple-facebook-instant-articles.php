@@ -193,6 +193,7 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 
 		add_action( 'the_content', array( $this, 'append_analytics_code' ) );
+		add_action( 'the_content', array( $this, 'append_ad_code' ) );
 
 	}
 
