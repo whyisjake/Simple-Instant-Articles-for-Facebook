@@ -337,24 +337,34 @@ class Simple_FB_Instant_Articles {
 	/**
 	 * Append analytics script in the format ready for FB IA.
 	 *
-	 * Analytics Docs: https://developers.facebook.com/docs/instant-articles/reference/analytics
+	 * @param string $html HTML markup for the content.
 	 *
-	 * @param string   $html    HTML markup for the content.
-	 *
-	 * @return string           Content HTML.
+	 * @return string Content HTML.
 	 */
 	public function append_analytics_code( $html ) {
+		$html .= $this->get_analytics_code();
+		return $html;
+	}
+
+	/**
+	 * Get analytics script in the format ready for FB IA.
+	 *
+	 * Analytics Docs: https://developers.facebook.com/docs/instant-articles/reference/analytics
+	 *
+	 * @return string Content HTML.
+	 */
+	public function get_analytics_code() {
 
 		$analytics_template_file = trailingslashit( $this->template_path ) . 'script-ga.php';
 		$ga_profile_id           = get_option( 'lawrence_ga_tracking_id' );
 
 		if ( ! $ga_profile_id ) {
-			return $html;
+			return;
 		}
 
 		ob_start();
 		require( $analytics_template_file );
-		$html .= ob_get_clean();
+		return ob_get_clean();
 
 		return $html;
 
