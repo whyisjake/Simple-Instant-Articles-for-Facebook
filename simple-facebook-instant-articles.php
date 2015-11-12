@@ -62,12 +62,7 @@ class Simple_FB_Instant_Articles {
 		add_action( 'init', array( $this, 'add_feed' ) );
 		add_action( 'wp', array( $this, 'add_actions' ) );
 
-		// Render post content into FB AI format.
-		// Shortcodes.
-		add_action( 'simple_fb_pre_render', array( $this, 'register_shortcodes' ) );
-		add_action( 'simple_fb_before_feed', array( $this, 'register_shortcodes' ) );
-
-		// Post content - use the_content filter.
+		// Render post content into FB IA format.
 		add_action( 'simple_fb_pre_render', array( $this, 'render_post_content' ) );
 		add_action( 'simple_fb_before_feed', array( $this, 'render_post_content' ) );
 
@@ -165,11 +160,6 @@ class Simple_FB_Instant_Articles {
 		do_action( 'simple_fb_after_feed' );
 	}
 
-	public function register_shortcodes() {
-		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
-		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
-	}
-
 	public function update_rss_permalink() {
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
 	}
@@ -240,6 +230,10 @@ class Simple_FB_Instant_Articles {
 	 * can be rendered into FB IA format.
 	 */
 	public function render_post_content() {
+
+		// Shortcodes - overwrite WP native ones with FB IA format.
+		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
+		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
 
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
