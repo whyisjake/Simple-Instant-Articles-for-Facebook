@@ -366,7 +366,32 @@ class Simple_FB_Instant_Articles {
 		require( $analytics_template_file );
 		return ob_get_clean();
 
+	}
+
+	/**
+	 * Append ad script in the format ready for FB IA.
+	 *
+	 * @param string $html HTML markup for the content.
+	 *
+	 * @return string Content HTML.
+	 */
+	public function append_ad_code( $html ) {
+		$html .= $this->get_ad_code();
 		return $html;
+	}
+
+	/**
+	 * Get ad code in the format ready for FB IA.
+	 *
+	 * @return string           Content HTML.
+	 */
+	public function get_ad_code() {
+
+		$ad_template_file = trailingslashit( $this->template_path ) . 'ad.php';
+
+		ob_start();
+		require( $ad_template_file );
+		return ob_get_clean();
 
 	}
 
