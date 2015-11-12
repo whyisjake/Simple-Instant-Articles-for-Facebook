@@ -158,8 +158,12 @@ class Simple_FB_Instant_Articles {
 	/**
 	 * Setup all filters to modify content ready for Facebook IA.
 	 *
-	 * Hooked in just before we the content is rendered in both feeds and single post view.
-	 * uses actions simple_fb_pre_render & simple_fb_before_feed
+	 * Hooked in just before the content is rendered in both feeds and single post view
+	 * for Facebook IA only.
+	 *
+	 * This function is added to the following actions:
+	 * 1) simple_fb_pre_render
+	 * 2) simple_fb_before_feed
 	 */
 	public function setup_content_mods() {
 
@@ -180,7 +184,6 @@ class Simple_FB_Instant_Articles {
 
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
-
 	}
 
 	public function rss_permalink( $link ) {
