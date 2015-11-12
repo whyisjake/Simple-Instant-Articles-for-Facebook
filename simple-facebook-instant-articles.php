@@ -18,12 +18,12 @@ class Simple_FB_Instant_Articles {
 	private static $instance;
 
 	/**
-	 * Endpoint query var
+	 * Endpoint query var.
 	 */
 	private $token = 'fb';
 
 	/**
-	 * Endpoint query var
+	 * Endpoint query var.
 	 */
 	private $endpoint = 'fb-instant';
 
@@ -48,7 +48,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Template Path
+	 * Template Path.
 	 */
 	private $template_path;
 
@@ -68,15 +68,16 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_before_feed', array( $this, 'setup_content_mods' ) );
 
 		// Setup the props.
-		$this->version = $version;
-		$this->dir = dirname( $file );
-		$this->file = $file;
+		$this->version       = $version;
+		$this->dir           = dirname( $file );
+		$this->file          = $file;
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
-		$this->home_url = trailingslashit( home_url() );
+		$this->home_url      = trailingslashit( home_url() );
 	}
 
 	/**
-	 * Kickoff method
+	 * Kickoff method.
+	 *
 	 * @return void
 	 */
 	public function init() {
@@ -86,7 +87,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Add the template redirect, and maybe more!
+	 * Add the template redirect.
 	 */
 	public function add_actions() {
 		if ( ! is_singular() ) {
@@ -100,7 +101,6 @@ class Simple_FB_Instant_Articles {
 
 	/**
 	 * Redirect the template for the Instant Article post.
-	 * @return [type] [description]
 	 */
 	public function template_redirect() {
 		$this->render( get_queried_object_id() );
@@ -109,7 +109,9 @@ class Simple_FB_Instant_Articles {
 
 	/**
 	 * Based on the post ID, render the Instant Articles page.
-	 * @param  int   $post_id Post ID
+	 *
+	 * @param  int   $post_id Post ID.
+	 *
 	 * @return void
 	 */
 	public function render( $post_id ) {
@@ -118,7 +120,8 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Register FB feed
+	 * Register FB feed.
+	 *
 	 * @return void
 	 */
 	public function add_feed() {
@@ -127,7 +130,8 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Load feed template
+	 * Load feed template.
+	 *
 	 * @return void
 	 */
 	public function feed_template() {
@@ -141,31 +145,38 @@ class Simple_FB_Instant_Articles {
 
 		$user_template_file = apply_filters( 'simple_fb_feed_template_file', trailingslashit( get_template_directory() ) . $file_name );
 
-		// Any functions hooked in here must NOT output any data or else feed will break
+		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_before_feed' );
 
-		// Load user feed template if it exists, otherwise use plugin template
+		// Load user feed template if it exists, otherwise use plugin template.
 		if ( file_exists( $user_template_file ) ) {
 			require( $user_template_file );
 		} else {
 			require( $this->template_path . $file_name );
 		}
 
-		// Any functions hooked in here must NOT output any data or else feed will break
+		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_after_feed' );
 	}
 
 	/**
 	 * Setup all filters to modify content ready for Facebook IA.
 	 *
-	 * Hooked in just before we the content is rendered in both feeds and single post view.
-	 * uses actions simple_fb_pre_render & simple_fb_before_feed
+	 * Hooked in just before the content is rendered in both feeds and single post view
+	 * for Facebook IA only.
+	 *
+	 * This function is added to the following actions:
+	 * 1) simple_fb_pre_render
+	 * 2) simple_fb_before_feed
 	 */
 	public function setup_content_mods() {
 
 		// Shortcodes - overwrite WP native ones with FB IA format.
 		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
 		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
+
+		// Shortcodes - custom galleries.
+		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
 
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
@@ -182,6 +193,7 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 
 		add_action( 'the_content', array( $this, 'append_analytics_code' ) );
+
 	}
 
 	public function rss_permalink( $link ) {
@@ -189,13 +201,16 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Gallery Shortcode
+	 * Gallery Shortcode.
+	 *
 	 * @param  array     $atts       Array of attributes passed to shortcode.
 	 * @param  string    $content    The content passed to the shortcode.
+	 *
 	 * @return string                The generated content.
 	 */
 	public function gallery_shortcode( $atts, $content = '' ) {
-		// Get the IDs
+
+		// Get the IDs.
 		$ids = explode( ',', $atts['ids'] );
 
 		ob_start(); ?>
@@ -243,6 +258,67 @@ class Simple_FB_Instant_Articles {
 			<?php simple_fb_image_caption( $attachment_id ); ?>
 		</figure>
 		<?php return ob_get_clean();
+	}
+
+	/**
+	 * Convert custom gallery shortcode - sigallery,
+	 * into FB IA image gallery format.
+	 *
+	 * @param $atts        Array of attributes passed to shortcode.
+	 *
+	 * @return string|void Return FB IA image gallery markup for sigallery shortcode,
+	 *                     On error - nothing.
+	 */
+	public function api_galleries_shortcode( $atts ) {
+
+		// Stop - if gallery ID is empty.
+		if ( ! $atts['id'] ) {
+			return;
+		}
+
+		// Stop - if can't get the API gallery.
+		if ( ! $gallery = \USAT\API_Galleries\get_gallery( $atts['id'] ) ) {
+			return;
+		}
+
+		// Display API gallery in FB IA format.
+		ob_start();
+		?>
+
+		<figure class="op-slideshow">
+			<?php foreach ( $gallery->images as $key => $image ) : ?>
+				<figure>
+					<img src="<?php echo esc_url( $image->url ); ?>" />
+					<?php if ( $image->custom_caption ) : ?>
+						<figcaption><h1><?php echo esc_html( strip_tags( $image->custom_caption ) ); ?></h1></figcaption>
+					<?php endif; ?>
+				</figure>
+			<?php endforeach; ?>
+
+			<?php if ( $atts['title'] ) : ?>
+				<figcaption><h1><?php echo esc_html( $atts['title'] ); ?></h1></figcaption>
+			<?php endif;?>
+		</figure>
+
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Render social embeds into FB IA format.
+	 *
+	 * Social embeds Ref: https://developers.facebook.com/docs/instant-articles/reference/social
+	 *
+	 * @param string   $html    HTML markup to be embeded into post sontent.
+	 * @param string   $url     The attempted embed URL.
+	 * @param array    $attr    An array of shortcode attributes.
+	 * @param int|null $post_ID Post ID for which embeded URLs are processed.
+	 *
+	 * @return string           FB IA formatted markup for social embeds.
+	 */
+	public function fb_formatted_social_embeds( $html, $url, $attr, $post_ID = null ) {
+
+		return '<figure class="op-social"><iframe>' . $html . '</iframe></figure>';
 	}
 
 	/**
@@ -398,5 +474,5 @@ function simple_fb_instant_articles( $file, $version ) {
 	return Simple_FB_Instant_Articles::instance( $file, $version );
 }
 
-// Kick off the plugin on init
+// Kick off the plugin on init.
 simple_fb_instant_articles( __FILE__, '0.5.0' );
