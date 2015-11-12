@@ -8,6 +8,7 @@ Author URI: http://jakespurlock.com
 */
 
 require_once( 'includes/functions.php' );
+
 class Simple_FB_Instant_Articles {
 	/**
 	 * The one instance of Simple_FB_Instant_Articles.
@@ -63,15 +64,8 @@ class Simple_FB_Instant_Articles {
 		add_action( 'wp', array( $this, 'add_actions' ) );
 
 		// Render post content into FB IA format.
-		add_action( 'simple_fb_pre_render', array( $this, 'render_post_content' ) );
-		add_action( 'simple_fb_before_feed', array( $this, 'render_post_content' ) );
-
-		// Render post content into FB IA format - via DOM.
-		// Pull quotes.
-		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
-
-		// Post URL for the feed.
-		add_filter( 'simple_fb_before_feed', array( $this, 'update_rss_permalink' ) );
+		add_action( 'simple_fb_pre_render', array( $this, 'setup_content_filters' ) );
+		add_action( 'simple_fb_before_feed', array( $this, 'setup_content_filters' ) );
 
 		// Setup the props.
 		$this->version = $version;
@@ -161,8 +155,32 @@ class Simple_FB_Instant_Articles {
 		do_action( 'simple_fb_after_feed' );
 	}
 
-	public function update_rss_permalink() {
+	/**
+	 * Setup all filters to modify content ready for Facebook IA.
+	 *
+	 * Hooked in just before we the content is rendered in both feeds and single post view.
+	 * uses actions simple_fb_pre_render & simple_fb_before_feed
+	 */
+	public function setup_content_filters() {
+
+		// Shortcodes - overwrite WP native ones with FB IA format.
+		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
+		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
+
+		// Render social embeds into FB IA format.
+		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
+		add_filter( 'embed_oembed_html', array( $this, 'fb_formatted_social_embeds' ), 10, 4 );
+
+		// Render post content via DOM - to format it into FB IA format.
+		// DO it last, so content was altered via WP native hooks as much as possible.
+		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ), 1000 );
+
+		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
+
+		// Render post content into FB IA format - using DOM object.
+		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
+
 	}
 
 	public function rss_permalink( $link ) {
@@ -224,25 +242,6 @@ class Simple_FB_Instant_Articles {
 			<?php simple_fb_image_caption( $attachment_id ); ?>
 		</figure>
 		<?php return ob_get_clean();
-	}
-
-	/**
-	 * Hook into the_content filter, so the post content
-	 * can be rendered into FB IA format.
-	 */
-	public function render_post_content() {
-
-		// Shortcodes - overwrite WP native ones with FB IA format.
-		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
-		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
-
-		// Render social embeds into FB IA format.
-		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
-		add_filter( 'embed_oembed_html', array( $this, 'fb_formatted_social_embeds' ), 10, 4 );
-
-		// Render post content via DOM - to format it into FB IA format.
-		// DO it last, so content was altered via WP native hooks as much as possible.
-		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ), 1000 );
 	}
 
 	/**
