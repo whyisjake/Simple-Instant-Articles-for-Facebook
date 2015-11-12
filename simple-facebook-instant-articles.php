@@ -175,6 +175,9 @@ class Simple_FB_Instant_Articles {
 		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
 		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
 
+		// Shortcodes - custom galleries.
+		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
+
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
 		add_filter( 'embed_oembed_html', array( $this, 'fb_formatted_social_embeds' ), 10, 4 );
@@ -252,6 +255,50 @@ class Simple_FB_Instant_Articles {
 			<?php simple_fb_image_caption( $attachment_id ); ?>
 		</figure>
 		<?php return ob_get_clean();
+	}
+
+	/**
+	 * Convert custom gallery shortcode - sigallery,
+	 * into FB IA image gallery format.
+	 *
+	 * @param $atts        Array of attributes passed to shortcode.
+	 *
+	 * @return string|void Return FB IA image gallery markup for sigallery shortcode,
+	 *                     On error - nothing.
+	 */
+	public function api_galleries_shortcode( $atts ) {
+
+		// Stop - if gallery ID is empty.
+		if ( ! $atts['id'] ) {
+			return;
+		}
+
+		// Stop - if can't get the API gallery.
+		if ( ! $gallery = \USAT\API_Galleries\get_gallery( $atts['id'] ) ) {
+			return;
+		}
+
+		// Display API gallery in FB IA format.
+		ob_start();
+		?>
+
+		<figure class="op-slideshow">
+			<?php foreach ( $gallery->images as $key => $image ) : ?>
+				<figure>
+					<img src="<?php echo esc_url( $image->url ); ?>" />
+					<?php if ( $image->custom_caption ) : ?>
+						<figcaption><h1><?php echo esc_html( strip_tags( $image->custom_caption ) ); ?></h1></figcaption>
+					<?php endif; ?>
+				</figure>
+			<?php endforeach; ?>
+
+			<?php if ( $atts['title'] ) : ?>
+				<figcaption><h1><?php echo esc_html( $atts['title'] ); ?></h1></figcaption>
+			<?php endif;?>
+		</figure>
+
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
