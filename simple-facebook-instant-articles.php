@@ -394,23 +394,6 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Render social embeds into FB IA format.
-	 *
-	 * Social embeds Ref: https://developers.facebook.com/docs/instant-articles/reference/social
-	 *
-	 * @param string   $html    HTML markup to be embeded into post sontent.
-	 * @param string   $url     The attempted embed URL.
-	 * @param array    $attr    An array of shortcode attributes.
-	 * @param int|null $post_ID Post ID for which embeded URLs are processed.
-	 *
-	 * @return string           FB IA formatted markup for social embeds.
-	 */
-	public function fb_formatted_social_embeds( $html, $url, $attr, $post_ID = null ) {
-
-		return '<figure class="op-social"><iframe>' . $html . '</iframe></figure>';
-	}
-
-	/**
 	 * Append analytics script in the format ready for FB IA.
 	 *
 	 * @param string $html HTML markup for the content.
