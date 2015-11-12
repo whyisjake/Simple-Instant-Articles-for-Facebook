@@ -62,15 +62,11 @@ class Simple_FB_Instant_Articles {
 		add_action( 'init', array( $this, 'add_feed' ) );
 		add_action( 'wp', array( $this, 'add_actions' ) );
 
-		// Render post content into FB AI format.
-		// Shortcodes.
-		add_action( 'simple_fb_pre_render', array( $this, 'register_shortcodes' ) );
-		add_action( 'simple_fb_before_feed', array( $this, 'register_shortcodes' ) );
-
-		// Post content - use the_content filter.
+		// Render post content into FB IA format.
 		add_action( 'simple_fb_pre_render', array( $this, 'render_post_content' ) );
 		add_action( 'simple_fb_before_feed', array( $this, 'render_post_content' ) );
 
+		// Render post content into FB IA format - via DOM.
 		// Pull quotes.
 		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 
@@ -98,7 +94,7 @@ class Simple_FB_Instant_Articles {
 	/**
 	 * Add the template redirect, and maybe more!
 	 */
-	function add_actions() {
+	public function add_actions() {
 		if ( ! is_singular() ) {
 			return;
 		}
@@ -163,11 +159,6 @@ class Simple_FB_Instant_Articles {
 
 		// Any functions hooked in here must NOT output any data or else feed will break
 		do_action( 'simple_fb_after_feed' );
-	}
-
-	public function register_shortcodes() {
-		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
-		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
 	}
 
 	public function update_rss_permalink() {
@@ -240,7 +231,18 @@ class Simple_FB_Instant_Articles {
 	 * can be rendered into FB IA format.
 	 */
 	public function render_post_content() {
-		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ) );
+
+		// Shortcodes - overwrite WP native ones with FB IA format.
+		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
+		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
+
+		// Render social embeds into FB IA format.
+		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
+		add_filter( 'embed_oembed_html', array( $this, 'fb_formatted_social_embeds' ), 10, 4 );
+
+		// Render post content via DOM - to format it into FB IA format.
+		// DO it last, so content was altered via WP native hooks as much as possible.
+		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ), 1000 );
 	}
 
 	/**
@@ -316,6 +318,23 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
+	 * Render social embeds into FB IA format.
+	 *
+	 * Social embeds Ref: https://developers.facebook.com/docs/instant-articles/reference/social
+	 *
+	 * @param string   $html    HTML markup to be embeded into post sontent.
+	 * @param string   $url     The attempted embed URL.
+	 * @param array    $attr    An array of shortcode attributes.
+	 * @param int|null $post_ID Post ID for which embeded URLs are processed.
+	 *
+	 * @return string           FB IA formatted markup for social embeds.
+	 */
+	public function fb_formatted_social_embeds( $html, $url, $attr, $post_ID = null ) {
+
+		return '<figure class="op-social"><iframe>' . $html . '</iframe></figure>';
+	}
+
+	/**
 	 * Generates HTML string for DOM node object.
 	 *
 	 * @param DOMNode $node Node object to generate the HTML string for.
@@ -326,7 +345,7 @@ class Simple_FB_Instant_Articles {
 
 		$node_html  = '';
 		foreach ( $node->childNodes as $child_node ) {
-			$node_html .= $child_node->ownerDocument->saveXML( $child_node );
+			$node_html .= $child_node->ownerDocument->saveHTML( $child_node );
 		}
 
 		return $node_html;
