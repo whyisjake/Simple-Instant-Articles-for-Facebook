@@ -8,6 +8,7 @@ Author URI: http://jakespurlock.com
 */
 
 require_once( 'includes/functions.php' );
+require_once( 'includes/shortcodes.php' );
 class Simple_FB_Instant_Articles {
 	/**
 	 * The one instance of Simple_FB_Instant_Articles.
@@ -54,8 +55,6 @@ class Simple_FB_Instant_Articles {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'add_feed' ) );
 		add_action( 'wp', array( $this, 'add_actions' ) );
-		add_filter( 'simple_fb_pre_render', array( $this, 'register_shortcodes' ) );
-		add_filter( 'simple_fb_before_feed', array( $this, 'register_shortcodes' ) );
 		add_filter( 'simple_fb_before_feed', array( $this, 'update_rss_permalink' ) );
 
 		// Setup the props.
@@ -146,43 +145,12 @@ class Simple_FB_Instant_Articles {
 		do_action( 'simple_fb_after_feed' );
 	}
 
-	public function register_shortcodes() {
-		add_shortcode( 'gallery', array( $this, 'gallery' ) );
-	}
-
 	public function update_rss_permalink() {
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
 	}
 
 	public function rss_permalink( $link ) {
 		return esc_url( $link . $this->endpoint );
-	}
-
-	/**
-	 * Gallery Shortcode
-	 * @param  array     $atts       Array of attributes passed to shortcode.
-	 * @param  string    $content    The content passed to the shortcode.
-	 * @return string                The generated content.
-	 */
-	public function gallery( $atts, $content = '' ) {
-		// Get the IDs
-		$ids = explode( ',', $atts['ids'] );
-
-		ob_start(); ?>
-		<figure class="op-slideshow">
-			<?php foreach ( $ids as $id ) : ?>
-				<?php $image = wp_get_attachment_image_src( $id, 'large' ); ?>
-				<?php $url   = ( $image[0] ); ?>
-				<figure>
-					<img src="<?php echo esc_url( $url ); ?>" alt="<?php echo esc_attr( get_the_title( $id ) ); ?>">
-					<?php $caption = get_post_field( 'post_content', $id ); ?>
-					<?php if ( ! empty( $caption ) ) : ?>
-						<figcaption><?php echo esc_html( $caption ); ?></figcaption>
-					<?php endif; ?>
-				</figure>
-			<?php endforeach; ?>
-		</figure>
-		<?php return ob_get_clean();
 	}
 
 }

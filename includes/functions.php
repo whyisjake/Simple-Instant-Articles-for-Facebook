@@ -7,6 +7,6 @@ function simple_fb_thumbnail_caption() {
 	$post_id    = get_the_id();
 	$thumb_id   = get_post_thumbnail_id( $post_id );
 	$thumb_post = get_post( $thumb_id );
-	$caption    = apply_filters( 'simple-fb-caption', $thumb_post->post_content );
+	$caption    = apply_filters( 'simple-fb-caption', $thumb_post->post_excerpt );
 	return $caption;
 }
