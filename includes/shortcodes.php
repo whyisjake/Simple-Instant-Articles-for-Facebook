@@ -210,7 +210,7 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		 * @param string $class CSS class or list of space-separated classes.
 		 */
 		$html_atts = array(
-			'class'    => apply_filters( 'wp_audio_shortcode_class', 'simple-fb-audio-shortcode' ),
+			'class'    => apply_filters( 'simple_fb_audio_shortcode_class', 'simple-fb-audio-shortcode' ),
 			'id'       => sprintf( 'audio-%d', $post_id ),
 			'loop'     => wp_validate_boolean( $atts['loop'] ),
 			'autoplay' => wp_validate_boolean( $atts['autoplay'] ),
@@ -258,7 +258,7 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		 * @param string $audio   Audio file.
 		 * @param int    $post_id Post ID.
 		 */
-		return apply_filters( 'wp_audio_shortcode', $html, $atts, $audio, $post_id );
+		return apply_filters( 'simple_fb_audio_shortcode', $html, $atts, $audio, $post_id );
 	}
 
 	/**
