@@ -191,7 +191,7 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
 
 		// Render post content into FB IA format - using DOM object.
-		add_action( 'simple_facebook_ia_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 
 	}
 
@@ -322,7 +322,7 @@ class Simple_FB_Instant_Articles {
 
 	/**
 	 * Setup dom and xpath objects for formatting post content.
-	 * Introduces `simple_facebook_ia_reformat_post_content` filter, so that post content
+	 * Introduces `simple_fb_reformat_post_content` filter, so that post content
 	 * can be formatted as necessary and dom/xpath objects re-used.
 	 *
 	 * @param $post_content Post content that needs to be formatted into FB IA format.
@@ -346,7 +346,7 @@ class Simple_FB_Instant_Articles {
 		$xpath = new \DOMXPath( $dom );
 
 		// Allow to render post content via action.
-		do_action_ref_array( 'simple_facebook_ia_reformat_post_content', array( &$dom, &$xpath ) );
+		do_action_ref_array( 'simple_fb_reformat_post_content', array( &$dom, &$xpath ) );
 
 		// Get the FB formatted post content HTML.
 		$body_node = $dom->getElementsByTagName( 'body' )->item( 0 );
