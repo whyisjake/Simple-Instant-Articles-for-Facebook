@@ -10,6 +10,7 @@ Author URI: http://jakespurlock.com
 require_once( 'includes/functions.php' );
 
 class Simple_FB_Instant_Articles {
+
 	/**
 	 * The one instance of Simple_FB_Instant_Articles.
 	 *
@@ -179,21 +180,19 @@ class Simple_FB_Instant_Articles {
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
 
 		// Render social embeds into FB IA format.
-		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
-		add_filter( 'embed_oembed_html', array( $this, 'fb_formatted_social_embeds' ), 10, 4 );
+		add_filter( 'embed_handler_html', array( $this, 'get_social_embed' ), 10, 3 );
+		add_filter( 'embed_oembed_html', array( $this, 'get_social_embed' ), 10, 4 );
 
-		add_action( 'the_content', array( $this, 'append_google_analytics_code' ) );
-		add_action( 'the_content', array( $this, 'append_ad_code' ) );
-
-		// Render post content via DOM - to format it into FB IA format.
-		// DO it last, so content was altered via WP native hooks as much as possible.
-		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ), 1000 );
+		// Modify the content
+		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
+		add_action( 'the_content', array( $this, 'append_google_analytics_code' ), 1100 );
+		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
 
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
 
 		// Render post content into FB IA format - using DOM object.
-		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
+		add_action( 'simple_facebook_ia_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 
 	}
 
@@ -317,14 +316,14 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @return string           FB IA formatted markup for social embeds.
 	 */
-	public function fb_formatted_social_embeds( $html, $url, $attr, $post_ID = null ) {
+	public function get_social_embed( $html, $url, $attr, $post_ID = null ) {
 
 		return '<figure class="op-social"><iframe>' . $html . '</iframe></figure>';
 	}
 
 	/**
 	 * Setup dom and xpath objects for formatting post content.
-	 * Introduces `simple_fb_formatted_post_content` filter, so that post content
+	 * Introduces `simple_facebook_ia_reformat_post_content` filter, so that post content
 	 * can be formatted as necessary and dom/xpath objects re-used.
 	 *
 	 * @param $post_content Post content that needs to be formatted into FB IA format.
@@ -332,7 +331,7 @@ class Simple_FB_Instant_Articles {
 	 * @return string|void  Post content in FB IA format if dom is generated for post content,
 	 *                      Otherwise, nothing.
 	 */
-	public function fb_formatted_post_content( $post_content ) {
+	public function reformat_post_content( $post_content ) {
 
 		$dom = new \DOMDocument();
 
@@ -348,7 +347,7 @@ class Simple_FB_Instant_Articles {
 		$xpath = new \DOMXPath( $dom );
 
 		// Allow to render post content via action.
-		do_action_ref_array( 'simple_fb_formatted_post_content', array( &$dom, &$xpath ) );
+		do_action_ref_array( 'simple_facebook_ia_reformat_post_content', array( &$dom, &$xpath ) );
 
 		// Get the FB formatted post content HTML.
 		$body_node = $dom->getElementsByTagName( 'body' )->item( 0 );
