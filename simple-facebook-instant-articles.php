@@ -182,7 +182,7 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'embed_handler_html', array( $this, 'get_social_embed' ), 10, 3 );
 		add_filter( 'embed_oembed_html', array( $this, 'get_social_embed' ), 10, 4 );
 
-		// Modify the content
+		// Modify the content.
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_action( 'the_content', array( $this, 'append_google_analytics_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
@@ -429,23 +429,25 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Append ad script in the format ready for FB IA.
+	 * Append Ad script in the FB IA format to the post content.
 	 *
-	 * @param string $html HTML markup for the content.
+	 * @param string $post_content Post content.
 	 *
-	 * @return string Content HTML.
+	 * @return string Post content with added ad script in FB IA format.
 	 */
-	public function append_ad_code( $html ) {
-		$html .= $this->get_ad_code();
-		return $html;
+	public function append_ad_code( $post_content ) {
+
+		$post_content .= $this->get_ad_code();
+		return $post_content;
 	}
 
 	/**
-	 * Get ad code in the format ready for FB IA.
+	 * Get Ad code in the FB IA format.
 	 *
-	 * @return string Content HTML.
+	 * @return string Ad script in FB IA format.
 	 */
 	public function get_ad_code() {
+
 		ob_start();
 		require( trailingslashit( $this->template_path ) . 'ad.php' );
 		return ob_get_clean();
@@ -453,14 +455,15 @@ class Simple_FB_Instant_Articles {
 
 	/**
 	 * Get Ad targeting args.
-	 * @return array targeting params
+	 *
+	 * @return array Targeting params.
 	 */
 	protected function get_ad_targeting_params() {
 
 		$args    = array( 'fields' => 'names' );
-		$tags    = wp_get_post_tags( get_the_ID(), $args ); // get tag names
+		$tags    = wp_get_post_tags( get_the_ID(), $args );       // get tag names
 		$cats    = wp_get_post_categories( get_the_ID(), $args ); // get category names
-		$authors = (array) get_coauthors( get_the_ID() ); // get authors
+		$authors = (array) get_coauthors( get_the_ID() );         // get authors
 
 		$authors = array_map( function( $author ) {
 			return $author->display_name;
@@ -476,15 +479,15 @@ class Simple_FB_Instant_Articles {
 		);
 
 		return $targeting_params;
-
 	}
 
 	/**
-	 * Output ad targeting JS.
+	 * Output Ad targeting JS.
 	 *
 	 * @return void
 	 */
 	public function ad_targeting_js() {
+
 		foreach ( $this->get_ad_targeting_params() as $key => $value ) {
 			printf( ".setTargeting( '%s', %s )", esc_js( $key ), wp_json_encode( $value ) );
 		}
