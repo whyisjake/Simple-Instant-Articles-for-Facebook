@@ -3,8 +3,7 @@
 Plugin Name: Simple Facebook Instant Articles
 Version: 0.5.0
 Description: Add support to Facebook Instant Articles
-Author: Jake Spurlock
-Author URI: http://jakespurlock.com
+Author: Jake Spurlock, Human Made Limited
 */
 
 require_once( 'includes/functions.php' );
@@ -402,6 +401,7 @@ class Simple_FB_Instant_Articles {
 	 * @return string Post content with added GA script in FB IA format.
 	 */
 	public function append_google_analytics_code( $post_content ) {
+
 		$post_content .= $this->get_google_analytics_code();
 		return $post_content;
 	}
