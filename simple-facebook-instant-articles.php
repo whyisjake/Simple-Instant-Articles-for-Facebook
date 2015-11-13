@@ -228,8 +228,7 @@ class Simple_FB_Instant_Articles {
 
 	/**
 	 * Caption shortcode - overwrite WP native shortcode.
-	 * Format caption of inserted images into post content into
-	 * FB IA format.
+	 * Format images in caption shortcodes into FB IA format.
 	 *
 	 * @param $atts           Array of attributes passed to shortcode.
 	 * @param string $content The content passed to the shortcode.
@@ -239,10 +238,10 @@ class Simple_FB_Instant_Articles {
 	public function image_shortcode( $atts, $content = '' ) {
 
 		// Get attachment ID from the shortcode attribute.
-		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : '';
+		$image_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : '';
 
 		// Get image info.
-		$image     = wp_get_attachment_image_src( $attachment_id, $this->image_size );
+		$image     = wp_get_attachment_image_src( $image_id, $this->image_size );
 		$image_url = isset( $image[0] ) ? $image[0] : '';
 
 		// Stop - if image URL is empty.
@@ -254,7 +253,7 @@ class Simple_FB_Instant_Articles {
 		ob_start(); ?>
 		<figure>
 			<img src="<?php echo esc_url( $image_url ); ?>" />
-			<?php simple_fb_image_caption( $attachment_id ); ?>
+			<?php simple_fb_image_caption( $image_id ); ?>
 		</figure>
 		<?php return ob_get_clean();
 	}
@@ -321,7 +320,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Setup dom and xpath objects for formatting post content.
+	 * Setup DOM and XPATH objects for formatting post content.
 	 * Introduces `simple_fb_formatted_post_content` filter, so that post content
 	 * can be formatted as necessary and dom/xpath objects re-used.
 	 *
@@ -360,8 +359,8 @@ class Simple_FB_Instant_Articles {
 	 * Renders pull quotes into FB AI format.
 	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/pullquote
 	 *
-	 * @param DOMDocument $dom   Dom object generated for post content.
-	 * @param DOMXPath    $xpath Xpath object generated for post content.
+	 * @param DOMDocument $dom   DOM object generated for post content.
+	 * @param DOMXPath    $xpath XPATH object generated for post content.
 	 */
 	public function render_pull_quotes( \DOMDocument &$dom, \DOMXPath &$xpath ) {
 
