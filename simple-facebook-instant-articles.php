@@ -394,23 +394,25 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Append analytics script in the format ready for FB IA.
+	 * Append Google Analytics (GA) script in the FB IA format
+	 * to the post content.
 	 *
-	 * @param string $html HTML markup for the content.
+	 * @param string $post_content Post content.
 	 *
-	 * @return string Content HTML.
+	 * @return string Post content with added GA script in FB IA format.
 	 */
-	public function append_analytics_code( $html ) {
-		$html .= $this->get_analytics_code();
-		return $html;
+	public function append_analytics_code( $post_content ) {
+
+		$post_content .= $this->get_analytics_code();
+		return $post_content;
 	}
 
 	/**
-	 * Get analytics script in the format ready for FB IA.
+	 * Get GA script in the FB IA format.
 	 *
-	 * Analytics Docs: https://developers.facebook.com/docs/instant-articles/reference/analytics
+	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/analytics
 	 *
-	 * @return string Content HTML.
+	 * @return string GA script in FB IA format.
 	 */
 	public function get_analytics_code() {
 
