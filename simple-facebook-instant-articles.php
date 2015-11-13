@@ -453,14 +453,14 @@ class Simple_FB_Instant_Articles {
 
 	/**
 	 * Get Ad targeting args.
-	 * @return [type] [description]
+	 * @return array targeting params
 	 */
 	protected function get_ad_targeting_params() {
 
 		$args    = array( 'fields' => 'names' );
 		$tags    = wp_get_post_tags( get_the_ID(), $args ); // get tag names
 		$cats    = wp_get_post_categories( get_the_ID(), $args ); // get category names
-		$authors = (array) get_coauthors( $post_id ); // get authors
+		$authors = (array) get_coauthors( get_the_ID() ); // get authors
 
 		$authors = array_map( function( $author ) {
 			return $author->display_name;
@@ -479,6 +479,11 @@ class Simple_FB_Instant_Articles {
 
 	}
 
+	/**
+	 * Output ad targeting JS.
+	 *
+	 * @return void
+	 */
 	public function ad_targeting_js() {
 		foreach ( $this->get_ad_targeting_params() as $key => $value ) {
 			printf( ".setTargeting( '%s', %s )", esc_js( $key ), wp_json_encode( $value ) );
