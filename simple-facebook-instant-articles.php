@@ -182,6 +182,9 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
 		add_filter( 'embed_oembed_html', array( $this, 'fb_formatted_social_embeds' ), 10, 4 );
 
+		// GA analytics code.
+		add_action( 'the_content', array( $this, 'append_analytics_code' ) );
+
 		// Render post content via DOM - to format it into FB IA format.
 		// DO it last, so content was altered via WP native hooks as much as possible.
 		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ), 1000 );
@@ -191,9 +194,6 @@ class Simple_FB_Instant_Articles {
 
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
-
-		add_action( 'the_content', array( $this, 'append_analytics_code' ) );
-
 	}
 
 	public function rss_permalink( $link ) {
