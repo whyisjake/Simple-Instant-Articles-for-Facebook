@@ -97,34 +97,6 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 	 * @return string HTML content to display the caption.
 	 */
 	public function caption( $attr, $content = null ) {
-		// New-style shortcode with the caption inside the shortcode with the link and image tags.
-		if ( ! isset( $attr['caption'] ) ) {
-			if ( preg_match( '#((?:<a [^>]+>\s*)?<img [^>]+>(?:\s*</a>)?)(.*)#is', $content, $matches ) ) {
-				$content = $matches[1];
-				$attr['caption'] = trim( $matches[2] );
-			}
-		} elseif ( strpos( $attr['caption'], '<' ) !== false ) {
-			$attr['caption'] = wp_kses( $attr['caption'], 'post' );
-		}
-
-		/**
-		 * Filter the default caption shortcode output.
-		 *
-		 * If the filtered output isn't empty, it will be used instead of generating
-		 * the default caption template.
-		 *
-		 * @since 2.6.0
-		 *
-		 * @see img_caption_shortcode()
-		 *
-		 * @param string $output  The caption output. Default empty.
-		 * @param array  $attr    Attributes of the caption shortcode.
-		 * @param string $content The image element, possibly wrapped in a hyperlink.
-		 */
-		$output = apply_filters( 'img_caption_shortcode', '', $attr, $content );
-		if ( $output != '' )
-			return $output;
-
 		$atts = shortcode_atts( array(
 			'id'	  => '',
 			'align'	  => 'alignnone',
@@ -133,17 +105,12 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 			'class'   => '',
 		), $attr, 'caption' );
 
-		$atts['width'] = (int) $atts['width'];
-		if ( $atts['width'] < 1 || empty( $atts['caption'] ) )
-			return $content;
-
 		if ( ! empty( $atts['id'] ) )
 			$atts['id'] = 'id="' . esc_attr( sanitize_html_class( $atts['id'] ) ) . '" ';
 
 		$class = trim( 'wp-caption ' . $atts['align'] . ' ' . $atts['class'] );
 
-		return '<figure ' . $atts['id'] . 'style="width: ' . (int) $atts['width'] . 'px;" class="' . esc_attr( $class ) . '">'
-			. do_shortcode( $content ) . '<figcaption class="wp-caption-text">' . $atts['caption'] . '</figcaption></figure>';
+		return '<figure ' . $atts['id'] . 'class="' . esc_attr( $class ) . '">' . do_shortcode( $content ) . '<figcaption class="wp-caption-text">' . $atts['caption'] . '</figcaption></figure>';
 
 	}
 
@@ -152,10 +119,6 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 	 *
 	 * This implements the functionality of the Audio Shortcode for displaying
 	 * WordPress mp3s in a post.
-	 *
-	 * @since 3.6.0
-	 *
-	 * @staticvar int $instance
 	 *
 	 * @param array  $attr {
 	 *     Attributes of the audio shortcode.
@@ -172,12 +135,7 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 	 */
 	function audio( $attr, $content = '' ) {
 
-		return 'JAKE WAS HERE';
-
 		$post_id = get_post() ? get_the_ID() : 0;
-
-		static $instance = 0;
-		$instance++;
 
 		/**
 		 * Filter the default audio shortcode output.
@@ -189,9 +147,8 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		 * @param string $html     Empty variable to be replaced with shortcode markup.
 		 * @param array  $attr     Attributes of the shortcode. @see wp_audio_shortcode()
 		 * @param string $content  Shortcode content.
-		 * @param int    $instance Unique numeric ID of this audio shortcode instance.
 		 */
-		$override = apply_filters( 'wp_audio_shortcode_override', '', $attr, $content, $instance );
+		$override = apply_filters( 'simple_fb_audio_shortcode_override', '', $attr, $content );
 		if ( '' !== $override ) {
 			return $override;
 		}
@@ -246,19 +203,6 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		}
 
 		/**
-		 * Filter the media library used for the audio shortcode.
-		 *
-		 * @since 3.6.0
-		 *
-		 * @param string $library Media library used for the audio shortcode.
-		 */
-		$library = apply_filters( 'wp_audio_shortcode_library', 'mediaelement' );
-		if ( 'mediaelement' === $library && did_action( 'init' ) ) {
-			wp_enqueue_style( 'wp-mediaelement' );
-			wp_enqueue_script( 'wp-mediaelement' );
-		}
-
-		/**
 		 * Filter the class attribute for the audio shortcode output container.
 		 *
 		 * @since 3.6.0
@@ -267,7 +211,7 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		 */
 		$html_atts = array(
 			'class'    => apply_filters( 'wp_audio_shortcode_class', 'wp-audio-shortcode' ),
-			'id'       => sprintf( 'audio-%d-%d', $post_id, $instance ),
+			'id'       => sprintf( 'audio-%d', $post_id ),
 			'loop'     => wp_validate_boolean( $atts['loop'] ),
 			'autoplay' => wp_validate_boolean( $atts['autoplay'] ),
 			'preload'  => $atts['preload'],
@@ -287,9 +231,6 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		}
 
 		$html = '';
-		if ( 'mediaelement' === $library && 1 === $instance ) {
-			$html .= "<!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->\n";
-		}
 		$html .= sprintf( '<audio %s controls="controls">', join( ' ', $attr_strings ) );
 
 		$fileurl = '';
@@ -300,14 +241,11 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 					$fileurl = $atts[ $fallback ];
 				}
 				$type = wp_check_filetype( $atts[ $fallback ], wp_get_mime_types() );
-				$url = add_query_arg( '_', $instance, $atts[ $fallback ] );
+				$url = add_query_arg( '_', $atts[ $fallback ] );
 				$html .= sprintf( $source, $type['type'], esc_url( $url ) );
 			}
 		}
 
-		if ( 'mediaelement' === $library ) {
-			$html .= wp_mediaelement_fallback( $fileurl );
-		}
 		$html .= '</audio>';
 
 		/**
@@ -319,9 +257,8 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		 * @param array  $atts    Array of audio shortcode attributes.
 		 * @param string $audio   Audio file.
 		 * @param int    $post_id Post ID.
-		 * @param string $library Media library used for the audio shortcode.
 		 */
-		return apply_filters( 'wp_audio_shortcode', $html, $atts, $audio, $post_id, $library );
+		return apply_filters( 'wp_audio_shortcode', $html, $atts, $audio, $post_id );
 	}
 
 
