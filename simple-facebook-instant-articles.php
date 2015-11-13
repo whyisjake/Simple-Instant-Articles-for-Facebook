@@ -181,12 +181,12 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
 		add_filter( 'embed_oembed_html', array( $this, 'fb_formatted_social_embeds' ), 10, 4 );
 
-		// GA analytics code.
-		add_action( 'the_content', array( $this, 'append_google_analytics_code' ) );
-
 		// Render post content via DOM - to format it into FB IA format.
 		// DO it last, so content was altered via WP native hooks as much as possible.
 		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ), 1000 );
+
+		// GA analytics code.
+		add_action( 'the_content', array( $this, 'append_google_analytics_code' ), 1100 );
 
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
