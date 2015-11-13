@@ -192,10 +192,10 @@ class Simple_FB_Instant_Articles {
 
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
-
 	}
 
 	public function rss_permalink( $link ) {
+
 		return esc_url( $link . $this->endpoint );
 	}
 
