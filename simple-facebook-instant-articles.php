@@ -210,20 +210,17 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function gallery_shortcode( $atts, $content = '' ) {
 
-		// Get the IDs.
+		// Get the image IDs.
 		$ids = explode( ',', $atts['ids'] );
 
 		ob_start(); ?>
+
 		<figure class="op-slideshow">
-			<?php foreach ( $ids as $id ) : ?>
-				<?php $image = wp_get_attachment_image_src( $id, $this->image_size ); ?>
-				<?php $url   = ( $image[0] ); ?>
-				<figure>
-					<img src="<?php echo esc_url( $url ); ?>" alt="<?php echo esc_attr( get_the_title( $id ) ); ?>">
-					<?php simple_fb_image_caption( $id ); ?>
-				</figure>
-			<?php endforeach; ?>
+			<?php foreach ( $ids as $id ) {
+				echo $this->image_shortcode( array( 'id' => $id ) );
+			} ?>
 		</figure>
+
 		<?php return ob_get_clean();
 	}
 
@@ -252,10 +249,12 @@ class Simple_FB_Instant_Articles {
 
 		// FB IA image format.
 		ob_start(); ?>
+
 		<figure>
 			<img src="<?php echo esc_url( $image_url ); ?>" />
 			<?php simple_fb_image_caption( $image_id ); ?>
 		</figure>
+
 		<?php return ob_get_clean();
 	}
 
