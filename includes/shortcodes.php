@@ -108,9 +108,9 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		if ( ! empty( $atts['id'] ) )
 			$atts['id'] = 'id="' . esc_attr( sanitize_html_class( $atts['id'] ) ) . '" ';
 
-		$class = trim( 'wp-caption ' . $atts['align'] . ' ' . $atts['class'] );
+		$class = trim( 'simple-fb-caption ' . $atts['align'] . ' ' . $atts['class'] );
 
-		return '<figure ' . $atts['id'] . 'class="' . esc_attr( $class ) . '">' . do_shortcode( $content ) . '<figcaption class="wp-caption-text">' . $atts['caption'] . '</figcaption></figure>';
+		return '<figure ' . $atts['id'] . 'class="' . esc_attr( $class ) . '">' . do_shortcode( $content ) . '<figcaption class="simple-fb-caption-text">' . $atts['caption'] . '</figcaption></figure>';
 
 	}
 
@@ -127,7 +127,7 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 	 *     @type string $loop     The 'loop' attribute for the `<audio>` element. Default empty.
 	 *     @type string $autoplay The 'autoplay' attribute for the `<audio>` element. Default empty.
 	 *     @type string $preload  The 'preload' attribute for the `<audio>` element. Default empty.
-	 *     @type string $class    The 'class' attribute for the `<audio>` element. Default 'wp-audio-shortcode'.
+	 *     @type string $class    The 'class' attribute for the `<audio>` element. Default 'simple-fb-audio-shortcode'.
 	 *     @type string $style    The 'style' attribute for the `<audio>` element. Default 'width: 100%'.
 	 * }
 	 * @param string $content Shortcode content.
@@ -172,7 +172,7 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		if ( ! empty( $atts['src'] ) ) {
 			$type = wp_check_filetype( $atts['src'], wp_get_mime_types() );
 			if ( ! in_array( strtolower( $type['ext'] ), $default_types ) ) {
-				return sprintf( '<a class="wp-embedded-audio" href="%s">%s</a>', esc_url( $atts['src'] ), esc_html( $atts['src'] ) );
+				return sprintf( '<a class="simple-fb-embedded-audio" href="%s">%s</a>', esc_url( $atts['src'] ), esc_html( $atts['src'] ) );
 			}
 			$primary = true;
 			array_unshift( $default_types, 'src' );
@@ -210,7 +210,7 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		 * @param string $class CSS class or list of space-separated classes.
 		 */
 		$html_atts = array(
-			'class'    => apply_filters( 'wp_audio_shortcode_class', 'wp-audio-shortcode' ),
+			'class'    => apply_filters( 'simple_fb_audio_shortcode_class', 'simple-fb-audio-shortcode' ),
 			'id'       => sprintf( 'audio-%d', $post_id ),
 			'loop'     => wp_validate_boolean( $atts['loop'] ),
 			'autoplay' => wp_validate_boolean( $atts['autoplay'] ),
@@ -258,7 +258,163 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		 * @param string $audio   Audio file.
 		 * @param int    $post_id Post ID.
 		 */
-		return apply_filters( 'wp_audio_shortcode', $html, $atts, $audio, $post_id );
+		return apply_filters( 'simple_fb_audio_shortcode', $html, $atts, $audio, $post_id );
+	}
+
+	/**
+	 * Builds the Video shortcode output.
+	 *
+	 * This implements the functionality of the Video Shortcode for displaying
+	 * WordPress mp4s in a post.
+	 *
+	 *
+	 * @param array  $attr {
+	 *     Attributes of the shortcode.
+	 *
+	 *     @type string $src      URL to the source of the video file. Default empty.
+	 *     @type int    $height   Height of the video embed in pixels. Default 360.
+	 *     @type int    $width    Width of the video embed in pixels. Default $content_width or 640.
+	 *     @type string $poster   The 'poster' attribute for the `<video>` element. Default empty.
+	 *     @type string $loop     The 'loop' attribute for the `<video>` element. Default empty.
+	 *     @type string $autoplay The 'autoplay' attribute for the `<video>` element. Default empty.
+	 *     @type string $preload  The 'preload' attribute for the `<video>` element.
+	 *                            Default 'metadata'.
+	 *     @type string $class    The 'class' attribute for the `<video>` element.
+	 *                            Default 'simple-fb-video-shortcode'.
+	 * }
+	 * @param string $content Shortcode content.
+	 * @return string|void HTML content to display video.
+	 */
+	function video( $attr, $content = '' ) {
+		/**
+		 * Filter the default video shortcode output.
+		 *
+		 * If the filtered output isn't empty, it will be used instead of generating
+		 * the default video template.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @see wp_video_shortcode()
+		 *
+		 * @param string $html     Empty variable to be replaced with shortcode markup.
+		 * @param array  $attr     Attributes of the video shortcode.
+		 * @param string $content  Video shortcode content.
+		 */
+		$override = apply_filters( 'simple_fb_video_shortcode_override', '', $attr, $content );
+		if ( '' !== $override ) {
+			return $override;
+		}
+
+		$video = null;
+
+		$default_types = wp_get_video_extensions();
+		$defaults_atts = array(
+			'src'      => '',
+			'poster'   => '',
+			'loop'     => '',
+			'autoplay' => '',
+			'preload'  => 'metadata',
+			'width'    => 640,
+			'height'   => 360,
+		);
+
+		foreach ( $default_types as $type ) {
+			$defaults_atts[$type] = '';
+		}
+
+		// Boom, atts.
+		$atts = shortcode_atts( $defaults_atts, $attr, 'video' );
+
+		$primary = false;
+		foreach ( $default_types as $ext ) {
+			if ( ! empty( $atts[ $ext ] ) ) {
+				$type = wp_check_filetype( $atts[ $ext ], wp_get_mime_types() );
+				if ( strtolower( $type['ext'] ) === $ext ) {
+					$primary = true;
+				}
+			}
+		}
+
+		if ( ! $primary ) {
+			$videos = get_attached_media( 'video', $post_id );
+			if ( empty( $videos ) ) {
+				return;
+			}
+
+			$video = reset( $videos );
+			$atts['src'] = wp_get_attachment_url( $video->ID );
+			if ( empty( $atts['src'] ) ) {
+				return;
+			}
+
+			array_unshift( $default_types, 'src' );
+		}
+
+		$html_atts = array(
+			'class'    => apply_filters( 'wp_video_shortcode_class', 'simple-fb-video-shortcode' ),
+			'id'       => sprintf( 'video-%d', $post_id ),
+			'width'    => absint( $atts['width'] ),
+			'height'   => absint( $atts['height'] ),
+			'poster'   => esc_url( $atts['poster'] ),
+			'loop'     => wp_validate_boolean( $atts['loop'] ),
+			'autoplay' => wp_validate_boolean( $atts['autoplay'] ),
+			'preload'  => $atts['preload'],
+		);
+
+		// These ones should just be omitted altogether if they are blank
+		foreach ( array( 'poster', 'loop', 'autoplay', 'preload' ) as $a ) {
+			if ( empty( $html_atts[$a] ) ) {
+				unset( $html_atts[$a] );
+			}
+		}
+
+		$attr_strings = array();
+		foreach ( $html_atts as $k => $v ) {
+			$attr_strings[] = $k . '="' . esc_attr( $v ) . '"';
+		}
+
+		$html = '';
+		$html .= sprintf( '<video %s controls="controls">', join( ' ', $attr_strings ) );
+
+		$fileurl = '';
+		$source = '<source type="%s" src="%s" />';
+		foreach ( $default_types as $fallback ) {
+			if ( ! empty( $atts[ $fallback ] ) ) {
+				if ( empty( $fileurl ) ) {
+					$fileurl = $atts[ $fallback ];
+				}
+				if ( 'src' === $fallback && $is_youtube ) {
+					$type = array( 'type' => 'video/youtube' );
+				} elseif ( 'src' === $fallback && $is_vimeo ) {
+					$type = array( 'type' => 'video/vimeo' );
+				} else {
+					$type = wp_check_filetype( $atts[ $fallback ], wp_get_mime_types() );
+				}
+				$url = add_query_arg( '_', $instance, $atts[ $fallback ] );
+				$html .= sprintf( $source, $type['type'], esc_url( $url ) );
+			}
+		}
+
+		if ( ! empty( $content ) ) {
+			if ( false !== strpos( $content, "\n" ) ) {
+				$content = str_replace( array( "\r\n", "\n", "\t" ), '', $content );
+			}
+			$html .= trim( $content );
+		}
+
+		$html .= '</video>';
+
+		/**
+		 * Filter the output of the video shortcode.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param string $output  Video shortcode HTML output.
+		 * @param array  $atts    Array of video shortcode attributes.
+		 * @param string $video   Video file.
+		 * @param int    $post_id Post ID.
+		 */
+		return apply_filters( 'simple_fb_video_shortcode', $output, $atts, $video, $post_id );
 	}
 
 
