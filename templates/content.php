@@ -6,7 +6,7 @@
 <article>
 	<header>
 		<figure>
-			<?php the_post_thumbnail( 'medium' ); ?>
+			<?php the_post_thumbnail( 'full' ); ?>
 			<figcaption><?php echo simple_fb_thumbnail_caption(); ?></figcaption>
 		</figure>
 
