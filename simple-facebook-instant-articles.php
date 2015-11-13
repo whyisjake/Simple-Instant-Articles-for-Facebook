@@ -193,6 +193,7 @@ class Simple_FB_Instant_Articles {
 
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
+		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_images' ), 10, 2 );
 	}
 
 	public function rss_permalink( $link ) {
@@ -390,6 +391,42 @@ class Simple_FB_Instant_Articles {
 			// Replace original pull quotes with FB AI marked up ones.
 			$new_node = $dom->createDocumentFragment();
 			$new_node->appendXML( $fb_pull_quote );
+			$node->parentNode->replaceChild( $new_node, $node );
+		}
+	}
+
+	/**
+	 * Renders images into FB AI format that don't have <figure> element as parent.
+	 * Consider <img> with parent <figure> already been converted to FB IA format.
+	 *
+	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/image
+	 *
+	 * @param DOMDocument $dom   DOM object generated for post content.
+	 * @param DOMXPath    $xpath XPATH object generated for post content.
+	 */
+	public function render_images( \DOMDocument &$dom, \DOMXPath &$xpath ) {
+
+		// Images - with parent that's not <figure>.
+		foreach ( $xpath->query( '//img[not(parent::figure)]' ) as $node ) {
+
+			// Wrap <img> into <figure>.
+			$image_html = $this->get_html_for_node( $node, 'xml', true );
+
+			// FB IA image format.
+			$fb_image = sprintf(
+				'<figure>%s</figure>',
+				wp_kses( $image_html,
+					array(
+						'img' => array(
+							'src' => array(),
+						),
+					)
+				)
+			);
+
+			// Replace original image markup with FB IA markup.
+			$new_node = $dom->createDocumentFragment();
+			$new_node->appendXML( $fb_image );
 			$node->parentNode->replaceChild( $new_node, $node );
 		}
 	}
