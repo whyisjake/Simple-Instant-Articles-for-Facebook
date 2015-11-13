@@ -18,9 +18,12 @@
 	<?php
 	// Post featured image as FB IA cover image.
 	if ( $thumb_id = get_post_thumbnail_id() ) :
+
+		$thumb     = wp_get_attachment_image_src( $thumb_id, Simple_FB_Instant_Articles::instance()->image_size );
+		$thumb_url = $thumb[0];
 	?>
 		<figure>
-			<?php echo wp_kses_post( wp_get_attachment_image( $thumb_id, Simple_FB_Instant_Articles::instance()->image_size ) ); ?>
+			<img src="<?php echo esc_url( $thumb_url ); ?>" />
 		</figure>
 
 	<?php endif; ?>
