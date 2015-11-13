@@ -446,13 +446,43 @@ class Simple_FB_Instant_Articles {
 	 * @return string Content HTML.
 	 */
 	public function get_ad_code() {
-
-		$ad_template_file = trailingslashit( $this->template_path ) . 'ad.php';
-
 		ob_start();
-		require( $ad_template_file );
+		require( trailingslashit( $this->template_path ) . 'ad.php' );
 		return ob_get_clean();
+	}
 
+	/**
+	 * Get Ad targeting args.
+	 * @return [type] [description]
+	 */
+	protected function get_ad_targeting_params() {
+
+		$args    = array( 'fields' => 'names' );
+		$tags    = wp_get_post_tags( get_the_ID(), $args ); // get tag names
+		$cats    = wp_get_post_categories( get_the_ID(), $args ); // get category names
+		$authors = (array) get_coauthors( $post_id ); // get authors
+
+		$authors = array_map( function( $author ) {
+			return $author->display_name;
+		}, array_filter( $authors ) );
+
+		$url_bits = parse_url( esc_url( home_url() ) );
+
+		$targeting_params = array(
+			// Merge, Remove dupes, and fix keys order.
+			'kw'         => array_values( array_unique( array_merge( $cats, $tags, $authors ) ) ),
+			'category'   => $cats,
+			'domainName' => isset( $url_bits['host'] ) ? $url_bits['host'] : '',
+		);
+
+		return $targeting_params;
+
+	}
+
+	public function ad_targeting_js() {
+		foreach ( $this->get_ad_targeting_params() as $key => $value ) {
+			printf( ".setTargeting( '%s', %s )", esc_js( $key ), wp_json_encode( $value ) );
+		}
 	}
 
 	/**
