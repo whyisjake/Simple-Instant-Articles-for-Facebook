@@ -182,6 +182,9 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
 		add_filter( 'embed_oembed_html', array( $this, 'fb_formatted_social_embeds' ), 10, 4 );
 
+		// GA analytics code.
+		add_action( 'the_content', array( $this, 'append_google_analytics_code' ) );
+
 		// Render post content via DOM - to format it into FB IA format.
 		// DO it last, so content was altered via WP native hooks as much as possible.
 		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ), 1000 );
@@ -191,9 +194,6 @@ class Simple_FB_Instant_Articles {
 
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
-
-		add_action( 'the_content', array( $this, 'append_analytics_code' ) );
-
 	}
 
 	public function rss_permalink( $link ) {
@@ -394,25 +394,27 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Append analytics script in the format ready for FB IA.
+	 * Append Google Analytics (GA) script in the FB IA format
+	 * to the post content.
 	 *
-	 * @param string $html HTML markup for the content.
+	 * @param string $post_content Post content.
 	 *
-	 * @return string Content HTML.
+	 * @return string Post content with added GA script in FB IA format.
 	 */
-	public function append_analytics_code( $html ) {
-		$html .= $this->get_analytics_code();
-		return $html;
+	public function append_google_analytics_code( $post_content ) {
+
+		$post_content .= $this->get_google_analytics_code();
+		return $post_content;
 	}
 
 	/**
-	 * Get analytics script in the format ready for FB IA.
+	 * Get GA script in the FB IA format.
 	 *
-	 * Analytics Docs: https://developers.facebook.com/docs/instant-articles/reference/analytics
+	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/analytics
 	 *
-	 * @return string Content HTML.
+	 * @return string GA script in FB IA format.
 	 */
-	public function get_analytics_code() {
+	public function get_google_analytics_code() {
 
 		$analytics_template_file = trailingslashit( $this->template_path ) . 'script-ga.php';
 		$ga_profile_id           = get_option( 'lawrence_ga_tracking_id' );
@@ -424,9 +426,6 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		require( $analytics_template_file );
 		return ob_get_clean();
-
-		return $html;
-
 	}
 
 	/**
