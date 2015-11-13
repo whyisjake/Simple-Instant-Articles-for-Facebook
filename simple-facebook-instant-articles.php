@@ -183,7 +183,7 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'embed_oembed_html', array( $this, 'fb_formatted_social_embeds' ), 10, 4 );
 
 		// GA analytics code.
-		add_action( 'the_content', array( $this, 'append_analytics_code' ) );
+		add_action( 'the_content', array( $this, 'append_google_analytics_code' ) );
 
 		// Render post content via DOM - to format it into FB IA format.
 		// DO it last, so content was altered via WP native hooks as much as possible.
@@ -401,9 +401,9 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @return string Post content with added GA script in FB IA format.
 	 */
-	public function append_analytics_code( $post_content ) {
+	public function append_google_analytics_code( $post_content ) {
 
-		$post_content .= $this->get_analytics_code();
+		$post_content .= $this->get_google_analytics_code();
 		return $post_content;
 	}
 
@@ -414,7 +414,7 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @return string GA script in FB IA format.
 	 */
-	public function get_analytics_code() {
+	public function get_google_analytics_code() {
 
 		$analytics_template_file = trailingslashit( $this->template_path ) . 'script-ga.php';
 		$ga_profile_id           = get_option( 'lawrence_ga_tracking_id' );
