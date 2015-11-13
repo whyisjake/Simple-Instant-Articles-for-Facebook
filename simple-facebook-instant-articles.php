@@ -469,7 +469,7 @@ class Simple_FB_Instant_Articles {
 			return $author->display_name;
 		}, array_filter( $authors ) );
 
-		$url_bits = parse_url( esc_url( home_url() ) );
+		$url_bits = parse_url( home_url() );
 
 		$targeting_params = array(
 			// Merge, Remove dupes, and fix keys order.
