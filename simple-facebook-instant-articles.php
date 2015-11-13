@@ -9,6 +9,7 @@ Author: Jake Spurlock, Human Made Limited
 require_once( 'includes/functions.php' );
 
 class Simple_FB_Instant_Articles {
+
 	/**
 	 * The one instance of Simple_FB_Instant_Articles.
 	 *
@@ -178,25 +179,24 @@ class Simple_FB_Instant_Articles {
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
 
 		// Render social embeds into FB IA format.
-		add_filter( 'embed_handler_html', array( $this, 'fb_formatted_social_embeds' ), 10, 3 );
-		add_filter( 'embed_oembed_html', array( $this, 'fb_formatted_social_embeds' ), 10, 4 );
+		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
+		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
 
-		// Render post content via DOM - to format it into FB IA format.
-		// DO it last, so content was altered via WP native hooks as much as possible.
-		add_filter( 'the_content', array( $this, 'fb_formatted_post_content' ), 1000 );
-
-		// GA analytics code.
+		// Modify the content.
+		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_action( 'the_content', array( $this, 'append_google_analytics_code' ), 1100 );
+		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
 
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
 
 		// Render post content into FB IA format - using DOM object.
-		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
-		add_action( 'simple_fb_formatted_post_content', array( $this, 'render_images' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 	}
 
 	public function rss_permalink( $link ) {
+
 		return esc_url( $link . $this->endpoint );
 	}
 
@@ -314,14 +314,14 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @return string           FB IA formatted markup for social embeds.
 	 */
-	public function fb_formatted_social_embeds( $html, $url, $attr, $post_ID = null ) {
+	public function reformat_social_embed( $html, $url, $attr, $post_ID = null ) {
 
 		return '<figure class="op-social"><iframe>' . $html . '</iframe></figure>';
 	}
 
 	/**
 	 * Setup DOM and XPATH objects for formatting post content.
-	 * Introduces `simple_fb_formatted_post_content` filter, so that post content
+	 * Introduces `simple_fb_reformat_post_content` filter, so that post content
 	 * can be formatted as necessary and dom/xpath objects re-used.
 	 *
 	 * @param $post_content Post content that needs to be formatted into FB IA format.
@@ -329,7 +329,7 @@ class Simple_FB_Instant_Articles {
 	 * @return string|void  Post content in FB IA format if dom is generated for post content,
 	 *                      Otherwise, nothing.
 	 */
-	public function fb_formatted_post_content( $post_content ) {
+	public function reformat_post_content( $post_content ) {
 
 		$dom = new \DOMDocument();
 
@@ -345,7 +345,7 @@ class Simple_FB_Instant_Articles {
 		$xpath = new \DOMXPath( $dom );
 
 		// Allow to render post content via action.
-		do_action_ref_array( 'simple_fb_formatted_post_content', array( &$dom, &$xpath ) );
+		do_action_ref_array( 'simple_fb_reformat_post_content', array( &$dom, &$xpath ) );
 
 		// Get the FB IA formatted post content HTML.
 		$body_node = $dom->getElementsByTagName( 'body' )->item( 0 );
@@ -463,6 +463,72 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		require( $analytics_template_file );
 		return ob_get_clean();
+
+	}
+
+	/**
+	 * Append Ad script in the FB IA format to the post content.
+	 *
+	 * @param string $post_content Post content.
+	 *
+	 * @return string Post content with added ad script in FB IA format.
+	 */
+	public function append_ad_code( $post_content ) {
+
+		$post_content .= $this->get_ad_code();
+		return $post_content;
+	}
+
+	/**
+	 * Get Ad code in the FB IA format.
+	 *
+	 * @return string Ad script in FB IA format.
+	 */
+	public function get_ad_code() {
+
+		ob_start();
+		require( trailingslashit( $this->template_path ) . 'ad.php' );
+		return ob_get_clean();
+	}
+
+	/**
+	 * Get Ad targeting args.
+	 *
+	 * @return array Targeting params.
+	 */
+	protected function get_ad_targeting_params() {
+
+		$args    = array( 'fields' => 'names' );
+		$tags    = wp_get_post_tags( get_the_ID(), $args );       // get tag names
+		$cats    = wp_get_post_categories( get_the_ID(), $args ); // get category names
+		$authors = (array) get_coauthors( get_the_ID() );         // get authors
+
+		$authors = array_map( function( $author ) {
+			return $author->display_name;
+		}, array_filter( $authors ) );
+
+		$url_bits = parse_url( home_url() );
+
+		$targeting_params = array(
+			// Merge, Remove dupes, and fix keys order.
+			'kw'         => array_values( array_unique( array_merge( $cats, $tags, $authors ) ) ),
+			'category'   => $cats,
+			'domainName' => isset( $url_bits['host'] ) ? $url_bits['host'] : '',
+		);
+
+		return $targeting_params;
+	}
+
+	/**
+	 * Output Ad targeting JS.
+	 *
+	 * @return void
+	 */
+	public function ad_targeting_js() {
+
+		foreach ( $this->get_ad_targeting_params() as $key => $value ) {
+			printf( ".setTargeting( '%s', %s )", esc_js( $key ), wp_json_encode( $value ) );
+		}
 	}
 
 	/**
