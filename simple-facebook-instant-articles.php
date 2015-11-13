@@ -426,9 +426,6 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		require( $analytics_template_file );
 		return ob_get_clean();
-
-		return $html;
-
 	}
 
 	/**
