@@ -179,8 +179,8 @@ class Simple_FB_Instant_Articles {
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
 
 		// Render social embeds into FB IA format.
-		add_filter( 'embed_handler_html', array( $this, 'get_social_embed' ), 10, 3 );
-		add_filter( 'embed_oembed_html', array( $this, 'get_social_embed' ), 10, 4 );
+		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
+		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
 
 		// Modify the content.
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
@@ -315,7 +315,7 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @return string           FB IA formatted markup for social embeds.
 	 */
-	public function get_social_embed( $html, $url, $attr, $post_ID = null ) {
+	public function reformat_social_embed( $html, $url, $attr, $post_ID = null ) {
 
 		return '<figure class="op-social"><iframe>' . $html . '</iframe></figure>';
 	}
