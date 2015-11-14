@@ -6,7 +6,7 @@
 <article>
 	<header>
 
-		<?php simple_fb_header_figure(); ?>
+		<?php echo simple_fb_header_figure(); ?>
 
 		<?php the_title( '<h1>', '</h1>' ); ?>
 

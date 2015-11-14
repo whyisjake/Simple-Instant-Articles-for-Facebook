@@ -16,12 +16,7 @@ function simple_fb_thumbnail_caption() {
  * @return string header
  */
 function simple_fb_header_figure() {
-	ob_start();
-	echo '<figure>';
-	the_post_thumbnail( 'full' );
-	echo '<figcaption>';
-	echo simple_fb_thumbnail_caption();
-	echo '</figcaption></figure>';
-	$content = ob_get_contents();
+	$caption = sprintf( '<figcaption>%s</figcaption>', simple_fb_thumbnail_caption() );
+	$content = sprintf( '<figure>%s%s</figure>', get_the_post_thumbnail( get_the_id(), 'full' ), $caption );
 	return apply_filters( 'simple_fb_header_figure', $content );
 }
