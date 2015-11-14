@@ -5,10 +5,8 @@
 ?>
 <article>
 	<header>
-		<figure>
-			<?php the_post_thumbnail( 'full' ); ?>
-			<figcaption><?php echo simple_fb_thumbnail_caption(); ?></figcaption>
-		</figure>
+
+		<?php simple_fb_header_figure(); ?>
 
 		<?php the_title( '<h1>', '</h1>' ); ?>
 
