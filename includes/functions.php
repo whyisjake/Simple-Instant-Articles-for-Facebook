@@ -10,3 +10,18 @@ function simple_fb_thumbnail_caption() {
 	$caption    = apply_filters( 'simple-fb-caption', $thumb_post->post_excerpt );
 	return $caption;
 }
+
+/**
+ * Build the header for the story.
+ * @return string header
+ */
+function simple_fb_header_figure() {
+	ob_start();
+	echo '<figure>';
+	the_post_thumbnail( 'full' );
+	echo '<figcaption>';
+	echo simple_fb_thumbnail_caption();
+	echo '</figcaption></figure>';
+	$content = ob_get_contents();
+	return apply_filters( 'simple_fb_header_figure', $content );
+}
