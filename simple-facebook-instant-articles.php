@@ -82,8 +82,6 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function init() {
 		add_rewrite_endpoint( $this->endpoint, EP_PERMALINK );
-		register_activation_hook( __FILE__,   'flush_rewrite_rules' );
-		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 	}
 
 	/**
@@ -141,19 +139,15 @@ class Simple_FB_Instant_Articles {
 		$wp_query->is_404 = false;
 		status_header( 200 );
 
-		$file_name = 'feed.php';
-
-		$user_template_file = apply_filters( 'simple_fb_feed_template_file', trailingslashit( get_template_directory() ) . $file_name );
-
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_before_feed' );
 
-		// Load user feed template if it exists, otherwise use plugin template.
-		if ( file_exists( $user_template_file ) ) {
-			require( $user_template_file );
-		} else {
-			require( $this->template_path . $file_name );
+		$template = trailingslashit( $this->template_path ) . 'feed.php';;
+
+		if ( 0 === validate_file( $template ) ) {
+			require( $template );
 		}
+
 
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_after_feed' );
