@@ -344,9 +344,8 @@ class Simple_FB_Instant_Articles {
 		// Get the FB IA formatted post content HTML.
 		$body_node = $dom->getElementsByTagName( 'body' )->item( 0 );
 
-		// NOTE(!) post content should be returned as HTML otherwise <script></script> tags
-		// will be output as <script /> which is incorrect HTML.
-		return $this->get_html_for_node( $body_node, 'html' );
+		return $this->get_html_for_node( $body_node );
+
 	}
 
 	/**
@@ -528,35 +527,16 @@ class Simple_FB_Instant_Articles {
 	/**
 	 * Generates XML/HTML string for DOM node object.
 	 *
-	 * @param DOMNode $node         Node object to generate the XML/HTML string for.
-	 * @param string  $save_as      Whether to save Node as XML or not.
-	 *                              Default - true, save node as XML.
-	 *                              This is important(!):
-	 *                              1) Final post content should be returned as HTML -
-	 *                              otherwise <script></script> tags will be output as <script />
-	 *                              which is incorrect HTML.
-	 *                              2) However, while working with DOM document fragments we need XML,
-	 *                              otherwise nodes are not generated correctly; and never replaced.
-	 * @param bool    $is_self_html Whether to include node's markup itself in output.
-	 *                              Default - false, only return children markup.
+	 * @param DOMNode $node Node object to generate the XML/HTML string for.
 	 *
-	 * @return string               XML/HTML string/markup for supplied DOM node.
+	 * @return string       XML/HTML string/markup for supplied DOM node.
 	 */
-	protected function get_html_for_node( \DOMNode $node, $save_as = 'xml', $is_self_html = false ) {
+	protected function get_html_for_node( \DOMNode $node ) {
 
-		// Set up which method to use for saving node - XML or HTML.
-		$save_as = ( 'xml' === strtolower( $save_as ) ) ? 'saveXML' : 'saveHTML';
-
-		// Whole node markup - including itself and all it's children.
-		if ( $is_self_html ) {
-			return $node->ownerDocument->$save_as( $node );
-		}
-
-		// Node's children markup only - excluding node's markup itself.
 		$node_html  = '';
 
 		foreach ( $node->childNodes as $child_node ) {
-			$node_html .= $child_node->ownerDocument->$save_as( $child_node );
+			$node_html .= $child_node->ownerDocument->saveHTML( $child_node );
 		}
 
 		return $node_html;
