@@ -230,10 +230,10 @@ class Simple_FB_Instant_Articles {
 	public function image_shortcode( $atts, $content = '' ) {
 
 		// Get attachment ID from the shortcode attribute.
-		$image_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : '';
+		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : '';
 
 		// Get image info.
-		$image     = wp_get_attachment_image_src( $image_id, $this->image_size );
+		$image     = wp_get_attachment_image_src( $attachment_id, $this->image_size );
 		$image_url = isset( $image[0] ) ? $image[0] : '';
 
 		// Stop - if image URL is empty.
@@ -246,7 +246,7 @@ class Simple_FB_Instant_Articles {
 
 		<figure>
 			<img src="<?php echo esc_url( $image_url ); ?>" />
-			<?php simple_fb_image_caption( $image_id ); ?>
+			<?php simple_fb_image_caption( $attachment_id ); ?>
 		</figure>
 
 		<?php return ob_get_clean();
