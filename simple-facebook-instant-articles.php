@@ -186,6 +186,7 @@ class Simple_FB_Instant_Articles {
 
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 	}
 
 	public function rss_permalink( $link ) {
@@ -203,27 +204,23 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function gallery_shortcode( $atts, $content = '' ) {
 
-		// Get the IDs.
+		// Get the image IDs.
 		$ids = explode( ',', $atts['ids'] );
 
 		ob_start(); ?>
+
 		<figure class="op-slideshow">
-			<?php foreach ( $ids as $id ) : ?>
-				<?php $image = wp_get_attachment_image_src( $id, $this->image_size ); ?>
-				<?php $url   = ( $image[0] ); ?>
-				<figure>
-					<img src="<?php echo esc_url( $url ); ?>" alt="<?php echo esc_attr( get_the_title( $id ) ); ?>">
-					<?php simple_fb_image_caption( $id ); ?>
-				</figure>
-			<?php endforeach; ?>
+			<?php foreach ( $ids as $id ) {
+				echo $this->image_shortcode( array( 'id' => $id ) );
+			} ?>
 		</figure>
+
 		<?php return ob_get_clean();
 	}
 
 	/**
 	 * Caption shortcode - overwrite WP native shortcode.
-	 * Format caption of inserted images into post content into
-	 * FB IA format.
+	 * Format images in caption shortcodes into FB IA format.
 	 *
 	 * @param $atts           Array of attributes passed to shortcode.
 	 * @param string $content The content passed to the shortcode.
@@ -246,10 +243,12 @@ class Simple_FB_Instant_Articles {
 
 		// FB IA image format.
 		ob_start(); ?>
+
 		<figure>
 			<img src="<?php echo esc_url( $image_url ); ?>" />
 			<?php simple_fb_image_caption( $attachment_id ); ?>
 		</figure>
+
 		<?php return ob_get_clean();
 	}
 
@@ -315,7 +314,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Setup dom and xpath objects for formatting post content.
+	 * Setup DOM and XPATH objects for formatting post content.
 	 * Introduces `simple_fb_reformat_post_content` filter, so that post content
 	 * can be formatted as necessary and dom/xpath objects re-used.
 	 *
@@ -342,17 +341,19 @@ class Simple_FB_Instant_Articles {
 		// Allow to render post content via action.
 		do_action_ref_array( 'simple_fb_reformat_post_content', array( &$dom, &$xpath ) );
 
-		// Get the FB formatted post content HTML.
+		// Get the FB IA formatted post content HTML.
 		$body_node = $dom->getElementsByTagName( 'body' )->item( 0 );
+
 		return $this->get_html_for_node( $body_node );
+
 	}
 
 	/**
 	 * Renders pull quotes into FB AI format.
 	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/pullquote
 	 *
-	 * @param DOMDocument $dom   Dom object generated for post content.
-	 * @param DOMXPath    $xpath Xpath object generated for post content.
+	 * @param DOMDocument $dom   DOM object generated for post content.
+	 * @param DOMXPath    $xpath XPATH object generated for post content.
 	 */
 	public function render_pull_quotes( \DOMDocument &$dom, \DOMXPath &$xpath ) {
 
@@ -383,6 +384,31 @@ class Simple_FB_Instant_Articles {
 			$new_node = $dom->createDocumentFragment();
 			$new_node->appendXML( $fb_pull_quote );
 			$node->parentNode->replaceChild( $new_node, $node );
+		}
+	}
+
+	/**
+	 * Reformat images into FB AI format.
+	 *
+	 * Ensure they are child of <figure>.
+	 * Consider <img> with parent <figure> already been converted to FB IA format.
+	 *
+	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/image
+	 *
+	 * @param DOMDocument $dom   DOM object generated for post content.
+	 * @param DOMXPath    $xpath XPATH object generated for post content.
+	 */
+	public function render_images( \DOMDocument &$dom, \DOMXPath &$xpath ) {
+
+		// Images - with parent that's not <figure>.
+		foreach ( $xpath->query( '//img[not(parent::figure)]' ) as $node ) {
+
+			$figure = $dom->createElement( 'figure' );
+
+			$node->parentNode->replaceChild( $figure, $node );
+
+			$figure->appendChild( $node );
+
 		}
 	}
 
@@ -488,15 +514,16 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Generates HTML string for DOM node object.
+	 * Generates XML/HTML string for DOM node object.
 	 *
-	 * @param DOMNode $node Node object to generate the HTML string for.
+	 * @param DOMNode $node Node object to generate the XML/HTML string for.
 	 *
-	 * @return string       HTML string/markup for supplied DOM node.
+	 * @return string       XML/HTML string/markup for supplied DOM node.
 	 */
 	protected function get_html_for_node( \DOMNode $node ) {
 
 		$node_html  = '';
+
 		foreach ( $node->childNodes as $child_node ) {
 			$node_html .= $child_node->ownerDocument->saveHTML( $child_node );
 		}
