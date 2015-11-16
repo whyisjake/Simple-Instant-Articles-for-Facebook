@@ -82,8 +82,6 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function init() {
 		add_rewrite_endpoint( $this->endpoint, EP_PERMALINK );
-		register_activation_hook( __FILE__,   'flush_rewrite_rules' );
-		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 	}
 
 	/**
