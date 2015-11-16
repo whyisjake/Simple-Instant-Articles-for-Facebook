@@ -388,7 +388,9 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Renders images into FB AI format that don't have <figure> element as parent.
+	 * Reformat images into FB AI format.
+	 *
+	 * Ensure they are child of <figure>.
 	 * Consider <img> with parent <figure> already been converted to FB IA format.
 	 *
 	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/image
@@ -401,25 +403,12 @@ class Simple_FB_Instant_Articles {
 		// Images - with parent that's not <figure>.
 		foreach ( $xpath->query( '//img[not(parent::figure)]' ) as $node ) {
 
-			// Wrap <img> into <figure>.
-			$image_html = $this->get_html_for_node( $node, 'xml', true );
+			$figure = $dom->createElement( 'figure' );
 
-			// FB IA image format.
-			$fb_image = sprintf(
-				'<figure>%s</figure>',
-				wp_kses( $image_html,
-					array(
-						'img' => array(
-							'src' => array(),
-						),
-					)
-				)
-			);
+			$node->parentNode->replaceChild( $figure, $node );
 
-			// Replace original image markup with FB IA markup.
-			$new_node = $dom->createDocumentFragment();
-			$new_node->appendXML( $fb_image );
-			$node->parentNode->replaceChild( $new_node, $node );
+			$figure->appendChild( $node );
+
 		}
 	}
 
