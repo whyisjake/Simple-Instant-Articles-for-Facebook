@@ -348,7 +348,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Renders pull quotes into FB AI format.
+	 * Renders pull quotes into FB IA format.
 	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/pullquote
 	 *
 	 * @param DOMDocument $dom   DOM object generated for post content.
@@ -365,7 +365,7 @@ class Simple_FB_Instant_Articles {
 
 			$pull_quote_html = $this->get_inner_html_for_node( $node );
 
-			// FB AI pull quote format.
+			// FB IA pull quote format.
 			$fb_pull_quote = sprintf(
 				'<aside>%s<cite>%s</cite></aside>',
 				wp_kses( $pull_quote_html,
@@ -379,7 +379,7 @@ class Simple_FB_Instant_Articles {
 				esc_html( $cite->nodeValue )
 			);
 
-			// Replace original pull quotes with FB AI marked up ones.
+			// Replace original pull quotes with FB IA marked up ones.
 			$new_node = $dom->createDocumentFragment();
 			$new_node->appendXML( $fb_pull_quote );
 			$node->parentNode->replaceChild( $new_node, $node );
@@ -387,7 +387,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Reformat images into FB AI format.
+	 * Reformat images into FB IA format.
 	 *
 	 * Ensure they are child of <figure>.
 	 * Consider <img> with parent <figure> already been converted to FB IA format.
@@ -407,7 +407,6 @@ class Simple_FB_Instant_Articles {
 			$node->parentNode->replaceChild( $figure, $node );
 
 			$figure->appendChild( $node );
-
 		}
 	}
 
