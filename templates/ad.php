@@ -19,7 +19,7 @@
 		<script type='text/javascript'>
 			googletag.cmd.push(function() {
 				googletag.defineSlot('/7103/SMG_FTW_OO/iPhone_app-facebook_banner', [300, 250], 'div-gpt-ad-1447369134868-0').addService(googletag.pubads());
-				googletag.pubads().enableSingleRequest();
+				googletag.pubads()<?php Simple_FB_Instant_Articles::instance()->ad_targeting_js(); ?>.enableSingleRequest();
 				googletag.enableServices();
 			});
 		</script>
