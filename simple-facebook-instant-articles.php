@@ -6,8 +6,6 @@ Description: Add support to Facebook Instant Articles
 Author: Jake Spurlock, Human Made Limited
 */
 
-require_once( 'includes/functions.php' );
-
 class Simple_FB_Instant_Articles {
 
 	/**
@@ -212,11 +210,12 @@ class Simple_FB_Instant_Articles {
 		$ids = array_map( 'absint', explode( ',', $atts['ids'] ) );
 
 		ob_start();
+
 		?>
 
 		<figure class="op-slideshow">
 			<?php foreach ( $ids as $id ) {
-				$this->render_image_markup( $id );
+				$this->render_image_markup( $id, $this->get_image_caption( $id ) );
 			} ?>
 		</figure>
 
@@ -251,6 +250,7 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		$this->render_image_markup( $attachment_id, $caption );
 		return ob_get_clean();
+
 	}
 
 	/**
@@ -266,14 +266,23 @@ class Simple_FB_Instant_Articles {
 		if ( ! $image ) {
 			return;
 		}
-		?>
 
-		<figure>
-			<img src="<?php echo esc_url( $image[0] ); ?>" />
-			<?php simple_fb_image_caption( $image_id, $caption ); ?>
-		</figure>
+		$template = trailingslashit( $this->template_path ) . 'image.php';
+		$src      = $image[0] ;
 
-		<?php
+		require( $template );
+
+	}
+
+	public function get_image_caption( $id ) {
+
+		$attachment_post = get_post( $id );
+
+		// Stop if - attachment post not found or caption is empty.
+		if ( $attachment_post && $attachment_post->post_excerpt ) {
+			return trim( $attachment_post->post_excerpt );
+		}
+
 	}
 
 	/**
@@ -302,18 +311,19 @@ class Simple_FB_Instant_Articles {
 		?>
 
 		<figure class="op-slideshow">
-			<?php foreach ( $gallery->images as $key => $image ) : ?>
-				<figure>
-					<img src="<?php echo esc_url( $image->url ); ?>" />
-					<?php if ( $image->custom_caption ) : ?>
-						<figcaption><h1><?php echo esc_html( strip_tags( $image->custom_caption ) ); ?></h1></figcaption>
-					<?php endif; ?>
-				</figure>
-			<?php endforeach; ?>
+
+			<?php
+
+			foreach ( $gallery->images as $key => $image ) {
+				$this->render_image_markup( $image->url, $image->custom_caption );
+			}
+
+			?>
 
 			<?php if ( $atts['title'] ) : ?>
 				<figcaption><h1><?php echo esc_html( $atts['title'] ); ?></h1></figcaption>
 			<?php endif;?>
+
 		</figure>
 
 		<?php
