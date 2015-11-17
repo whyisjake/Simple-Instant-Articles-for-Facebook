@@ -165,6 +165,10 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function setup_content_mods() {
 
+		// Remove related content filters.
+		add_filter( 'lawrence_single_related_enabled', '__return_false' );
+		add_filter( 'lawrence_single_related_affiliate_enabled', '__return_false' );
+
 		// Shortcodes - overwrite WP native ones with FB IA format.
 		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
 		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
