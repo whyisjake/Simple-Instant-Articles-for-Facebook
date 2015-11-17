@@ -344,7 +344,7 @@ class Simple_FB_Instant_Articles {
 		// Get the FB IA formatted post content HTML.
 		$body_node = $dom->getElementsByTagName( 'body' )->item( 0 );
 
-		return $this->get_inner_html_for_node( $body_node );
+		return $this->get_node_inner_html( $body_node );
 	}
 
 	/**
@@ -363,7 +363,7 @@ class Simple_FB_Instant_Articles {
 			$cite = $node->getElementsByTagName( 'cite' )->item( 0 );
 			@$cite->parentNode->removeChild( $cite );
 
-			$pull_quote_html = $this->get_inner_html_for_node( $node );
+			$pull_quote_html = $this->get_node_inner_html( $node );
 
 			// FB IA pull quote format.
 			$fb_pull_quote = sprintf(
@@ -515,7 +515,7 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @return string       Inner HTML markup for the supplied DOM node.
 	 */
-	protected function get_inner_html_for_node( \DOMNode $node ) {
+	protected function get_node_inner_html( \DOMNode $node ) {
 
 		$node_html  = '';
 
