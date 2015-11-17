@@ -6,8 +6,6 @@ Description: Add support to Facebook Instant Articles
 Author: Jake Spurlock, Human Made Limited
 */
 
-require_once( 'includes/functions.php' );
-
 class Simple_FB_Instant_Articles {
 
 	/**
@@ -166,7 +164,7 @@ class Simple_FB_Instant_Articles {
 
 		// Shortcodes - overwrite WP native ones with FB IA format.
 		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
-		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
+		add_shortcode( 'caption', array( $this, 'caption_shortcode' ) );
 
 		// Shortcodes - custom galleries.
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
@@ -212,16 +210,15 @@ class Simple_FB_Instant_Articles {
 		$ids = array_map( 'absint', explode( ',', $atts['ids'] ) );
 
 		ob_start();
-		?>
 
-		<figure class="op-slideshow">
-			<?php foreach ( $ids as $id ) {
-				$this->render_image_markup( $id );
-			} ?>
-		</figure>
+		echo '<figure class="op-slideshow">';
+		foreach ( $ids as $id ) {
+			$this->render_image_markup( $id, $this->get_image_caption( $id ) );
+		}
+		echo '</figure>';
 
-		<?php
 		return ob_get_clean();
+
 	}
 
 	/**
@@ -230,12 +227,12 @@ class Simple_FB_Instant_Articles {
 	 * Overwrite WP native shortcode.
 	 * Format images in caption shortcodes into FB IA format.
 	 *
-	 * @param $atts           Array of attributes passed to shortcode.
+	 * @param array  $atts    Array of attributes passed to shortcode.
 	 * @param string $content The content passed to the shortcode.
 	 *
 	 * @return string|void    FB IA formatted images markup.
 	 */
-	public function image_shortcode( $atts, $content = '' ) {
+	public function caption_shortcode( $atts, $content = '' ) {
 
 		// Get attachment ID from the shortcode attribute.
 		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : '';
@@ -244,31 +241,46 @@ class Simple_FB_Instant_Articles {
 			return;
 		}
 
+		// Get image caption.
+		$reg_ex = preg_match( '#^<img.*?\/>(.*)$#', trim( $content ), $matches );
+		$caption = isset( $matches[1] ) ? trim( $matches[1] ) : '';
+
 		ob_start();
-		$this->render_image_markup( $attachment_id );
+		$this->render_image_markup( $attachment_id, $caption );
 		return ob_get_clean();
+
 	}
 
 	/**
 	 * Outputs image markup in FB IA format.
 	 *
-	 * @param int $image_id Image ID to output in FB IA format.
+	 * @param int    $image_id Image ID to output in FB IA format.
+	 * @param string $caption  Image caption to display in FB IA format.
 	 */
-	public function render_image_markup( $image_id ) {
+	public function render_image_markup( $image_id, $caption = '' ) {
 
 		$image = wp_get_attachment_image_src( $image_id, $this->image_size );
 
 		if ( ! $image ) {
 			return;
 		}
-		?>
 
-		<figure>
-			<img src="<?php echo esc_url( $image[0] ); ?>" />
-			<?php simple_fb_image_caption( $image_id ); ?>
-		</figure>
+		$template = trailingslashit( $this->template_path ) . 'image.php';
+		$src      = $image[0] ;
 
-		<?php
+		require( $template );
+
+	}
+
+	public function get_image_caption( $id ) {
+
+		$attachment_post = get_post( $id );
+
+		// Stop if - attachment post not found or caption is empty.
+		if ( $attachment_post && $attachment_post->post_excerpt ) {
+			return trim( $attachment_post->post_excerpt );
+		}
+
 	}
 
 	/**
@@ -297,18 +309,19 @@ class Simple_FB_Instant_Articles {
 		?>
 
 		<figure class="op-slideshow">
-			<?php foreach ( $gallery->images as $key => $image ) : ?>
-				<figure>
-					<img src="<?php echo esc_url( $image->url ); ?>" />
-					<?php if ( $image->custom_caption ) : ?>
-						<figcaption><h1><?php echo esc_html( strip_tags( $image->custom_caption ) ); ?></h1></figcaption>
-					<?php endif; ?>
-				</figure>
-			<?php endforeach; ?>
+
+			<?php
+
+			foreach ( $gallery->images as $key => $image ) {
+				$this->render_image_markup( $image->url, $image->custom_caption );
+			}
+
+			?>
 
 			<?php if ( $atts['title'] ) : ?>
 				<figcaption><h1><?php echo esc_html( $atts['title'] ); ?></h1></figcaption>
 			<?php endif;?>
+
 		</figure>
 
 		<?php
