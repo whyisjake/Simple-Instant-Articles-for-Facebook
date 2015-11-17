@@ -165,16 +165,16 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function setup_content_mods() {
 
-		// Remove related content filters.
-		add_filter( 'lawrence_single_related_enabled', '__return_false' );
-		add_filter( 'lawrence_single_related_affiliate_enabled', '__return_false' );
-
 		// Shortcodes - overwrite WP native ones with FB IA format.
 		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
 		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
 
 		// Shortcodes - custom galleries.
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
+
+		// Shortcodes - remove related lawrence content.
+		add_shortcode( 'lawrence-related', '__return_empty_string' );
+		add_shortcode( 'lawrence-auto-related', '__return_empty_string' );
 
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
