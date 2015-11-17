@@ -187,6 +187,8 @@ class Simple_FB_Instant_Articles {
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
+
 	}
 
 	public function rss_permalink( $link ) {
@@ -422,6 +424,36 @@ class Simple_FB_Instant_Articles {
 
 			$figure->appendChild( $node );
 		}
+	}
+
+	/**
+	 * Facebook throws a warning for all headings below h2.
+	 *
+	 * Replace with h2s.
+	 *
+	 * @param  \DOMDocument &$dom   Dom.
+	 * @param  \DOMXPath    &$xpath Xpath.
+	 *
+	 * @return void
+	 */
+	public function fix_headings( \DOMDocument &$dom, \DOMXPath &$xpath ) {
+
+		$headings = array( 'h3', 'h4', 'h5' );
+
+		foreach ( $headings as $heading_tag ) {
+			foreach ( $dom->getElementsByTagName( $heading_tag ) as $node ) {
+
+				$h2 = $dom->createElement( 'h2' );
+
+				while ( $node->childNodes->length > 0 ) {
+					$h2->appendChild( $node->childNodes->item(0) );
+				}
+
+				$node->parentNode->replaceChild( $h2, $node );
+
+			}
+		}
+
 	}
 
 	/**
