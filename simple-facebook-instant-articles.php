@@ -209,7 +209,7 @@ class Simple_FB_Instant_Articles {
 	public function gallery_shortcode( $atts, $content = '' ) {
 
 		// Get the image IDs.
-		$ids = array_map( 'id', explode( ',', $atts['ids'] ) );
+		$ids = array_map( 'absint', explode( ',', $atts['ids'] ) );
 
 		ob_start();
 		?>
