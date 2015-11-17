@@ -150,7 +150,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	public function rss_permalink( $link ) {
-		return esc_url( $link . $this->endpoint );
+		return trailingslashit( $link ) . $this->endpoint;
 	}
 
 }
