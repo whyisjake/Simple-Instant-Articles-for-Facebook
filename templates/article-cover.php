@@ -32,17 +32,11 @@
 
 	<?php lawrence_the_subheading( '<h2>', '</h2>' ); ?>
 
-	<?php
-	// The author(s) of the article.
-	foreach ( get_coauthors() as $author ) :
-		$author = get_user_by( 'id', $author->ID );
-		?>
-
-		<address>
-			<a><?php echo esc_html( $author->display_name ); ?></a>
-		</address>
-
-	<?php endforeach; ?>
+	<?php if ( function_exists( 'coauthors' ) ) : ?>
+		<?php coauthors( '</address>, <address>', ' </address> and <address> ', '<address>', '</address>' ); ?>
+	<?php else : ?>
+		<address><?php the_author(); ?></address>
+	<?php endif; ?>
 
 	<!-- The published and last modified time stamps -->
 	<time class="op-published" dateTime="<?php echo esc_attr( get_the_time( 'c' ) ); ?>"><?php echo esc_html( lawrence_display_date() ); ?></time>
