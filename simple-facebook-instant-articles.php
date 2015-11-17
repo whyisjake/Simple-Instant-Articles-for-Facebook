@@ -400,15 +400,27 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function render_images( \DOMDocument &$dom, \DOMXPath &$xpath ) {
 
-		// Images - with parent that's not <figure>.
+		// Get all images that are not children of figure already.
 		foreach ( $xpath->query( '//img[not(parent::figure)]' ) as $node ) {
 
-			$figure = $dom->createElement( 'figure' );
+			$figure   = $dom->createElement( 'figure' );
+			$top_node = $node;
 
-			$node->parentNode->replaceChild( $figure, $node );
+			// If image node is not a direct child of the body, we need to move it there.
+			// Recurse up the tree looking for highest level parent/grandparent node.
+			while ( $top_node->parentNode && 'body' !== $top_node->parentNode->nodeName ) {
+				$top_node = $top_node->parentNode;
+			}
+
+			// Insert after the parent/grandparent node.
+			// Workaround to handle the fact only insertBefore exists.
+			try {
+				$top_node->parentNode->insertBefore( $figure, $top_node->nextSibling );
+			} catch( \Exception $e ) {
+				$top_node->parentNode->appendChild( $figure );
+			}
 
 			$figure->appendChild( $node );
-
 		}
 	}
 
