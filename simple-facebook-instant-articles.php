@@ -211,16 +211,14 @@ class Simple_FB_Instant_Articles {
 
 		ob_start();
 
-		?>
+		echo '<figure class="op-slideshow">';
+		foreach ( $ids as $id ) {
+			$this->render_image_markup( $id, $this->get_image_caption( $id ) );
+		}
+		echo '</figure>';
 
-		<figure class="op-slideshow">
-			<?php foreach ( $ids as $id ) {
-				$this->render_image_markup( $id, $this->get_image_caption( $id ) );
-			} ?>
-		</figure>
-
-		<?php
 		return ob_get_clean();
+
 	}
 
 	/**
