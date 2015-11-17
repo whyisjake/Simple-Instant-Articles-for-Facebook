@@ -428,17 +428,17 @@ class Simple_FB_Instant_Articles {
 	/**
 	 * Remove all empty <p> elements.
 	 *
-	 * @param  \DOMDocument &$dom   Dom.
-	 * @param  \DOMXPath    &$xpath Xpath.
+	 * @param  \DOMDocument &$dom   DOM object generated for post content.
+	 * @param  \DOMXPath    &$xpath XPATH object generated for post content.
 	 *
 	 * @return void
 	 */
 	public function cleanup_empty_p( \DOMDocument &$dom, \DOMXPath &$xpath ) {
-		foreach( $xpath->query('//p[not(node())]') as $node ) {
-			$node->parentNode->removeChild($node);
+
+		foreach ( $xpath->query( '//p[not(node())]' ) as $node ) {
+			$node->parentNode->removeChild( $node );
 		}
 	}
-
 
 	/**
 	 * Append Google Analytics (GA) script in the FB IA format
