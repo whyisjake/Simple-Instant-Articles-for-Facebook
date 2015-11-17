@@ -180,6 +180,7 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_action( 'the_content', array( $this, 'append_google_analytics_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
+		add_action( 'the_content', array( $this, 'prepend_full_width_media' ), 1100 );
 
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
@@ -534,6 +535,27 @@ class Simple_FB_Instant_Articles {
 		foreach ( $this->get_ad_targeting_params() as $key => $value ) {
 			printf( ".setTargeting( '%s', %s )", esc_js( $key ), wp_json_encode( $value ) );
 		}
+	}
+
+	public function prepend_full_width_media( $content, $post_id = null ) {
+
+		global $wp_embed;
+
+		$post_id       = $post_id ?: get_the_ID();
+		$url           = get_post_meta( get_the_ID(), '_format_video_embed', true );
+		$path_info     = pathinfo( $url );
+		$image_formats = array( 'png', 'jpg', 'jpeg', 'tiff', 'gif' );
+		$is_image      = ! empty( $path_info['extension'] ) && in_array( strtolower( $path_info['extension'] ), $image_formats );
+		$media_html    = '';
+
+		if ( $url && $is_image ) {
+			$media_html = sprintf( '<figure><img src="%s"/></figure>', esc_url( $url ) );
+		} elseif ( $url && ! $is_image ) {
+			$media_html = $wp_embed->autoembed( $url );
+		}
+
+		return $media_html . $content;
+
 	}
 
 	/**
