@@ -480,14 +480,10 @@ class Simple_FB_Instant_Articles {
 	 */
 	protected function get_ad_targeting_params() {
 
-		$args    = array( 'fields' => 'names' );
-		$tags    = wp_get_post_tags( get_the_ID(), $args );       // get tag names
-		$cats    = wp_get_post_categories( get_the_ID(), $args ); // get category names
-		$authors = (array) get_coauthors( get_the_ID() );         // get authors
-
-		$authors = array_map( function( $author ) {
-			return $author->display_name;
-		}, array_filter( $authors ) );
+		// Note use of get_the_terms + wp_list_pluck as these are cached ang get_the_* is not.
+		$tags    = wp_list_pluck( get_the_terms( $post, 'post_tag' ), 'name' );
+		$cats    = wp_list_pluck( get_the_terms( $post, 'category' ), 'name' );
+		$authors = wp_list_pluck( array_filter( (array) get_coauthors( get_the_ID() ) ), 'display_name' );
 
 		$url_bits = parse_url( home_url() );
 
@@ -514,11 +510,11 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Generates XML/HTML string for DOM node object.
+	 * Generates HTML string for DOM node object.
 	 *
-	 * @param DOMNode $node Node object to generate the XML/HTML string for.
+	 * @param DOMNode $node Node object to generate the HTML string for.
 	 *
-	 * @return string       XML/HTML string/markup for supplied DOM node.
+	 * @return string       HTML string/markup for supplied DOM node.
 	 */
 	protected function get_html_for_node( \DOMNode $node ) {
 
