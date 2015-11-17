@@ -187,6 +187,7 @@ class Simple_FB_Instant_Articles {
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_p' ), 10, 2 );
 	}
 
 	public function rss_permalink( $link ) {
@@ -423,6 +424,21 @@ class Simple_FB_Instant_Articles {
 			$figure->appendChild( $node );
 		}
 	}
+
+	/**
+	 * Remove all empty <p> elements.
+	 *
+	 * @param  \DOMDocument &$dom   Dom.
+	 * @param  \DOMXPath    &$xpath Xpath.
+	 *
+	 * @return void
+	 */
+	public function cleanup_empty_p( \DOMDocument &$dom, \DOMXPath &$xpath ) {
+		foreach( $xpath->query('//p[not(node())]') as $node ) {
+			$node->parentNode->removeChild($node);
+		}
+	}
+
 
 	/**
 	 * Append Google Analytics (GA) script in the FB IA format
