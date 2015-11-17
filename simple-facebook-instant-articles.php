@@ -345,12 +345,11 @@ class Simple_FB_Instant_Articles {
 		// Get the FB IA formatted post content HTML.
 		$body_node = $dom->getElementsByTagName( 'body' )->item( 0 );
 
-		return $this->get_html_for_node( $body_node );
-
+		return $this->get_node_inner_html( $body_node );
 	}
 
 	/**
-	 * Renders pull quotes into FB AI format.
+	 * Renders pull quotes into FB IA format.
 	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/pullquote
 	 *
 	 * @param DOMDocument $dom   DOM object generated for post content.
@@ -365,9 +364,9 @@ class Simple_FB_Instant_Articles {
 			$cite = $node->getElementsByTagName( 'cite' )->item( 0 );
 			@$cite->parentNode->removeChild( $cite );
 
-			$pull_quote_html = $this->get_html_for_node( $node );
+			$pull_quote_html = $this->get_node_inner_html( $node );
 
-			// FB AI pull quote format.
+			// FB IA pull quote format.
 			$fb_pull_quote = sprintf(
 				'<aside>%s<cite>%s</cite></aside>',
 				wp_kses( $pull_quote_html,
@@ -381,7 +380,7 @@ class Simple_FB_Instant_Articles {
 				esc_html( $cite->nodeValue )
 			);
 
-			// Replace original pull quotes with FB AI marked up ones.
+			// Replace original pull quotes with FB IA marked up ones.
 			$new_node = $dom->createDocumentFragment();
 			$new_node->appendXML( $fb_pull_quote );
 			$node->parentNode->replaceChild( $new_node, $node );
@@ -389,7 +388,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Reformat images into FB AI format.
+	 * Reformat images into FB IA format.
 	 *
 	 * Ensure they are child of <figure>.
 	 * Consider <img> with parent <figure> already been converted to FB IA format.
@@ -538,13 +537,14 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Generates HTML string for DOM node object.
+	 * Generates HTML string for DOM node's inner markup.
 	 *
-	 * @param DOMNode $node Node object to generate the HTML string for.
+	 * @param DOMNode $node DOM Node object to generate the HTML string for
+	 *                      its inner markup.
 	 *
-	 * @return string       HTML string/markup for supplied DOM node.
+	 * @return string       Inner HTML markup for the supplied DOM node.
 	 */
-	protected function get_html_for_node( \DOMNode $node ) {
+	protected function get_node_inner_html( \DOMNode $node ) {
 
 		$node_html  = '';
 
