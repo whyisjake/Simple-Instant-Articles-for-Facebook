@@ -206,13 +206,13 @@ class Simple_FB_Instant_Articles {
 	public function gallery_shortcode( $atts, $content = '' ) {
 
 		// Get the image IDs.
-		$ids = explode( ',', $atts['ids'] );
+		$ids = array_map( 'id', explode( ',', $atts['ids'] ) );
 
 		ob_start(); ?>
 
 		<figure class="op-slideshow">
 			<?php foreach ( $ids as $id ) {
-				echo $this->image_shortcode( array( 'id' => $id ) );
+				$this->render_image_markup( $id );
 			} ?>
 		</figure>
 
@@ -220,7 +220,9 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Caption shortcode - overwrite WP native shortcode.
+	 * Caption shortcode.
+	 *
+	 * Overwrite WP native shortcode.
 	 * Format images in caption shortcodes into FB IA format.
 	 *
 	 * @param $atts           Array of attributes passed to shortcode.
@@ -230,27 +232,34 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function image_shortcode( $atts, $content = '' ) {
 
-		// Get attachment ID from the shortcode attribute.
 		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : '';
 
-		// Get image info.
-		$image     = wp_get_attachment_image_src( $attachment_id, $this->image_size );
-		$image_url = isset( $image[0] ) ? $image[0] : '';
-
-		// Stop - if image URL is empty.
-		if ( ! $image_url ) {
+		if ( ! $attachment_id ) {
 			return;
 		}
 
-		// FB IA image format.
-		ob_start(); ?>
+		ob_start();
+		$this->render_image_markup( $attachment_id );
+		return ob_get_clean();
+
+	}
+
+	public function render_image_markup( $attachment_id ) {
+
+		$image = wp_get_attachment_image_src( $attachment_id, $this->image_size );
+
+		if ( ! $image ) {
+			return;
+		}
+
+		?>
 
 		<figure>
-			<img src="<?php echo esc_url( $image_url ); ?>" />
+			<img src="<?php echo esc_url( $image[0] ); ?>" />
 			<?php simple_fb_image_caption( $attachment_id ); ?>
 		</figure>
 
-		<?php return ob_get_clean();
+		<?php
 	}
 
 	/**
