@@ -142,12 +142,11 @@ class Simple_FB_Instant_Articles {
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_before_feed' );
 
-		$template = trailingslashit( $this->template_path ) . 'feed.php';;
+		$template = trailingslashit( $this->template_path ) . 'feed.php';
 
 		if ( 0 === validate_file( $template ) ) {
 			require( $template );
 		}
-
 
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_after_feed' );
@@ -196,7 +195,7 @@ class Simple_FB_Instant_Articles {
 
 	public function rss_permalink( $link ) {
 
-		return esc_url( $link . $this->endpoint );
+		return trailingslashit( $link ) . $this->endpoint;
 	}
 
 	/**
