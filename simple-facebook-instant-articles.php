@@ -539,9 +539,9 @@ class Simple_FB_Instant_Articles {
 	protected function get_ad_targeting_params() {
 
 		// Note use of get_the_terms + wp_list_pluck as these are cached ang get_the_* is not.
-		$tags    = wp_list_pluck( get_the_terms( get_the_ID(), 'post_tag' ), 'name' );
-		$cats    = wp_list_pluck( get_the_terms( get_the_ID(), 'category' ), 'name' );
 		$authors = wp_list_pluck( array_filter( (array) get_coauthors( get_the_ID() ) ), 'display_name' );
+		$tags    = wp_list_pluck( array_filter( (array) get_the_terms( get_the_ID(), 'post_tag' ) ), 'name' );
+		$cats    = wp_list_pluck( array_filter( (array) get_the_terms( get_the_ID(), 'category' ) ), 'name' );
 
 		$url_bits = parse_url( home_url() );
 
