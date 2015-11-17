@@ -142,12 +142,11 @@ class Simple_FB_Instant_Articles {
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_before_feed' );
 
-		$template = trailingslashit( $this->template_path ) . 'feed.php';;
+		$template = trailingslashit( $this->template_path ) . 'feed.php';
 
 		if ( 0 === validate_file( $template ) ) {
 			require( $template );
 		}
-
 
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_after_feed' );
@@ -165,16 +164,16 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function setup_content_mods() {
 
-		// Remove related content filters.
-		add_filter( 'lawrence_single_related_enabled', '__return_false' );
-		add_filter( 'lawrence_single_related_affiliate_enabled', '__return_false' );
-
 		// Shortcodes - overwrite WP native ones with FB IA format.
 		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
 		add_shortcode( 'caption', array( $this, 'caption_shortcode' ) );
 
 		// Shortcodes - custom galleries.
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
+
+		// Shortcodes - remove related lawrence content.
+		add_shortcode( 'lawrence-related', '__return_empty_string' );
+		add_shortcode( 'lawrence-auto-related', '__return_empty_string' );
 
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
@@ -196,7 +195,7 @@ class Simple_FB_Instant_Articles {
 
 	public function rss_permalink( $link ) {
 
-		return esc_url( $link . $this->endpoint );
+		return trailingslashit( $link ) . $this->endpoint;
 	}
 
 	/**
@@ -210,7 +209,7 @@ class Simple_FB_Instant_Articles {
 	public function gallery_shortcode( $atts, $content = '' ) {
 
 		// Get the image IDs.
-		$ids = array_map( 'id', explode( ',', $atts['ids'] ) );
+		$ids = array_map( 'absint', explode( ',', $atts['ids'] ) );
 
 		ob_start();
 		?>
@@ -532,8 +531,8 @@ class Simple_FB_Instant_Articles {
 	protected function get_ad_targeting_params() {
 
 		// Note use of get_the_terms + wp_list_pluck as these are cached ang get_the_* is not.
-		$tags    = wp_list_pluck( get_the_terms( $post, 'post_tag' ), 'name' );
-		$cats    = wp_list_pluck( get_the_terms( $post, 'category' ), 'name' );
+		$tags    = wp_list_pluck( get_the_terms( get_the_ID(), 'post_tag' ), 'name' );
+		$cats    = wp_list_pluck( get_the_terms( get_the_ID(), 'category' ), 'name' );
 		$authors = wp_list_pluck( array_filter( (array) get_coauthors( get_the_ID() ) ), 'display_name' );
 
 		$url_bits = parse_url( home_url() );
