@@ -56,8 +56,8 @@ class Simple_FB_Instant_Articles {
 		add_action( 'init', array( $this, 'add_feed' ) );
 		add_action( 'wp', array( $this, 'add_actions' ) );
 
-		add_action( 'simple_fb_before_feed', array( $this, 'content_modifications' ) );
-		add_action( 'simple_fb_pre_render', array( $this, 'content_modifications' ) );
+		add_action( 'simple_fb_before_feed', array( $this, 'pre_render' ) );
+		add_action( 'simple_fb_pre_render', array( $this, 'pre_render' ) );
 
 		// Setup the props.
 		$this->version = $version;
@@ -148,11 +148,11 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Modify content ready for FB IA.
+	 * Modify content before render ready for FB IA.
 	 *
 	 * @return void
 	 */
-	public function content_modifications() {
+	public function pre_render() {
 
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
 
