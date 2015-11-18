@@ -8,10 +8,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Set RSS header
+// Set RSS header.
 header( 'Content-Type: ' . feed_content_type( 'rss-http' ) . '; charset=' . get_option( 'blog_charset' ), true );
 
-// Use `echo` for first line to prevent any extra characters at start of document
+// Use `echo` for first line to prevent any extra characters at start of document.
 echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) ) . '"?>'; ?>
 
 <rss version="2.0"
@@ -33,7 +33,7 @@ echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) )
 	<language><?php echo esc_html( bloginfo( 'language' ) ); ?></language>
 
 	<?php
-	// Add RSS2 headers
+	// Add RSS2 headers.
 	do_action( 'rss2_head' );
 	?>
 
