@@ -26,7 +26,9 @@
 
 	<?php the_title( '<h1>', '</h1>' ); ?>
 
-	<?php lawrence_the_subheading( '<h2>', '</h2>' ); ?>
+	<?php if ( function_exists( 'the_subheading' ) ) {
+		the_subheading( '<h2>', '</h2>' );
+	} ?>
 
 	<?php if ( function_exists( 'coauthors' ) ) : ?>
 		<?php coauthors( '</address>, <address>', ' </address> and <address> ', '<address>', '</address>' ); ?>
