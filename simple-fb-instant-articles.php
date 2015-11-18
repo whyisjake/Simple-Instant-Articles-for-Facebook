@@ -55,6 +55,7 @@ class Simple_FB_Instant_Articles {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'add_feed' ) );
 		add_action( 'wp', array( $this, 'add_actions' ) );
+		add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_filter( 'simple_fb_before_feed', array( $this, 'update_rss_permalink' ) );
 
 		// Setup the props.
@@ -117,6 +118,26 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function add_feed() {
 		add_feed( $this->feed_slug, array( $this, 'feed_template' ) );
+	}
+
+	/**
+	 * Modify the query before getting any posts.
+	 *
+	 * @param  WP_Query $query WP Query object
+	 *
+	 * @return void
+	 */
+	public function pre_get_posts( WP_Query $query ) {
+
+		if ( $query->is_main_query() && $query->is_feed( $this->feed_slug ) ) {
+
+			$query->set( 'posts_per_rss', intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) ) );
+
+			// Allow easy access to modify query args for the FB IA feed.
+			do_action( 'simple_fb_pre_get_posts', $query );
+
+		}
+
 	}
 
 	/**
