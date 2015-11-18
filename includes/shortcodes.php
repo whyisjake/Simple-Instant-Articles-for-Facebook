@@ -73,7 +73,7 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 					<img src="<?php echo esc_url( $url ); ?>" alt="<?php echo esc_attr( get_the_title( $id ) ); ?>">
 					<?php $caption = get_post_field( 'post_excerpt', $id ); ?>
 					<?php if ( ! empty( $caption ) ) : ?>
-						<figcaption><?php echo esc_html( $caption ); ?></figcaption>
+						<figcaption><?php echo wp_kses_post( $caption ); ?></figcaption>
 					<?php endif; ?>
 				</figure>
 			<?php endforeach; ?>
