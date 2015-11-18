@@ -312,7 +312,7 @@ class Simple_FB_Instant_Articles {
 		$gallery = null;
 
 		if ( function_exists( 'usat_newscred_get_gallery' ) ) {
-			$gallery = usat_newscred_get_gallery( $atts['id'] );
+			$gallery = usat_newscred_get_gallery( $atts['id'], 'sigallery' );
 		} elseif ( function_exists( '\USAT\API_Galleries\get_gallery' ) ) {
 			$gallery = \USAT\API_Galleries\get_gallery( $atts['id'] );
 		}
