@@ -220,7 +220,6 @@ class Simple_FB_Instant_Articles {
 		echo '</figure>';
 
 		return ob_get_clean();
-
 	}
 
 	/**
@@ -250,14 +249,13 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		$this->render_image_markup( $attachment_id, $caption );
 		return ob_get_clean();
-
 	}
 
 	/**
 	 * Outputs image markup in FB IA format.
 	 *
-	 * @param int    $image_id Image ID to output in FB IA format.
-	 * @param string $caption  Image caption to display in FB IA format.
+	 * @param int|string $src     Image ID or source to output in FB IA format.
+	 * @param string     $caption Image caption to display in FB IA format.
 	 */
 	public function render_image_markup( $src, $caption = '' ) {
 
@@ -278,19 +276,17 @@ class Simple_FB_Instant_Articles {
 	/**
 	 * Get caption for image.
 	 *
-	 * @param  mixed $id attachment ID.
+	 * @param int $id Attachment/image ID.
 	 *
-	 * @return string
+	 * @return string Attachment/image caption, if specified.
 	 */
 	public function get_image_caption( $id ) {
 
 		$attachment_post = get_post( $id );
 
-		// Stop if - attachment post not found or caption is empty.
 		if ( $attachment_post && $attachment_post->post_excerpt ) {
 			return trim( $attachment_post->post_excerpt );
 		}
-
 	}
 
 	/**
@@ -329,7 +325,6 @@ class Simple_FB_Instant_Articles {
 		echo '</figure>';
 
 		return ob_get_clean();
-
 	}
 
 	/**
@@ -507,7 +502,6 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		require( $analytics_template_file );
 		return ob_get_clean();
-
 	}
 
 	/**
