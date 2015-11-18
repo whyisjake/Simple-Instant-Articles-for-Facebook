@@ -10,10 +10,6 @@
 	<link rel="canonical" href="<?php the_permalink(); ?>">
 </head>
 <body>
-	<?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
-		<?php include( 'content.php' ); ?>
-	<?php endwhile; else : ?>
-		<p><?php _e( 'Sorry, no posts matched your criteria.' ); ?></p>
-	<?php endif; ?>
+	<?php include( 'content.php' ); ?>
 </body>
 </html>

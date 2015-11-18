@@ -108,8 +108,14 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	public function render( $post_id ) {
+
 		do_action( 'simple_fb_pre_render', $post_id );
-		include( apply_filters( 'simple_fb_article_template_file', $this->template_path . '/article.php' ) );
+
+		if ( have_posts() ) {
+			the_post();
+			include( apply_filters( 'simple_fb_article_template_file', $this->template_path . '/article.php' ) );
+		}
+
 	}
 
 	/**
