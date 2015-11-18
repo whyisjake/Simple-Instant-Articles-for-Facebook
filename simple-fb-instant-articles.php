@@ -18,11 +18,9 @@ class Simple_FB_Instant_Articles {
 	private static $instance;
 
 	/**
-	 * Feed Endpoint
-	 *
-	 * Use get_feed_slug to allow this to be filtered.
+	 * Endpoint query var
 	 */
-	private $feed_slug = 'fb';
+	private $token = 'fb';
 
 	/**
 	 * Endpoint query var
@@ -67,15 +65,6 @@ class Simple_FB_Instant_Articles {
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
 		$this->home_url = trailingslashit( home_url() );
 
-	}
-
-	/**
-	 * Get feed slug. Allow for filters.
-	 *
-	 * @return string
-	 */
-	public function get_feed_slug() {
-		return apply_filters( 'simple_fb_feed_slug', $this->feed_slug );
 	}
 
 	/**
@@ -131,7 +120,8 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	public function add_feed() {
-		add_feed( $this->get_feed_slug(), array( $this, 'feed_template' ) );
+		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
+		add_feed( $feed_slug, array( $this, 'feed_template' ) );
 	}
 
 	/**
@@ -143,7 +133,9 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function pre_get_posts( WP_Query $query ) {
 
-		if ( $query->is_main_query() && $query->is_feed( $this->get_feed_slug() ) ) {
+		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
+
+		if ( $query->is_main_query() && $query->is_feed( $feed_slug ) ) {
 
 			$query->set( 'posts_per_rss', intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) ) );
 
