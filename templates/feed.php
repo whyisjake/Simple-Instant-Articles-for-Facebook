@@ -38,7 +38,7 @@ echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) )
 		<?php while ( have_posts() ) : the_post(); ?>
 			<item>
 				<title><?php esc_html( the_title_rss() ); ?></title>
-				<link><?php esc_url( the_permalink_rss() ); ?></link>
+				<link><?php the_permalink_rss(); ?></link>
 				<pubDate><?php echo esc_html( mysql2date( 'D, d M Y H:i:s +0000', get_post_time( 'Y-m-d H:i:s', true ), false ) ); ?></pubDate>
 				<dc:creator><?php the_author(); ?></dc:creator>
 				<guid isPermaLink="false"><?php esc_html( the_guid() ); ?></guid>
