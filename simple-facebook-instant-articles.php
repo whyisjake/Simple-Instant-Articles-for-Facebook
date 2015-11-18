@@ -214,11 +214,7 @@ class Simple_FB_Instant_Articles {
 		echo '<figure class="op-slideshow">';
 
 		foreach ( $ids as $id ) {
-
-			if ( $image = wp_get_attachment_image_src( $id, $this->image_size ) ) {
-				$this->render_image_markup( $image[0], $this->get_image_caption( $id ) );
-			}
-
+			$this->render_image_markup( $id, $this->get_image_caption( $id ) );
 		}
 
 		echo '</figure>';
@@ -242,9 +238,8 @@ class Simple_FB_Instant_Articles {
 
 		// Get attachment ID from the shortcode attribute.
 		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : null;
-		$image         = wp_get_attachment_image_src( $attachment_id, $this->image_size );
 
-		if ( ! $image ) {
+		if ( ! $attachment_id ) {
 			return;
 		}
 
@@ -253,7 +248,7 @@ class Simple_FB_Instant_Articles {
 		$caption = isset( $matches[1] ) ? trim( $matches[1] ) : '';
 
 		ob_start();
-		$this->render_image_markup( $image[0], $caption );
+		$this->render_image_markup( $attachment_id, $caption );
 		return ob_get_clean();
 
 	}
@@ -265,6 +260,17 @@ class Simple_FB_Instant_Articles {
 	 * @param string $caption  Image caption to display in FB IA format.
 	 */
 	public function render_image_markup( $src, $caption = '' ) {
+
+		// Handle passing image ID.
+		if ( is_numeric( $src ) ) {
+			$image = wp_get_attachment_image_src( $src, $this->image_size );
+			$src   = $image ? $image[0] : null;
+		}
+
+		if ( empty( $src ) ) {
+			return;
+		}
+
 		$template = trailingslashit( $this->template_path ) . 'image.php';
 		require( $template );
 	}
