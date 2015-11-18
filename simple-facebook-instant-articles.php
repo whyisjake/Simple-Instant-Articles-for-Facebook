@@ -60,6 +60,7 @@ class Simple_FB_Instant_Articles {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'add_feed' ) );
 		add_action( 'wp', array( $this, 'add_actions' ) );
+		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 
 		// Render post content into FB IA format.
 		add_action( 'simple_fb_pre_render', array( $this, 'setup_content_mods' ) );
@@ -111,8 +112,14 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	public function render( $post_id ) {
+
 		do_action( 'simple_fb_pre_render', $post_id );
-		include( apply_filters( 'simple_fb_article_template_file', $this->template_path . '/article.php' ) );
+
+		if ( have_posts() ) {
+			the_post();
+			include( apply_filters( 'simple_fb_article_template_file', $this->template_path . '/article.php' ) );
+		}
+
 	}
 
 	/**
@@ -148,6 +155,22 @@ class Simple_FB_Instant_Articles {
 
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_after_feed' );
+	}
+
+
+	public function pre_get_posts( $query ) {
+
+		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
+
+		if ( $query->is_main_query() && $query->is_feed( $feed_slug ) ) {
+
+			$num_posts = intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) );
+			$query->set( 'posts_per_rss', $num_posts );
+
+			do_action( 'simple_fb_pre_get_posts', $query );
+
+		}
+
 	}
 
 	/**
