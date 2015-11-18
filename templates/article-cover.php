@@ -16,10 +16,15 @@
 <header>
 
 	<?php
+
+	$has_article_cover = ! empty( get_post_meta( get_the_ID(), '_format_video_embed', true ) );
+	$thumbnail_id      = get_post_thumbnail_id();
+
 	// Post featured image as FB IA cover image.
-	if ( $thumb_id = get_post_thumbnail_id() ) {
-		Simple_FB_Instant_Articles::instance()->render_image_markup( $thumb_id );
+	if ( ! $has_article_cover && $thumbnail_id ) {
+		Simple_FB_Instant_Articles::instance()->render_image_markup( $thumbnail_id );
 	}
+
 	?>
 
 	<?php the_title( '<h1>', '</h1>' ); ?>
