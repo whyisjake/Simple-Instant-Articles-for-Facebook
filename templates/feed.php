@@ -51,4 +51,4 @@ echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) )
 		<?php endwhile; ?>
 	<?php endif; ?>
 </channel>
-</rss><?php exit; ?>
+</rss>
