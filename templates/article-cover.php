@@ -13,8 +13,6 @@
  * @see https://developers.facebook.com/docs/instant-articles/guides/articlecreate#specify-cover
  */
 
-$plugin = Simple_FB_Instant_Articles::instance();
-
 ?>
 <header>
 
@@ -22,7 +20,7 @@ $plugin = Simple_FB_Instant_Articles::instance();
 
 	// Post featured image as FB IA cover image.
 	if ( has_post_thumbnail() ) {
-		$plugin->render_image_markup( get_post_thumbnail_id() );
+		Simple_FB_Instant_Articles::instance()->render_image_markup( get_post_thumbnail_id() );
 	}
 
 	?>
