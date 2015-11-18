@@ -601,12 +601,22 @@ class Simple_FB_Instant_Articles {
 		}
 	}
 
+	/**
+	 * Prepend full width media.
+	 *
+	 * This functionality is mostly a duplicate of parts/single/format-video.
+	 *
+	 * @param  string $content Post content.
+	 * @param  mixed  $post_id Post id.
+	 *
+	 * @return string Post content.
+	 */
 	public function prepend_full_width_media( $content, $post_id = null ) {
 
 		global $wp_embed;
 
 		$post_id       = $post_id ?: get_the_ID();
-		$url           = get_post_meta( get_the_ID(), '_format_video_embed', true );
+		$url           = get_post_meta( $post_id, '_format_video_embed', true );
 		$path_info     = pathinfo( $url );
 		$image_formats = array( 'png', 'jpg', 'jpeg', 'tiff', 'gif' );
 		$is_image      = ! empty( $path_info['extension'] ) && in_array( strtolower( $path_info['extension'] ), $image_formats );
