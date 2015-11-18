@@ -33,9 +33,9 @@ echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) )
 	<language><?php echo esc_html( bloginfo( 'language' ) ); ?></language>
 
 	<?php
-
 	// Add RSS2 headers
-	do_action( 'rss2_head' ); ?>
+	do_action( 'rss2_head' );
+	?>
 
 	<?php if ( have_posts() ) : ?>
 		<?php while ( have_posts() ) : the_post(); ?>
