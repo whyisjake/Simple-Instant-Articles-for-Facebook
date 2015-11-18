@@ -189,6 +189,8 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_p' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
+
 	}
 
 	public function rss_permalink( $link ) {
@@ -467,6 +469,39 @@ class Simple_FB_Instant_Articles {
 
 		foreach ( $xpath->query( '//p[not(node())]' ) as $node ) {
 			$node->parentNode->removeChild( $node );
+		}
+	}
+
+	/**
+	 * Facebook throws a warning for all headings below h2.
+	 *
+	 * Replace with h2s.
+	 *
+	 * @param  \DOMDocument &$dom   DOM object generated for post content.
+	 * @param  \DOMXPath    &$xpath XPATH object generated for post content.
+	 *
+	 * @return void
+	 */
+	public function fix_headings( \DOMDocument &$dom, \DOMXPath &$xpath ) {
+
+		$headings = array( 'h3', 'h4', 'h5', 'h6' );
+
+		foreach ( $headings as $heading_tag ) {
+
+			$headings = $dom->getElementsByTagName( $heading_tag );
+
+			while ( $headings->length ) {
+
+				$node = $headings->item( 0 );
+				$h2   = $dom->createElement( 'h2' );
+
+				while ( $node->childNodes->length > 0 ) {
+					$h2->appendChild( $node->childNodes->item( 0 ) );
+				}
+
+				$node->parentNode->replaceChild( $h2, $node );
+
+			}
 		}
 	}
 
