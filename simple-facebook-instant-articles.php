@@ -167,7 +167,9 @@ class Simple_FB_Instant_Articles {
 		add_shortcode( 'caption', array( $this, 'caption_shortcode' ) );
 
 		// Shortcodes - custom galleries.
-		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
+		if ( function_exists( 'usat_newscred_get_gallery' ) ) {
+			add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
+		}
 
 		// Shortcodes - remove related lawrence content.
 		add_shortcode( 'lawrence-related', '__return_empty_string' );
@@ -303,12 +305,12 @@ class Simple_FB_Instant_Articles {
 	public function api_galleries_shortcode( $atts ) {
 
 		// Stop - if gallery ID is empty.
-		if ( ! $atts['id'] ) {
+		if ( empty( $atts['id'] ) ) {
 			return;
 		}
 
 		// Stop - if can't get the API gallery.
-		if ( ! $gallery = \USAT\API_Galleries\get_gallery( $atts['id'] ) ) {
+		if ( ! $gallery = usat_newscred_get_gallery( $atts['id'] ) ) {
 			return;
 		}
 
