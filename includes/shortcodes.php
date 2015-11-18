@@ -42,6 +42,16 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		add_shortcode( 'gallery', array( $this, 'gallery' ) );
 		add_shortcode( 'caption', array( $this, 'caption' ) );
 		add_shortcode( 'audio',   array( $this, 'audio' ) );
+		add_filter( 'the_content', array( $this, 'promote_tags' ) );
+	}
+
+	/**
+	 * All of the tags that in the content need to be h1/h2, so promote all h3-h6 tags to h2.
+	 * @param  string $content Post Content
+	 * @return string          Post Content
+	 */
+	public function promote_tags( $content ) {
+		return preg_replace( "/(<h[3-6]>)(.*)(<\/h[3-6]>)/", "<h2>$2</h2>", $content );
 	}
 
 	/**
