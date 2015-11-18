@@ -167,9 +167,7 @@ class Simple_FB_Instant_Articles {
 		add_shortcode( 'caption', array( $this, 'caption_shortcode' ) );
 
 		// Shortcodes - custom galleries.
-		if ( function_exists( 'usat_newscred_get_gallery' ) ) {
-			add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
-		}
+		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
 
 		// Shortcodes - remove related lawrence content.
 		add_shortcode( 'lawrence-related', '__return_empty_string' );
@@ -309,8 +307,15 @@ class Simple_FB_Instant_Articles {
 			return;
 		}
 
-		// Stop - if can't get the API gallery.
-		if ( ! $gallery = usat_newscred_get_gallery( $atts['id'] ) ) {
+		$gallery = null;
+
+		if ( function_exists( 'usat_newscred_get_gallery' ) ) {
+			$gallery = usat_newscred_get_gallery( $atts['id'] );
+		} elseif ( function_exists( '\USAT\API_Galleries\get_gallery' ) ) {
+			$gallery = \USAT\API_Galleries\get_gallery( $atts['id'] );
+		}
+
+		if ( ! $gallery ) {
 			return;
 		}
 
@@ -329,6 +334,7 @@ class Simple_FB_Instant_Articles {
 		echo '</figure>';
 
 		return ob_get_clean();
+
 	}
 
 	/**
