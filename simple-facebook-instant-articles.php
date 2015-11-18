@@ -458,15 +458,19 @@ class Simple_FB_Instant_Articles {
 
 		foreach ( $headings as $heading_tag ) {
 
-			foreach ( $dom->getElementsByTagName( $heading_tag ) as $node ) {
+			$headings = $dom->getElementsByTagName( $heading_tag );
 
-				$h2 = $dom->createElement( 'h2' );
+			while ( $headings->length ) {
+
+				$node = $headings->item( $i );
+				$h2   = $dom->createElement( 'h2' );
 
 				while ( $node->childNodes->length > 0 ) {
 					$h2->appendChild( $node->childNodes->item( 0 ) );
 				}
 
 				$node->parentNode->replaceChild( $h2, $node );
+
 			}
 		}
 	}
