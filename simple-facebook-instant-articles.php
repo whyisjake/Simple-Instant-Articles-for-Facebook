@@ -305,12 +305,19 @@ class Simple_FB_Instant_Articles {
 	public function api_galleries_shortcode( $atts ) {
 
 		// Stop - if gallery ID is empty.
-		if ( ! $atts['id'] ) {
+		if ( empty( $atts['id'] ) ) {
 			return;
 		}
 
-		// Stop - if can't get the API gallery.
-		if ( ! $gallery = \USAT\API_Galleries\get_gallery( $atts['id'] ) ) {
+		$gallery = null;
+
+		if ( function_exists( 'usat_newscred_get_gallery' ) ) {
+			$gallery = usat_newscred_get_gallery( $atts['id'] );
+		} elseif ( function_exists( '\USAT\API_Galleries\get_gallery' ) ) {
+			$gallery = \USAT\API_Galleries\get_gallery( $atts['id'] );
+		}
+
+		if ( ! $gallery ) {
 			return;
 		}
 
@@ -329,6 +336,7 @@ class Simple_FB_Instant_Articles {
 		echo '</figure>';
 
 		return ob_get_clean();
+
 	}
 
 	/**
