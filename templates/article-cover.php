@@ -19,8 +19,8 @@
 	<?php
 
 	// Post featured image as FB IA cover image.
-	if ( has_post_thumbnail() ) {
-		Simple_FB_Instant_Articles::instance()->render_image_markup( get_post_thumbnail_id() );
+	if ( $thumb_id = get_post_thumbnail_id() ) {
+		Simple_FB_Instant_Articles::instance()->render_image_markup( $thumb_id );
 	}
 
 	?>
