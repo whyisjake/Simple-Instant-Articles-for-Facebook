@@ -213,7 +213,9 @@ class Simple_FB_Instant_Articles {
 
 		echo '<figure class="op-slideshow">';
 		foreach ( $ids as $id ) {
-			$this->render_image_markup( $id, $this->get_image_caption( $id ) );
+			if ( $image = wp_get_attachment_image_src( $id, $this->image_size ) ) {
+				$this->render_image_markup( $image[0], $this->get_image_caption( $id ) );
+			}
 		}
 		echo '</figure>';
 
@@ -235,9 +237,10 @@ class Simple_FB_Instant_Articles {
 	public function caption_shortcode( $atts, $content = '' ) {
 
 		// Get attachment ID from the shortcode attribute.
-		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : '';
+		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : null;
+		$image = wp_get_attachment_image_src( $attachment_id, $this->image_size );
 
-		if ( ! $attachment_id ) {
+		if ( ! $image ) {
 			return;
 		}
 
@@ -246,7 +249,7 @@ class Simple_FB_Instant_Articles {
 		$caption = isset( $matches[1] ) ? trim( $matches[1] ) : '';
 
 		ob_start();
-		$this->render_image_markup( $attachment_id, $caption );
+		$this->render_image_markup( $image[0], $caption );
 		return ob_get_clean();
 
 	}
@@ -257,19 +260,9 @@ class Simple_FB_Instant_Articles {
 	 * @param int    $image_id Image ID to output in FB IA format.
 	 * @param string $caption  Image caption to display in FB IA format.
 	 */
-	public function render_image_markup( $image_id, $caption = '' ) {
-
-		$image = wp_get_attachment_image_src( $image_id, $this->image_size );
-
-		if ( ! $image ) {
-			return;
-		}
-
+	public function render_image_markup( $src, $caption = '' ) {
 		$template = trailingslashit( $this->template_path ) . 'image.php';
-		$src      = $image[0] ;
-
 		require( $template );
-
 	}
 
 	public function get_image_caption( $id ) {
@@ -304,28 +297,22 @@ class Simple_FB_Instant_Articles {
 			return;
 		}
 
-		// Display API gallery in FB IA format.
 		ob_start();
-		?>
 
-		<figure class="op-slideshow">
+		echo '<figure class="op-slideshow">';
 
-			<?php
+		foreach ( $gallery->images as $key => $image ) {
+			$this->render_image_markup( $image->url, $image->custom_caption );
+		}
 
-			foreach ( $gallery->images as $key => $image ) {
-				$this->render_image_markup( $image->url, $image->custom_caption );
-			}
+		if ( $atts['title'] ) {
+			printf( '<figcaption><h1>%s</h1></figcaption>', esc_html( $atts['title'] ) );
+		}
 
-			?>
+		echo '</figure>';
 
-			<?php if ( $atts['title'] ) : ?>
-				<figcaption><h1><?php echo esc_html( $atts['title'] ); ?></h1></figcaption>
-			<?php endif;?>
-
-		</figure>
-
-		<?php
 		return ob_get_clean();
+
 	}
 
 	/**
@@ -539,8 +526,8 @@ class Simple_FB_Instant_Articles {
 	protected function get_ad_targeting_params() {
 
 		// Note use of get_the_terms + wp_list_pluck as these are cached ang get_the_* is not.
-		$tags    = wp_list_pluck( array_filter( (array) get_the_terms( get_the_ID(), 'post_tag' ) ), 'name' );
-		$cats    = wp_list_pluck( array_filter( (array) get_the_terms( get_the_ID(), 'category' ) ), 'name' );
+		$tags    = wp_list_pluck( (array) get_the_terms( get_the_ID(), 'post_tag' ), 'name' );
+		$cats    = wp_list_pluck( (array) get_the_terms( get_the_ID(), 'category' ), 'name' );
 		$authors = wp_list_pluck( get_coauthors( get_the_ID() ), 'display_name' );
 
 		$url_bits = parse_url( home_url() );
