@@ -214,13 +214,14 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 
 		echo '<figure class="op-slideshow">';
+
 		foreach ( $ids as $id ) {
 			$this->render_image_markup( $id, $this->get_image_caption( $id ) );
 		}
+
 		echo '</figure>';
 
 		return ob_get_clean();
-
 	}
 
 	/**
@@ -237,52 +238,57 @@ class Simple_FB_Instant_Articles {
 	public function caption_shortcode( $atts, $content = '' ) {
 
 		// Get attachment ID from the shortcode attribute.
-		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : '';
+		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : null;
 
 		if ( ! $attachment_id ) {
 			return;
 		}
 
 		// Get image caption.
-		$reg_ex = preg_match( '#^<img.*?\/>(.*)$#', trim( $content ), $matches );
+		$reg_ex  = preg_match( '#^<img.*?\/>(.*)$#', trim( $content ), $matches );
 		$caption = isset( $matches[1] ) ? trim( $matches[1] ) : '';
 
 		ob_start();
 		$this->render_image_markup( $attachment_id, $caption );
 		return ob_get_clean();
-
 	}
 
 	/**
 	 * Outputs image markup in FB IA format.
 	 *
-	 * @param int    $image_id Image ID to output in FB IA format.
-	 * @param string $caption  Image caption to display in FB IA format.
+	 * @param int|string $src     Image ID or source to output in FB IA format.
+	 * @param string     $caption Image caption to display in FB IA format.
 	 */
-	public function render_image_markup( $image_id, $caption = '' ) {
+	public function render_image_markup( $src, $caption = '' ) {
 
-		$image = wp_get_attachment_image_src( $image_id, $this->image_size );
+		// Handle passing image ID.
+		if ( is_numeric( $src ) ) {
+			$image = wp_get_attachment_image_src( $src, $this->image_size );
+			$src   = $image ? $image[0] : null;
+		}
 
-		if ( ! $image ) {
+		if ( empty( $src ) ) {
 			return;
 		}
 
 		$template = trailingslashit( $this->template_path ) . 'image.php';
-		$src      = $image[0] ;
-
 		require( $template );
-
 	}
 
+	/**
+	 * Get caption for image.
+	 *
+	 * @param int $id Attachment/image ID.
+	 *
+	 * @return string Attachment/image caption, if specified.
+	 */
 	public function get_image_caption( $id ) {
 
 		$attachment_post = get_post( $id );
 
-		// Stop if - attachment post not found or caption is empty.
 		if ( $attachment_post && $attachment_post->post_excerpt ) {
 			return trim( $attachment_post->post_excerpt );
 		}
-
 	}
 
 	/**
@@ -306,27 +312,20 @@ class Simple_FB_Instant_Articles {
 			return;
 		}
 
-		// Display API gallery in FB IA format.
 		ob_start();
-		?>
 
-		<figure class="op-slideshow">
+		echo '<figure class="op-slideshow">';
 
-			<?php
+		foreach ( $gallery->images as $key => $image ) {
+			$this->render_image_markup( $image->url, $image->custom_caption );
+		}
 
-			foreach ( $gallery->images as $key => $image ) {
-				$this->render_image_markup( $image->url, $image->custom_caption );
-			}
+		if ( $atts['title'] ) {
+			printf( '<figcaption><h1>%s</h1></figcaption>', esc_html( $atts['title'] ) );
+		}
 
-			?>
+		echo '</figure>';
 
-			<?php if ( $atts['title'] ) : ?>
-				<figcaption><h1><?php echo esc_html( $atts['title'] ); ?></h1></figcaption>
-			<?php endif;?>
-
-		</figure>
-
-		<?php
 		return ob_get_clean();
 	}
 
@@ -538,7 +537,6 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		require( $analytics_template_file );
 		return ob_get_clean();
-
 	}
 
 	/**
