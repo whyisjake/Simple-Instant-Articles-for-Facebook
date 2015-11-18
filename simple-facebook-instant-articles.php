@@ -212,11 +212,15 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 
 		echo '<figure class="op-slideshow">';
+
 		foreach ( $ids as $id ) {
+
 			if ( $image = wp_get_attachment_image_src( $id, $this->image_size ) ) {
 				$this->render_image_markup( $image[0], $this->get_image_caption( $id ) );
 			}
+
 		}
+
 		echo '</figure>';
 
 		return ob_get_clean();
@@ -238,14 +242,14 @@ class Simple_FB_Instant_Articles {
 
 		// Get attachment ID from the shortcode attribute.
 		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : null;
-		$image = wp_get_attachment_image_src( $attachment_id, $this->image_size );
+		$image         = wp_get_attachment_image_src( $attachment_id, $this->image_size );
 
 		if ( ! $image ) {
 			return;
 		}
 
 		// Get image caption.
-		$reg_ex = preg_match( '#^<img.*?\/>(.*)$#', trim( $content ), $matches );
+		$reg_ex  = preg_match( '#^<img.*?\/>(.*)$#', trim( $content ), $matches );
 		$caption = isset( $matches[1] ) ? trim( $matches[1] ) : '';
 
 		ob_start();
@@ -265,6 +269,13 @@ class Simple_FB_Instant_Articles {
 		require( $template );
 	}
 
+	/**
+	 * Get caption for image.
+	 *
+	 * @param  mixed $id attachment ID.
+	 *
+	 * @return string
+	 */
 	public function get_image_caption( $id ) {
 
 		$attachment_post = get_post( $id );

@@ -21,7 +21,7 @@ $plugin = Simple_FB_Instant_Articles::instance();
 	<?php
 
 	// Post featured image as FB IA cover image.
-	if ( has_post_thumbnail() && $image = wp_get_attachment_image_src( get_post_thumbnail_id(), $plugin->image_size ) ) {
+	if ( $image = wp_get_attachment_image_src( get_post_thumbnail_id(), $plugin->image_size ) ) {
 		$plugin->render_image_markup( $image[0] );
 	}
 
