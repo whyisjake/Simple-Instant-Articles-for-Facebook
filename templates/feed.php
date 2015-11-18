@@ -31,28 +31,11 @@ echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) )
 	<description><?php echo esc_html( bloginfo( 'description' ) ); ?></description>
 	<lastBuildDate><?php echo esc_html( mysql2date( 'D, d M Y H:i:s +0000', get_lastpostmodified( 'GMT' ), false ) ); ?></lastBuildDate>
 	<language><?php echo esc_html( bloginfo( 'language' ) ); ?></language>
-	<?php
 
-	// Add RSS2 headers
-	do_action( 'rss2_head' );
+	<?php do_action( 'rss2_head' ); // Add RSS2 headers ?>
 
-	// How many posts? Let's add a specific filter for this.
-	$num_posts = intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) );
-
-	// And the default args.
-	$args = array(
-		'posts_per_page' => $num_posts,
-	);
-
-	// Add a filter for all of the args.
-	$args = apply_filters( 'simple_fb_feed_query_args', $args );
-
-	// Kick off the query.
-	$query = new WP_Query( $args );
-	?>
-
-	<?php if ( $query->have_posts() ) : ?>
-		<?php while ( $query->have_posts() ) : $query->the_post(); ?>
+	<?php if ( have_posts() ) : ?>
+		<?php while ( have_posts() ) : the_post(); ?>
 			<item>
 				<title><?php esc_html( the_title_rss() ); ?></title>
 				<link><?php esc_url( the_permalink_rss() ); ?></link>
