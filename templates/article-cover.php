@@ -12,17 +12,14 @@
  *
  * @see https://developers.facebook.com/docs/instant-articles/guides/articlecreate#specify-cover
  */
-
-$plugin = Simple_FB_Instant_Articles::instance();
-
 ?>
 <header>
 
 	<?php
 
 	// Post featured image as FB IA cover image.
-	if ( has_post_thumbnail() && $image = wp_get_attachment_image_src( get_post_thumbnail_id(), $plugin->image_size ) ) {
-		$plugin->render_image_markup( $image[0] );
+	if ( $thumb_id = get_post_thumbnail_id() ) {
+		Simple_FB_Instant_Articles::instance()->render_image_markup( $thumb_id );
 	}
 
 	?>
