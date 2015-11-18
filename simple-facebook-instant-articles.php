@@ -181,6 +181,7 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_action( 'the_content', array( $this, 'append_google_analytics_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
+		add_action( 'the_content', array( $this, 'append_omniture_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'prepend_full_width_media' ), 1100 );
 
 		// Post URL for the feed.
@@ -587,6 +588,55 @@ class Simple_FB_Instant_Articles {
 		);
 
 		return $targeting_params;
+	}
+
+	/**
+	 * Append the omniture code.
+	 *
+	 * @param string $content Post content HTML string.
+	 * @param mixed $post_id  Post ID.
+	 *
+	 * @return string $content Post content HTML string.
+	 */
+	function append_omniture_code( $content, $post_id = null ) {
+		$post_id  = $post_id ?: get_the_ID();
+		return $content . $this->get_omniture_code( $post_id );
+	}
+
+	/**
+	 * Get the omniture code markup.
+	 *
+	 * @param mixed $post_id  Post ID.
+	 *
+	 * @return string HTML string.
+	 */
+	function get_omniture_code( $post_id ) {
+
+		$tags     = wp_list_pluck( (array) get_the_terms( $post_id, 'post_tag' ), 'name' );
+		$cats     = wp_list_pluck( (array) get_the_terms( $post_id, 'category' ), 'name' );
+		$keywords = array_values( array_unique( array_merge( $cats, $tags ) ) );
+
+		$omniture_data = array(
+			'cobrand_vendor'   => 'facebookinstantarticle',
+			'assetid'          => $post_id,
+			'byline'           => coauthors( ',', ' and ', null, null, false ),
+			'contenttype'      => 'text',
+			'cst'              => 'sports/ftw',
+			'eventtype'        => 'page:load',
+			'linkTrackVars'    => 'prop1',
+			'ssts'             => 'sports/ftw',
+			'pathName'         => get_permalink( $post_id ),
+			'taxonomykeywords' => implode( ',', $keywords ),
+			'topic'            => 'sports',
+			'videoincluded'    => 'No'
+		);
+
+		$url_bits = parse_url( home_url() );
+
+		ob_start();
+		require( trailingslashit( $this->template_path ) . 'omniture.php' );
+		return ob_get_clean();
+
 	}
 
 	/**
