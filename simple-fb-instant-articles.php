@@ -56,7 +56,6 @@ class Simple_FB_Instant_Articles {
 		add_action( 'init', array( $this, 'add_feed' ) );
 		add_action( 'wp', array( $this, 'add_actions' ) );
 		add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
-		add_filter( 'simple_fb_before_feed', array( $this, 'update_rss_permalink' ) );
 		add_action( 'simple_fb_before_feed', array( $this, 'pre_render' ) );
 		add_action( 'simple_fb_pre_render', array( $this, 'pre_render' ) );
 
