@@ -57,6 +57,8 @@ class Simple_FB_Instant_Articles {
 		add_action( 'wp', array( $this, 'add_actions' ) );
 		add_filter( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_filter( 'simple_fb_before_feed', array( $this, 'update_rss_permalink' ) );
+		add_action( 'simple_fb_before_feed', array( $this, 'pre_render' ) );
+		add_action( 'simple_fb_pre_render', array( $this, 'pre_render' ) );
 
 		// Setup the props.
 		$this->version = $version;
@@ -175,12 +177,36 @@ class Simple_FB_Instant_Articles {
 		do_action( 'simple_fb_after_feed' );
 	}
 
-	public function update_rss_permalink() {
+	/**
+	 * Modify content before render ready for FB IA.
+	 *
+	 * @return void
+	 */
+	public function pre_render() {
+
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
+
+		// Ensure oEmbeds are in the correct format.
+		add_filter( 'embed_handler_html', array( $this, 'format_social_embed' ) );
+		add_filter( 'embed_oembed_html', array( $this, 'format_social_embed' ) );
+
 	}
 
 	public function rss_permalink( $link ) {
 		return esc_url( $link . $this->endpoint );
+	}
+
+	/**
+	 * Ensure oEmbeds are in the correct format.
+	 *
+	 * Social embeds Ref: https://developers.facebook.com/docs/instant-articles/reference/social
+	 *
+	 * @param string   $html    HTML markup to be embeded into post sontent.
+	 *
+	 * @return string           HTML wrapped in FB IA markup for social embeds.
+	 */
+	public function format_social_embed( $html ) {
+		return '<figure class="op-social"><iframe>' . $html . '</iframe></figure>';
 	}
 
 }
