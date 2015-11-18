@@ -462,7 +462,7 @@ class Simple_FB_Instant_Articles {
 
 			while ( $headings->length ) {
 
-				$node = $headings->item( $i );
+				$node = $headings->item( 0 );
 				$h2   = $dom->createElement( 'h2' );
 
 				while ( $node->childNodes->length > 0 ) {
