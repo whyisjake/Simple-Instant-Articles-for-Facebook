@@ -6,8 +6,6 @@ Description: Add support to Facebook Instant Articles
 Author: Jake Spurlock, Human Made Limited
 */
 
-require_once( 'includes/functions.php' );
-
 class Simple_FB_Instant_Articles {
 
 	/**
@@ -142,12 +140,11 @@ class Simple_FB_Instant_Articles {
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_before_feed' );
 
-		$template = trailingslashit( $this->template_path ) . 'feed.php';;
+		$template = trailingslashit( $this->template_path ) . 'feed.php';
 
 		if ( 0 === validate_file( $template ) ) {
 			require( $template );
 		}
-
 
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_after_feed' );
@@ -167,10 +164,14 @@ class Simple_FB_Instant_Articles {
 
 		// Shortcodes - overwrite WP native ones with FB IA format.
 		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
-		add_shortcode( 'caption', array( $this, 'image_shortcode' ) );
+		add_shortcode( 'caption', array( $this, 'caption_shortcode' ) );
 
 		// Shortcodes - custom galleries.
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
+
+		// Shortcodes - remove related lawrence content.
+		add_shortcode( 'lawrence-related', '__return_empty_string' );
+		add_shortcode( 'lawrence-auto-related', '__return_empty_string' );
 
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
@@ -189,11 +190,13 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_p' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
+
 	}
 
 	public function rss_permalink( $link ) {
 
-		return esc_url( $link . $this->endpoint );
+		return trailingslashit( $link ) . $this->endpoint;
 	}
 
 	/**
@@ -207,51 +210,86 @@ class Simple_FB_Instant_Articles {
 	public function gallery_shortcode( $atts, $content = '' ) {
 
 		// Get the image IDs.
-		$ids = explode( ',', $atts['ids'] );
+		$ids = array_map( 'absint', explode( ',', $atts['ids'] ) );
 
-		ob_start(); ?>
+		ob_start();
 
-		<figure class="op-slideshow">
-			<?php foreach ( $ids as $id ) {
-				echo $this->image_shortcode( array( 'id' => $id ) );
-			} ?>
-		</figure>
+		echo '<figure class="op-slideshow">';
 
-		<?php return ob_get_clean();
+		foreach ( $ids as $id ) {
+			$this->render_image_markup( $id, $this->get_image_caption( $id ) );
+		}
+
+		echo '</figure>';
+
+		return ob_get_clean();
 	}
 
 	/**
-	 * Caption shortcode - overwrite WP native shortcode.
+	 * Caption shortcode.
+	 *
+	 * Overwrite WP native shortcode.
 	 * Format images in caption shortcodes into FB IA format.
 	 *
-	 * @param $atts           Array of attributes passed to shortcode.
+	 * @param array  $atts    Array of attributes passed to shortcode.
 	 * @param string $content The content passed to the shortcode.
 	 *
 	 * @return string|void    FB IA formatted images markup.
 	 */
-	public function image_shortcode( $atts, $content = '' ) {
+	public function caption_shortcode( $atts, $content = '' ) {
 
 		// Get attachment ID from the shortcode attribute.
-		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : '';
+		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : null;
 
-		// Get image info.
-		$image     = wp_get_attachment_image_src( $attachment_id, $this->image_size );
-		$image_url = isset( $image[0] ) ? $image[0] : '';
-
-		// Stop - if image URL is empty.
-		if ( ! $image_url ) {
+		if ( ! $attachment_id ) {
 			return;
 		}
 
-		// FB IA image format.
-		ob_start(); ?>
+		// Get image caption.
+		$reg_ex  = preg_match( '#^<img.*?\/>(.*)$#', trim( $content ), $matches );
+		$caption = isset( $matches[1] ) ? trim( $matches[1] ) : '';
 
-		<figure>
-			<img src="<?php echo esc_url( $image_url ); ?>" />
-			<?php simple_fb_image_caption( $attachment_id ); ?>
-		</figure>
+		ob_start();
+		$this->render_image_markup( $attachment_id, $caption );
+		return ob_get_clean();
+	}
 
-		<?php return ob_get_clean();
+	/**
+	 * Outputs image markup in FB IA format.
+	 *
+	 * @param int|string $src     Image ID or source to output in FB IA format.
+	 * @param string     $caption Image caption to display in FB IA format.
+	 */
+	public function render_image_markup( $src, $caption = '' ) {
+
+		// Handle passing image ID.
+		if ( is_numeric( $src ) ) {
+			$image = wp_get_attachment_image_src( $src, $this->image_size );
+			$src   = $image ? $image[0] : null;
+		}
+
+		if ( empty( $src ) ) {
+			return;
+		}
+
+		$template = trailingslashit( $this->template_path ) . 'image.php';
+		require( $template );
+	}
+
+	/**
+	 * Get caption for image.
+	 *
+	 * @param int $id Attachment/image ID.
+	 *
+	 * @return string Attachment/image caption, if specified.
+	 */
+	public function get_image_caption( $id ) {
+
+		$attachment_post = get_post( $id );
+
+		if ( $attachment_post && $attachment_post->post_excerpt ) {
+			return trim( $attachment_post->post_excerpt );
+		}
 	}
 
 	/**
@@ -275,26 +313,20 @@ class Simple_FB_Instant_Articles {
 			return;
 		}
 
-		// Display API gallery in FB IA format.
 		ob_start();
-		?>
 
-		<figure class="op-slideshow">
-			<?php foreach ( $gallery->images as $key => $image ) : ?>
-				<figure>
-					<img src="<?php echo esc_url( $image->url ); ?>" />
-					<?php if ( $image->custom_caption ) : ?>
-						<figcaption><h1><?php echo esc_html( strip_tags( $image->custom_caption ) ); ?></h1></figcaption>
-					<?php endif; ?>
-				</figure>
-			<?php endforeach; ?>
+		echo '<figure class="op-slideshow">';
 
-			<?php if ( $atts['title'] ) : ?>
-				<figcaption><h1><?php echo esc_html( $atts['title'] ); ?></h1></figcaption>
-			<?php endif;?>
-		</figure>
+		foreach ( $gallery->images as $key => $image ) {
+			$this->render_image_markup( $image->url, $image->custom_caption );
+		}
 
-		<?php
+		if ( $atts['title'] ) {
+			printf( '<figcaption><h1>%s</h1></figcaption>', esc_html( $atts['title'] ) );
+		}
+
+		echo '</figure>';
+
 		return ob_get_clean();
 	}
 
@@ -441,6 +473,39 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
+	 * Facebook throws a warning for all headings below h2.
+	 *
+	 * Replace with h2s.
+	 *
+	 * @param  \DOMDocument &$dom   DOM object generated for post content.
+	 * @param  \DOMXPath    &$xpath XPATH object generated for post content.
+	 *
+	 * @return void
+	 */
+	public function fix_headings( \DOMDocument &$dom, \DOMXPath &$xpath ) {
+
+		$headings = array( 'h3', 'h4', 'h5', 'h6' );
+
+		foreach ( $headings as $heading_tag ) {
+
+			$headings = $dom->getElementsByTagName( $heading_tag );
+
+			while ( $headings->length ) {
+
+				$node = $headings->item( 0 );
+				$h2   = $dom->createElement( 'h2' );
+
+				while ( $node->childNodes->length > 0 ) {
+					$h2->appendChild( $node->childNodes->item( 0 ) );
+				}
+
+				$node->parentNode->replaceChild( $h2, $node );
+
+			}
+		}
+	}
+
+	/**
 	 * Append Google Analytics (GA) script in the FB IA format
 	 * to the post content.
 	 *
@@ -473,7 +538,6 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		require( $analytics_template_file );
 		return ob_get_clean();
-
 	}
 
 	/**
@@ -509,9 +573,9 @@ class Simple_FB_Instant_Articles {
 	protected function get_ad_targeting_params() {
 
 		// Note use of get_the_terms + wp_list_pluck as these are cached ang get_the_* is not.
-		$tags    = wp_list_pluck( get_the_terms( $post, 'post_tag' ), 'name' );
-		$cats    = wp_list_pluck( get_the_terms( $post, 'category' ), 'name' );
-		$authors = wp_list_pluck( array_filter( (array) get_coauthors( get_the_ID() ) ), 'display_name' );
+		$tags    = wp_list_pluck( (array) get_the_terms( get_the_ID(), 'post_tag' ), 'name' );
+		$cats    = wp_list_pluck( (array) get_the_terms( get_the_ID(), 'category' ), 'name' );
+		$authors = wp_list_pluck( get_coauthors( get_the_ID() ), 'display_name' );
 
 		$url_bits = parse_url( home_url() );
 
