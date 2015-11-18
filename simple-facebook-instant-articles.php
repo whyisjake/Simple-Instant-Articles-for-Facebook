@@ -368,11 +368,17 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function reformat_post_content( $post_content ) {
 
-		$dom = new \DOMDocument();
+		$dom = new \DomDocument();
 
 		// Parse post content to generate DOM document.
 		// Use loadHTML as it doesn't need to be well-formed to load.
-		@$dom->loadHTML( '<html><body>' . $post_content . '</body></html>' );
+		// Charset meta tag required to ensure it correctly detects the encoding.
+		@$dom->loadHTML( sprintf(
+			'<html><head><meta http-equiv="Content-Type" content="%s" charset="%s"/></head><body>%s</body></html>',
+			get_bloginfo( 'html_type' ),
+			get_bloginfo( 'charset' ),
+			$post_content
+		) );
 
 		// Stop - if dom isn't generated.
 		if ( ! $dom ) {
