@@ -18,9 +18,9 @@ class Simple_FB_Instant_Articles {
 	private static $instance;
 
 	/**
-	 * Endpoint query var
+	 * Feed Endpoint
 	 */
-	private $token = 'fb';
+	private $feed_slug = 'fb';
 
 	/**
 	 * Endpoint query var
@@ -63,6 +63,10 @@ class Simple_FB_Instant_Articles {
 		$this->file = $file;
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
 		$this->home_url = trailingslashit( home_url() );
+
+		// Set feed slug.
+		$this->feed_slug = apply_filters( 'simple_fb_feed_slug', $this->feed_slug );
+
 	}
 
 	/**
@@ -112,8 +116,7 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	public function add_feed() {
-		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
-		add_feed( $feed_slug, array( $this, 'feed_template' ) );
+		add_feed( $this->feed_slug, array( $this, 'feed_template' ) );
 	}
 
 	/**
