@@ -51,7 +51,7 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 	 * @return string          Post Content
 	 */
 	public function promote_tags( $content ) {
-		preg_replace_all("/(<h[3-6](.*)>)(.*)(<\/h[3-6]>)/m", "<h2 $2>$3</h2>", $input_lines);
+		return preg_replace( "/(<h[3-6](.*)>)(.*)(<\/h[3-6]>)/", "<h2$2>$3</h2>", $content );
 	}
 
 	/**
