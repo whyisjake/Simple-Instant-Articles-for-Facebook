@@ -116,7 +116,6 @@ class Simple_FB_Instant_Articles {
 		do_action( 'simple_fb_pre_render', $post_id );
 
 		if ( have_posts() ) {
-
 			the_post();
 
 			$template = apply_filters( 'simple_fb_article_template_file', $this->template_path . '/article.php' );
@@ -124,9 +123,7 @@ class Simple_FB_Instant_Articles {
 			if ( 0 === validate_file( $template ) ) {
 				require( $template );
 			}
-
 		}
-
 	}
 
 	/**
@@ -174,6 +171,7 @@ class Simple_FB_Instant_Articles {
 
 		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
 
+		// Customise FB IA feed query.
 		if ( $query->is_main_query() && $query->is_feed( $feed_slug ) ) {
 
 			$num_posts = intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) );
@@ -186,6 +184,11 @@ class Simple_FB_Instant_Articles {
 					'value'   => '',
 					'compare' => '=',
 				),
+				array(
+					'key'     => '_format_sponsored_link',
+					'compare' => 'NOT EXISTS',
+				),
+				'relation' => 'OR',
 			) );
 
 			do_action( 'simple_fb_pre_get_posts', $query );
