@@ -221,12 +221,12 @@ class Simple_FB_Instant_Articles {
 		add_shortcode( 'lawrence-related', '__return_empty_string' );
 		add_shortcode( 'lawrence-auto-related', '__return_empty_string' );
 
+		// Fix embeds that need some extra attention.
+		add_filter( 'embed_handler_html', array( $this, 'load_brightcove_scripts' ), 5, 2 );
+
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
 		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
-
-		// Fix embeds that need some extra attention.
-		add_filter( 'embed_handler_html', array( $this, 'load_brightcove_scripts' ), 5, 2 );
 
 		// Modify the content.
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
@@ -405,6 +405,7 @@ class Simple_FB_Instant_Articles {
 	 * @return string           FB IA formatted markup for social embeds.
 	 */
 	public function reformat_social_embed( $html, $url, $attr, $post_ID = null ) {
+
 		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
 	}
 
@@ -417,7 +418,6 @@ class Simple_FB_Instant_Articles {
 	 * @return string Embed markup.
 	 */
 	function load_brightcove_scripts( $html, $url ) {
-
 		global $wp_embed;
 
 		$brightcove_handler = null;
@@ -441,7 +441,6 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return $html;
-
 	}
 
 	/**
