@@ -226,6 +226,7 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
 
 		// Fix embeds that need some extra attention.
+		add_filter( 'embed_handler_html', array( $this, 'load_facebook_scripts' ), 5, 3 );
 		add_filter( 'embed_brightcove', array( $this, 'load_brightcove_scripts' ), 10, 4 );
 
 		// Modify the content.
@@ -397,7 +398,7 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * Social embeds Ref: https://developers.facebook.com/docs/instant-articles/reference/social
 	 *
-	 * @param string   $html    HTML markup to be embeded into post sontent.
+	 * @param string   $html    HTML markup to be embeded into post content.
 	 * @param string   $url     The attempted embed URL.
 	 * @param array    $attr    An array of shortcode attributes.
 	 * @param int|null $post_ID Post ID for which embeded URLs are processed.
@@ -405,7 +406,62 @@ class Simple_FB_Instant_Articles {
 	 * @return string           FB IA formatted markup for social embeds.
 	 */
 	public function reformat_social_embed( $html, $url, $attr, $post_ID = null ) {
+
 		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
+	}
+
+	/**
+	 * Ensure facebook scripts are loaded for facebook embeds.
+	 *
+	 * @param string   $html    HTML markup to be embeded into post content.
+	 * @param string   $url     The attempted embed URL.
+	 * @param array    $attr    An array of shortcode attributes.
+	 *
+	 * @return string           Facebook embed code with required script.
+	 */
+	public function load_facebook_scripts( $html, $url, $attr ) {
+		global $wp_embed;
+
+		// Use handlers IDs as keys for quicker lookup.
+		$facebook_handlers_ids = array(
+			'facebook'                 => true,
+			'facebook-alternate'       => true,
+			'facebook-photo'           => true,
+			'facebook-alternate-photo' => true,
+			'facebook-video'           => true,
+		);
+
+		$is_facebook_embed = false;
+
+		// Check if we're processing facebook embed.
+		foreach ( $wp_embed->handlers as $priority => $handlers ) {
+			foreach ( $handlers as $name => $args ) {
+
+				// Stop - if we looked at all FB handlers.
+				if ( ! $facebook_handlers_ids ) {
+					break 2;
+				}
+				// See if embed URL is one of facebook recognised embed URLs.
+				elseif ( isset( $facebook_handlers_ids[ $name ] ) ) {
+
+					if ( preg_match( $args['regex'], $url ) ) {
+						$is_facebook_embed = true;
+						break 2;
+					}
+
+					unset( $facebook_handlers_ids[ $name ] );
+				}
+			}
+		}
+
+		// It is a facebook embed - insert script.
+		if ( $is_facebook_embed && function_exists( 'jetpack_facebook_add_script' ) ) {
+			ob_start();
+			jetpack_facebook_add_script();
+			$html .= ob_get_clean();
+		}
+
+		return $html;
 	}
 
 	/**
