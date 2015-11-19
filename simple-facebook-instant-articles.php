@@ -117,7 +117,12 @@ class Simple_FB_Instant_Articles {
 
 		if ( have_posts() ) {
 			the_post();
-			include( apply_filters( 'simple_fb_article_template_file', $this->template_path . '/article.php' ) );
+
+			$template = apply_filters( 'simple_fb_article_template_file', $this->template_path . '/article.php' );
+
+			if ( 0 === validate_file( $template ) ) {
+				require( $template );
+			}
 		}
 	}
 
@@ -166,23 +171,25 @@ class Simple_FB_Instant_Articles {
 
 		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
 
-		// FB IA feed - customise query.
+		// Customise FB IA feed query.
 		if ( $query->is_main_query() && $query->is_feed( $feed_slug ) ) {
 
-			// Number of posts for feed.
 			$num_posts = intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) );
 			$query->set( 'posts_per_rss', $num_posts );
 
-			// Exclude sponsored articles.
-			$exclude_sponsored_posts = array(
+			// Meta query to exclude sponsored articles.
+			$query->set( 'meta_query', array(
 				array(
 					'key'     => '_format_sponsored_link',
 					'value'   => '',
 					'compare' => '=',
 				),
-			);
-
-			$query->set( 'meta_query', $exclude_sponsored_posts );
+				array(
+					'key'     => '_format_sponsored_link',
+					'compare' => 'NOT EXISTS',
+				),
+				'relation' => 'OR',
+			) );
 
 			do_action( 'simple_fb_pre_get_posts', $query );
 		}
@@ -204,6 +211,9 @@ class Simple_FB_Instant_Articles {
 		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
 		add_shortcode( 'caption', array( $this, 'caption_shortcode' ) );
 
+		// Try and fix misc shortcodes.
+		$this->make_shortcode_figure_op_social( 'protected-iframe' );
+
 		// Shortcodes - custom galleries.
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
 
@@ -219,6 +229,8 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_action( 'the_content', array( $this, 'append_google_analytics_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
+		add_action( 'the_content', array( $this, 'append_omniture_code' ), 1100 );
+		add_action( 'the_content', array( $this, 'prepend_full_width_media' ), 1100 );
 
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
@@ -341,12 +353,19 @@ class Simple_FB_Instant_Articles {
 	public function api_galleries_shortcode( $atts ) {
 
 		// Stop - if gallery ID is empty.
-		if ( ! $atts['id'] ) {
+		if ( empty( $atts['id'] ) ) {
 			return;
 		}
 
-		// Stop - if can't get the API gallery.
-		if ( ! $gallery = \USAT\API_Galleries\get_gallery( $atts['id'] ) ) {
+		$gallery = null;
+
+		if ( function_exists( 'usat_newscred_get_gallery' ) ) {
+			$gallery = usat_newscred_get_gallery( $atts['id'], 'sigallery' );
+		} elseif ( function_exists( '\USAT\API_Galleries\get_gallery' ) ) {
+			$gallery = \USAT\API_Galleries\get_gallery( $atts['id'] );
+		}
+
+		if ( ! $gallery ) {
 			return;
 		}
 
@@ -365,6 +384,7 @@ class Simple_FB_Instant_Articles {
 		echo '</figure>';
 
 		return ob_get_clean();
+
 	}
 
 	/**
@@ -396,11 +416,17 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function reformat_post_content( $post_content ) {
 
-		$dom = new \DOMDocument();
+		$dom = new \DomDocument();
 
 		// Parse post content to generate DOM document.
 		// Use loadHTML as it doesn't need to be well-formed to load.
-		@$dom->loadHTML( '<html><body>' . $post_content . '</body></html>' );
+		// Charset meta tag required to ensure it correctly detects the encoding.
+		@$dom->loadHTML( sprintf(
+			'<html><head><meta http-equiv="Content-Type" content="%s" charset="%s"/></head><body>%s</body></html>',
+			get_bloginfo( 'html_type' ),
+			get_bloginfo( 'charset' ),
+			$post_content
+		) );
 
 		// Stop - if dom isn't generated.
 		if ( ! $dom ) {
@@ -627,6 +653,55 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
+	 * Append the omniture code.
+	 *
+	 * @param string $content Post content HTML string.
+	 * @param mixed $post_id  Post ID.
+	 *
+	 * @return string $content Post content HTML string.
+	 */
+	function append_omniture_code( $content, $post_id = null ) {
+		$post_id  = $post_id ?: get_the_ID();
+		return $content . $this->get_omniture_code( $post_id );
+	}
+
+	/**
+	 * Get the omniture code markup.
+	 *
+	 * @param mixed $post_id  Post ID.
+	 *
+	 * @return string HTML string.
+	 */
+	function get_omniture_code( $post_id ) {
+
+		$tags     = wp_list_pluck( (array) get_the_terms( $post_id, 'post_tag' ), 'name' );
+		$cats     = wp_list_pluck( (array) get_the_terms( $post_id, 'category' ), 'name' );
+		$keywords = array_values( array_unique( array_merge( $cats, $tags ) ) );
+
+		$omniture_data = array(
+			'cobrand_vendor'   => 'facebookinstantarticle',
+			'assetid'          => $post_id,
+			'byline'           => coauthors( ',', ' and ', null, null, false ),
+			'contenttype'      => 'text',
+			'cst'              => 'sports/ftw',
+			'eventtype'        => 'page:load',
+			'linkTrackVars'    => 'prop1',
+			'ssts'             => 'sports/ftw',
+			'pathName'         => get_permalink( $post_id ),
+			'taxonomykeywords' => implode( ',', $keywords ),
+			'topic'            => 'sports',
+			'videoincluded'    => 'No'
+		);
+
+		$url_bits = parse_url( home_url() );
+
+		ob_start();
+		require( trailingslashit( $this->template_path ) . 'omniture.php' );
+		return ob_get_clean();
+
+	}
+
+	/**
 	 * Output Ad targeting JS.
 	 *
 	 * @return void
@@ -636,6 +711,65 @@ class Simple_FB_Instant_Articles {
 		foreach ( $this->get_ad_targeting_params() as $key => $value ) {
 			printf( ".setTargeting( '%s', %s )", esc_js( $key ), wp_json_encode( $value ) );
 		}
+	}
+
+	/**
+	 * Prepend full width media.
+	 *
+	 * This functionality is mostly a duplicate of parts/single/format-video.
+	 *
+	 * @param  string $content Post content.
+	 * @param  mixed  $post_id Post id.
+	 *
+	 * @return string Post content.
+	 */
+	public function prepend_full_width_media( $content, $post_id = null ) {
+
+		global $wp_embed;
+
+		$post_id       = $post_id ?: get_the_ID();
+		$url           = get_post_meta( $post_id, '_format_video_embed', true );
+		$path_info     = pathinfo( $url );
+		$image_formats = array( 'png', 'jpg', 'jpeg', 'tiff', 'gif' );
+		$is_image      = ! empty( $path_info['extension'] ) && in_array( strtolower( $path_info['extension'] ), $image_formats );
+		$media_html    = '';
+
+		if ( $url && $is_image ) {
+			$media_html = sprintf( '<figure><img src="%s"/></figure>', esc_url( $url ) );
+		} elseif ( $url && ! $is_image ) {
+			$media_html = $wp_embed->autoembed( $url );
+		}
+
+		return $media_html . $content;
+
+	}
+
+	/**
+	 * Wrap shortcode output in figure op-social + iframe markup to sandbox functionality.
+	 *
+	 * Used to handle generic shortcodes that we don't really want to mess with might be broken.
+	 *
+	 * @param  string $shortcode_tag Shortcode.
+	 * @return void
+	 */
+	protected function make_shortcode_figure_op_social( $shortcode_tag ) {
+
+		global $shortcode_tags;
+
+		if ( ! isset( $shortcode_tags[ $shortcode_tag ] ) ) {
+			return;
+		}
+
+		$old_callback = $shortcode_tags[ $shortcode_tag ];
+
+		$shortcode_tags['protected-iframe'] = function() use ( $old_callback ) {
+
+			$r = '<figure class="op-social"><iframe>';
+			$r .= call_user_func_array( $old_callback, func_get_args() );
+			$r .= '</iframe></figure>';
+			return $r;
+		};
+
 	}
 
 	/**
