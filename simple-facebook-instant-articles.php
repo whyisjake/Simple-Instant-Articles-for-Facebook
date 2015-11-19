@@ -226,7 +226,7 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
 
 		// Fix embeds that need some extra attention.
-:		add_filter( 'embed_brightcove', array( $this, 'load_brightcove_scripts' ), 10, 4 );
+		add_filter( 'embed_brightcove', array( $this, 'load_brightcove_scripts' ), 10, 4 );
 
 		// Modify the content.
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
