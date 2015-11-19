@@ -374,7 +374,10 @@ class Simple_FB_Instant_Articles {
 		echo '<figure class="op-slideshow">';
 
 		foreach ( $gallery->images as $key => $image ) {
-			$this->render_image_markup( $image->url, $image->custom_caption );
+
+			$caption = $image->custom_caption ? $image->custom_caption : $image->caption;
+
+			$this->render_image_markup( $image->url, $caption );
 		}
 
 		if ( $atts['title'] ) {
@@ -384,7 +387,6 @@ class Simple_FB_Instant_Articles {
 		echo '</figure>';
 
 		return ob_get_clean();
-
 	}
 
 	/**
