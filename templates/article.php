@@ -10,10 +10,11 @@
 	<link rel="canonical" href="<?php the_permalink(); ?>">
 </head>
 <body>
-	<?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
-		<?php include( 'content.php' ); ?>
-	<?php endwhile; else : ?>
-		<p><?php _e( 'Sorry, no posts matched your criteria.' ); ?></p>
-	<?php endif; ?>
+	<article>
+		<?php include( apply_filters( 'simple_fb_article_cover_template_file', 'article-cover.php' ) ); ?>
+		<?php do_action( 'simple_fb_before_the_content' ); ?>
+		<?php the_content(); ?>
+		<?php do_action( 'simple_fb_after_the_content' ); ?>
+	</article>
 </body>
 </html>
