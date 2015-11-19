@@ -116,9 +116,17 @@ class Simple_FB_Instant_Articles {
 		do_action( 'simple_fb_pre_render', $post_id );
 
 		if ( have_posts() ) {
+
 			the_post();
-			include( apply_filters( 'simple_fb_article_template_file', $this->template_path . '/article.php' ) );
+
+			$template = apply_filters( 'simple_fb_article_template_file', $this->template_path . '/article.php' );
+
+			if ( 0 === validate_file( $template ) ) {
+				require( $template );
+			}
+
 		}
+
 	}
 
 	/**
