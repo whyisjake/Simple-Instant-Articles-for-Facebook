@@ -42,7 +42,7 @@ class Simple_FB_Shortcodes extends Simple_FB_Instant_Articles {
 		add_shortcode( 'gallery', array( $this, 'gallery' ) );
 		add_shortcode( 'caption', array( $this, 'caption' ) );
 		add_shortcode( 'audio',   array( $this, 'audio' ) );
-		add_filter( 'the_content', array( $this, 'promote_tags' ) );
+		add_filter( 'the_content', array( $this, 'promote_tags' ), 999 );
 	}
 
 	/**
