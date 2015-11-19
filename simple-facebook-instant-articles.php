@@ -225,14 +225,15 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
 		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
 
+		// Fix embeds that need some extra attention.
+		add_filter( 'embed_handler_html', array( $this, 'load_brightcove_scripts' ), 5, 2 );
+
 		// Modify the content.
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_action( 'the_content', array( $this, 'append_google_analytics_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_omniture_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'prepend_full_width_media' ), 1100 );
-
-		add_filter( 'simple_fb_social_embed_html', array( $this, 'load_brightcove_scripts' ), 10, 4 );
 
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
@@ -404,10 +405,7 @@ class Simple_FB_Instant_Articles {
 	 * @return string           FB IA formatted markup for social embeds.
 	 */
 	public function reformat_social_embed( $html, $url, $attr, $post_ID = null ) {
-
-		$html = apply_filters( 'simple_fb_social_embed_html', $html, $url, $attr, $post_ID );
 		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
-
 	}
 
 	/**
