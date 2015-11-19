@@ -418,7 +418,7 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @return string Embed markup.
 	 */
-	function load_brightcove_scripts( $embed, $matches, $attr, $url ) {
+	public function load_brightcove_scripts( $embed, $matches, $attr, $url ) {
 
 		ob_start();
 		do_action( 'wp_enqueue_scripts' );
@@ -426,7 +426,6 @@ class Simple_FB_Instant_Articles {
 		$embed .= ob_get_clean();
 
 		return $embed;
-
 	}
 
 	/**
