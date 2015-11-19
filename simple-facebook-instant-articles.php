@@ -232,6 +232,8 @@ class Simple_FB_Instant_Articles {
 		add_action( 'the_content', array( $this, 'append_omniture_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'prepend_full_width_media' ), 1100 );
 
+		add_filter( 'simple_fb_social_embed_html', array( $this, 'load_brightcove_scripts' ), 10, 4 );
+
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
 
@@ -403,7 +405,45 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function reformat_social_embed( $html, $url, $attr, $post_ID = null ) {
 
-		return '<figure class="op-social"><iframe>' . $html . '</iframe></figure>';
+		$html = apply_filters( 'simple_fb_social_embed_html', $html, $url, $attr, $post_ID );
+		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
+
+	}
+
+	/**
+	 * Ensure brightcove scripts are loaded.
+	 *
+	 * @param  string $html Embed markup.
+	 * @param  string $url  Embed url.
+	 *
+	 * @return string Embed markup.
+	 */
+	function load_brightcove_scripts( $html, $url ) {
+
+		global $wp_embed;
+
+		$brightcove_handler = null;
+
+		// Find brightcove embed handler.
+		foreach ( $wp_embed->handlers as $priority => $handlers ) {
+			foreach ( $handlers as $name => $args ) {
+				if ( 'brightcove' === $name ) {
+					$brightcove_handler = $args;
+					break;
+				}
+			}
+		}
+
+		// If we've found the brightcove handler, and the regex matches, output the brightcove script.
+		if ( $brightcove_handler && preg_match( $brightcove_handler['regex'], $url ) ) {
+			ob_start();
+			do_action( 'wp_enqueue_scripts' );
+			wp_print_scripts( 'brightcove' );
+			$html .= ob_get_clean();
+		}
+
+		return $html;
+
 	}
 
 	/**
