@@ -184,6 +184,8 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_action( 'the_content', array( $this, 'append_google_analytics_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
+		add_action( 'the_content', array( $this, 'append_omniture_code' ), 1100 );
+		add_action( 'the_content', array( $this, 'prepend_full_width_media' ), 1100 );
 
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
@@ -192,6 +194,8 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_p' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
+
 	}
 
 	public function rss_permalink( $link ) {
@@ -215,13 +219,14 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 
 		echo '<figure class="op-slideshow">';
+
 		foreach ( $ids as $id ) {
 			$this->render_image_markup( $id, $this->get_image_caption( $id ) );
 		}
+
 		echo '</figure>';
 
 		return ob_get_clean();
-
 	}
 
 	/**
@@ -238,52 +243,57 @@ class Simple_FB_Instant_Articles {
 	public function caption_shortcode( $atts, $content = '' ) {
 
 		// Get attachment ID from the shortcode attribute.
-		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : '';
+		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : null;
 
 		if ( ! $attachment_id ) {
 			return;
 		}
 
 		// Get image caption.
-		$reg_ex = preg_match( '#^<img.*?\/>(.*)$#', trim( $content ), $matches );
+		$reg_ex  = preg_match( '#^<img.*?\/>(.*)$#', trim( $content ), $matches );
 		$caption = isset( $matches[1] ) ? trim( $matches[1] ) : '';
 
 		ob_start();
 		$this->render_image_markup( $attachment_id, $caption );
 		return ob_get_clean();
-
 	}
 
 	/**
 	 * Outputs image markup in FB IA format.
 	 *
-	 * @param int    $image_id Image ID to output in FB IA format.
-	 * @param string $caption  Image caption to display in FB IA format.
+	 * @param int|string $src     Image ID or source to output in FB IA format.
+	 * @param string     $caption Image caption to display in FB IA format.
 	 */
-	public function render_image_markup( $image_id, $caption = '' ) {
+	public function render_image_markup( $src, $caption = '' ) {
 
-		$image = wp_get_attachment_image_src( $image_id, $this->image_size );
+		// Handle passing image ID.
+		if ( is_numeric( $src ) ) {
+			$image = wp_get_attachment_image_src( $src, $this->image_size );
+			$src   = $image ? $image[0] : null;
+		}
 
-		if ( ! $image ) {
+		if ( empty( $src ) ) {
 			return;
 		}
 
 		$template = trailingslashit( $this->template_path ) . 'image.php';
-		$src      = $image[0] ;
-
 		require( $template );
-
 	}
 
+	/**
+	 * Get caption for image.
+	 *
+	 * @param int $id Attachment/image ID.
+	 *
+	 * @return string Attachment/image caption, if specified.
+	 */
 	public function get_image_caption( $id ) {
 
 		$attachment_post = get_post( $id );
 
-		// Stop if - attachment post not found or caption is empty.
 		if ( $attachment_post && $attachment_post->post_excerpt ) {
 			return trim( $attachment_post->post_excerpt );
 		}
-
 	}
 
 	/**
@@ -298,37 +308,38 @@ class Simple_FB_Instant_Articles {
 	public function api_galleries_shortcode( $atts ) {
 
 		// Stop - if gallery ID is empty.
-		if ( ! $atts['id'] ) {
+		if ( empty( $atts['id'] ) ) {
 			return;
 		}
 
-		// Stop - if can't get the API gallery.
-		if ( ! $gallery = \USAT\API_Galleries\get_gallery( $atts['id'] ) ) {
+		$gallery = null;
+
+		if ( function_exists( 'usat_newscred_get_gallery' ) ) {
+			$gallery = usat_newscred_get_gallery( $atts['id'], 'sigallery' );
+		} elseif ( function_exists( '\USAT\API_Galleries\get_gallery' ) ) {
+			$gallery = \USAT\API_Galleries\get_gallery( $atts['id'] );
+		}
+
+		if ( ! $gallery ) {
 			return;
 		}
 
-		// Display API gallery in FB IA format.
 		ob_start();
-		?>
 
-		<figure class="op-slideshow">
+		echo '<figure class="op-slideshow">';
 
-			<?php
+		foreach ( $gallery->images as $key => $image ) {
+			$this->render_image_markup( $image->url, $image->custom_caption );
+		}
 
-			foreach ( $gallery->images as $key => $image ) {
-				$this->render_image_markup( $image->url, $image->custom_caption );
-			}
+		if ( $atts['title'] ) {
+			printf( '<figcaption><h1>%s</h1></figcaption>', esc_html( $atts['title'] ) );
+		}
 
-			?>
+		echo '</figure>';
 
-			<?php if ( $atts['title'] ) : ?>
-				<figcaption><h1><?php echo esc_html( $atts['title'] ); ?></h1></figcaption>
-			<?php endif;?>
-
-		</figure>
-
-		<?php
 		return ob_get_clean();
+
 	}
 
 	/**
@@ -360,11 +371,17 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function reformat_post_content( $post_content ) {
 
-		$dom = new \DOMDocument();
+		$dom = new \DomDocument();
 
 		// Parse post content to generate DOM document.
 		// Use loadHTML as it doesn't need to be well-formed to load.
-		@$dom->loadHTML( '<html><body>' . $post_content . '</body></html>' );
+		// Charset meta tag required to ensure it correctly detects the encoding.
+		@$dom->loadHTML( sprintf(
+			'<html><head><meta http-equiv="Content-Type" content="%s" charset="%s"/></head><body>%s</body></html>',
+			get_bloginfo( 'html_type' ),
+			get_bloginfo( 'charset' ),
+			$post_content
+		) );
 
 		// Stop - if dom isn't generated.
 		if ( ! $dom ) {
@@ -474,6 +491,39 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
+	 * Facebook throws a warning for all headings below h2.
+	 *
+	 * Replace with h2s.
+	 *
+	 * @param  \DOMDocument &$dom   DOM object generated for post content.
+	 * @param  \DOMXPath    &$xpath XPATH object generated for post content.
+	 *
+	 * @return void
+	 */
+	public function fix_headings( \DOMDocument &$dom, \DOMXPath &$xpath ) {
+
+		$headings = array( 'h3', 'h4', 'h5', 'h6' );
+
+		foreach ( $headings as $heading_tag ) {
+
+			$headings = $dom->getElementsByTagName( $heading_tag );
+
+			while ( $headings->length ) {
+
+				$node = $headings->item( 0 );
+				$h2   = $dom->createElement( 'h2' );
+
+				while ( $node->childNodes->length > 0 ) {
+					$h2->appendChild( $node->childNodes->item( 0 ) );
+				}
+
+				$node->parentNode->replaceChild( $h2, $node );
+
+			}
+		}
+	}
+
+	/**
 	 * Append Google Analytics (GA) script in the FB IA format
 	 * to the post content.
 	 *
@@ -506,7 +556,6 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		require( $analytics_template_file );
 		return ob_get_clean();
-
 	}
 
 	/**
@@ -559,6 +608,55 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
+	 * Append the omniture code.
+	 *
+	 * @param string $content Post content HTML string.
+	 * @param mixed $post_id  Post ID.
+	 *
+	 * @return string $content Post content HTML string.
+	 */
+	function append_omniture_code( $content, $post_id = null ) {
+		$post_id  = $post_id ?: get_the_ID();
+		return $content . $this->get_omniture_code( $post_id );
+	}
+
+	/**
+	 * Get the omniture code markup.
+	 *
+	 * @param mixed $post_id  Post ID.
+	 *
+	 * @return string HTML string.
+	 */
+	function get_omniture_code( $post_id ) {
+
+		$tags     = wp_list_pluck( (array) get_the_terms( $post_id, 'post_tag' ), 'name' );
+		$cats     = wp_list_pluck( (array) get_the_terms( $post_id, 'category' ), 'name' );
+		$keywords = array_values( array_unique( array_merge( $cats, $tags ) ) );
+
+		$omniture_data = array(
+			'cobrand_vendor'   => 'facebookinstantarticle',
+			'assetid'          => $post_id,
+			'byline'           => coauthors( ',', ' and ', null, null, false ),
+			'contenttype'      => 'text',
+			'cst'              => 'sports/ftw',
+			'eventtype'        => 'page:load',
+			'linkTrackVars'    => 'prop1',
+			'ssts'             => 'sports/ftw',
+			'pathName'         => get_permalink( $post_id ),
+			'taxonomykeywords' => implode( ',', $keywords ),
+			'topic'            => 'sports',
+			'videoincluded'    => 'No'
+		);
+
+		$url_bits = parse_url( home_url() );
+
+		ob_start();
+		require( trailingslashit( $this->template_path ) . 'omniture.php' );
+		return ob_get_clean();
+
+	}
+
+	/**
 	 * Output Ad targeting JS.
 	 *
 	 * @return void
@@ -568,6 +666,37 @@ class Simple_FB_Instant_Articles {
 		foreach ( $this->get_ad_targeting_params() as $key => $value ) {
 			printf( ".setTargeting( '%s', %s )", esc_js( $key ), wp_json_encode( $value ) );
 		}
+	}
+
+	/**
+	 * Prepend full width media.
+	 *
+	 * This functionality is mostly a duplicate of parts/single/format-video.
+	 *
+	 * @param  string $content Post content.
+	 * @param  mixed  $post_id Post id.
+	 *
+	 * @return string Post content.
+	 */
+	public function prepend_full_width_media( $content, $post_id = null ) {
+
+		global $wp_embed;
+
+		$post_id       = $post_id ?: get_the_ID();
+		$url           = get_post_meta( $post_id, '_format_video_embed', true );
+		$path_info     = pathinfo( $url );
+		$image_formats = array( 'png', 'jpg', 'jpeg', 'tiff', 'gif' );
+		$is_image      = ! empty( $path_info['extension'] ) && in_array( strtolower( $path_info['extension'] ), $image_formats );
+		$media_html    = '';
+
+		if ( $url && $is_image ) {
+			$media_html = sprintf( '<figure><img src="%s"/></figure>', esc_url( $url ) );
+		} elseif ( $url && ! $is_image ) {
+			$media_html = $wp_embed->autoembed( $url );
+		}
+
+		return $media_html . $content;
+
 	}
 
 	/**
