@@ -243,7 +243,6 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_p' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
-
 	}
 
 	public function rss_permalink( $link ) {
@@ -587,7 +586,6 @@ class Simple_FB_Instant_Articles {
 				}
 
 				$node->parentNode->replaceChild( $h2, $node );
-
 			}
 		}
 	}
@@ -722,7 +720,6 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		require( trailingslashit( $this->template_path ) . 'omniture.php' );
 		return ob_get_clean();
-
 	}
 
 	/**
@@ -765,7 +762,6 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return $media_html . $content;
-
 	}
 
 	/**
@@ -777,7 +773,6 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	protected function make_shortcode_figure_op_social( $shortcode_tag ) {
-
 		global $shortcode_tags;
 
 		if ( ! isset( $shortcode_tags[ $shortcode_tag ] ) ) {
@@ -793,7 +788,6 @@ class Simple_FB_Instant_Articles {
 			$r .= '</iframe></figure>';
 			return $r;
 		};
-
 	}
 
 	/**
