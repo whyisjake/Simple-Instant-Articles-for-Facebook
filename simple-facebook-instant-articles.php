@@ -800,7 +800,6 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	protected function make_shortcode_figure_op_social( $shortcode_tag ) {
-
 		global $shortcode_tags;
 
 		if ( ! isset( $shortcode_tags[ $shortcode_tag ] ) ) {
@@ -809,14 +808,13 @@ class Simple_FB_Instant_Articles {
 
 		$old_callback = $shortcode_tags[ $shortcode_tag ];
 
-		$shortcode_tags['protected-iframe'] = function() use ( $old_callback ) {
+		$shortcode_tags[ $shortcode_tag ] = function() use ( $old_callback ) {
 
 			$r = '<figure class="op-social"><iframe>';
 			$r .= call_user_func_array( $old_callback, func_get_args() );
 			$r .= '</iframe></figure>';
 			return $r;
 		};
-
 	}
 
 	/**
