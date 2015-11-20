@@ -771,7 +771,6 @@ class Simple_FB_Instant_Articles {
 	 * @return string Post content.
 	 */
 	public function prepend_full_width_media( $content, $post_id = null ) {
-
 		global $wp_embed;
 
 		$post_id       = $post_id ?: get_the_ID();
@@ -788,7 +787,6 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return $media_html . $content;
-
 	}
 
 	/**
