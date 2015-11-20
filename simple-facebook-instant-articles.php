@@ -226,6 +226,7 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
 
 		// Fix embeds that need some extra attention.
+		add_filter( 'embed_handler_html', array( $this, 'load_facebook_scripts' ), 5, 3 );
 		add_filter( 'embed_brightcove', array( $this, 'load_brightcove_scripts' ), 10, 4 );
 
 		// Modify the content.
@@ -396,7 +397,7 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * Social embeds Ref: https://developers.facebook.com/docs/instant-articles/reference/social
 	 *
-	 * @param string   $html    HTML markup to be embeded into post sontent.
+	 * @param string   $html    HTML markup to be embeded into post content.
 	 * @param string   $url     The attempted embed URL.
 	 * @param array    $attr    An array of shortcode attributes.
 	 * @param int|null $post_ID Post ID for which embeded URLs are processed.
@@ -412,6 +413,27 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
+	}
+
+	/**
+	 * Ensure facebook scripts are loaded for facebook embeds.
+	 *
+	 * @param string   $html    HTML markup to be embeded into post content.
+	 * @param string   $url     The attempted embed URL.
+	 * @param array    $attr    An array of shortcode attributes.
+	 *
+	 * @return string           Facebook embed code with required script.
+	 */
+	public function load_facebook_scripts( $html, $url, $attr ) {
+
+		// If the embed is any kind of facebook embed, try and load the Facebook SDK.
+		// Can't use precise regex, as we don't really know what WP.com is doing here!
+		if ( false !== strpos( $url, 'facebook.com' ) ) {
+
+			$html .= '<div id="fb-root"></div> <script>(function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = "//connect.facebook.net/en_US/all.js#xfbml=1"; fjs.parentNode.insertBefore(js, fjs); }(document, "script", "facebook-jssdk"));</script>';
+		}
+
+		return $html;
 	}
 
 	/**
