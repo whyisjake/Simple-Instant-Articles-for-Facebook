@@ -404,6 +404,13 @@ class Simple_FB_Instant_Articles {
 	 * @return string           FB IA formatted markup for social embeds.
 	 */
 	public function reformat_social_embed( $html, $url, $attr, $post_ID = null ) {
+
+		// Stop - if embed markup starts with `<figure class="op`,
+		// which means it's already been converted to FB IA format.
+		if ( false !== strpos( $html, '<figure class="op' ) ) {
+			return $html;
+		}
+
 		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
 	}
 
