@@ -179,16 +179,32 @@ class Simple_FB_Instant_Articles {
 
 			// Meta query to exclude sponsored articles.
 			$query->set( 'meta_query', array(
+				'relation' => 'AND',
 				array(
-					'key'     => '_format_sponsored_link',
-					'value'   => '',
-					'compare' => '=',
+					'relation' => 'OR',
+					array(
+						'key'     => '_format_sponsored_link',
+						'value'   => '',
+						'compare' => '=',
+					),
+					array(
+						'key'     => '_format_sponsored_link',
+						'compare' => 'NOT EXISTS',
+					),
 				),
 				array(
-					'key'     => '_format_sponsored_link',
-					'compare' => 'NOT EXISTS',
+					'relation' => 'OR',
+					array(
+						'key'     => '_lawrence_hide_on_fb_ia_feed',
+						'value'   => 0,
+						'compare' => '=',
+						'type'    => 'NUMERIC',
+					),
+					array(
+						'key'     => '_lawrence_hide_on_fb_ia_feed',
+						'compare' => 'NOT EXISTS',
+					),
 				),
-				'relation' => 'OR',
 			) );
 
 			do_action( 'simple_fb_pre_get_posts', $query );
