@@ -420,45 +420,13 @@ class Simple_FB_Instant_Articles {
 	 * @return string           Facebook embed code with required script.
 	 */
 	public function load_facebook_scripts( $html, $url, $attr ) {
-		global $wp_embed;
 
-		// Use handlers IDs as keys for quicker lookup.
-		$facebook_handlers_ids = array(
-			'facebook'                 => true,
-			'facebook-alternate'       => true,
-			'facebook-photo'           => true,
-			'facebook-alternate-photo' => true,
-			'facebook-video'           => true,
-		);
-
-		$is_facebook_embed = false;
-
-		// Check if we're processing facebook embed.
-		foreach ( $wp_embed->handlers as $priority => $handlers ) {
-			foreach ( $handlers as $name => $args ) {
-
-				// Stop - if we looked at all FB handlers.
-				if ( ! $facebook_handlers_ids ) {
-					break 2;
-				}
-				// See if embed URL is one of facebook recognised embed URLs.
-				elseif ( isset( $facebook_handlers_ids[ $name ] ) ) {
-
-					if ( preg_match( $args['regex'], $url ) ) {
-						$is_facebook_embed = true;
-						break 2;
-					}
-
-					unset( $facebook_handlers_ids[ $name ] );
-				}
-			}
-		}
-
-		// It is a facebook embed - insert script.
-		if ( $is_facebook_embed && function_exists( 'jetpack_facebook_add_script' ) ) {
-			ob_start();
-			jetpack_facebook_add_script();
-			$html .= ob_get_clean();
+		/**
+		 * If the embed is any kind of facebook embed, try and load the Facebook SDK.
+		 * Can't use precise regex, as we don't really know what WP.com is doing here!
+		 */
+		if ( strpos( $url, 'facebook.com' ) ) {
+			$html .= '<div id="fb-root"></div> <script>(function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = "//connect.facebook.net/en_US/all.js#xfbml=1"; fjs.parentNode.insertBefore(js, fjs); }(document, "script", "facebook-jssdk"));</script>';
 		}
 
 		return $html;
