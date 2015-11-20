@@ -177,18 +177,36 @@ class Simple_FB_Instant_Articles {
 			$num_posts = intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) );
 			$query->set( 'posts_per_rss', $num_posts );
 
-			// Meta query to exclude sponsored articles.
+			// Meta query to exclude:
+			// 1) sponsored posts.
+			// 2) posts marked to be excluded from the feed.
 			$query->set( 'meta_query', array(
+				'relation' => 'AND',
 				array(
-					'key'     => '_format_sponsored_link',
-					'value'   => '',
-					'compare' => '=',
+					'relation' => 'OR',
+					array(
+						'key'     => '_format_sponsored_link',
+						'value'   => '',
+						'compare' => '=',
+					),
+					array(
+						'key'     => '_format_sponsored_link',
+						'compare' => 'NOT EXISTS',
+					),
 				),
 				array(
-					'key'     => '_format_sponsored_link',
-					'compare' => 'NOT EXISTS',
+					'relation' => 'OR',
+					array(
+						'key'     => '_lawrence_hide_on_fb_ia_feed',
+						'value'   => 0,
+						'compare' => '=',
+						'type'    => 'NUMERIC',
+					),
+					array(
+						'key'     => '_lawrence_hide_on_fb_ia_feed',
+						'compare' => 'NOT EXISTS',
+					),
 				),
-				'relation' => 'OR',
 			) );
 
 			do_action( 'simple_fb_pre_get_posts', $query );
