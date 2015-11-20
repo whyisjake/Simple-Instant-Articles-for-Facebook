@@ -177,7 +177,9 @@ class Simple_FB_Instant_Articles {
 			$num_posts = intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) );
 			$query->set( 'posts_per_rss', $num_posts );
 
-			// Meta query to exclude sponsored articles.
+			// Meta query to exclude:
+			// 1) sponsored posts.
+			// 2) posts marked to be excluded from the feed.
 			$query->set( 'meta_query', array(
 				'relation' => 'AND',
 				array(
