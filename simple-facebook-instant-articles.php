@@ -228,7 +228,7 @@ class Simple_FB_Instant_Articles {
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
-		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_p' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_nodes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
 	}
 
@@ -542,7 +542,7 @@ class Simple_FB_Instant_Articles {
 
 			// If image node is not a direct child of the body, we need to move it there.
 			// Recurse up the tree looking for highest level parent/grandparent node.
-			while ( $top_node->parentNode && 'body' !== $top_node->parentNode->nodeName ) {
+			while ( $top_node->parentNode && 'body' !== $top_node->parentNode->tagName ) {
 				$top_node = $top_node->parentNode;
 			}
 
@@ -555,11 +555,12 @@ class Simple_FB_Instant_Articles {
 			}
 
 			$figure->appendChild( $node );
+
 		}
 	}
 
 	/**
-	 * Remove all empty <p> elements.
+	 * Remove all empty elements.
 	 *
 	 * @param  \DOMDocument &$dom   DOM object generated for post content.
 	 * @param  \DOMXPath    &$xpath XPATH object generated for post content.
@@ -568,9 +569,26 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function cleanup_empty_p( \DOMDocument &$dom, \DOMXPath &$xpath ) {
 
-		foreach ( $xpath->query( '//p[not(node())]' ) as $node ) {
-			$node->parentNode->removeChild( $node );
+		$target_tags = array( 'p', 'a' );
+		$found       = false;
+
+		foreach ( $target_tags as $target_tag ) {
+
+			$list  = $xpath->query( '//' . $target_tag . '[not(node())]' );
+			$found = $found || (bool) $list->length;
+
+			foreach ( $list as $node ) {
+				$node->parentNode->removeChild( $node );
+			}
+
 		}
+
+		// If we found anything, run this again.
+		// Ensures we catch any empty nodes created whilst cleaning up.
+		if ( $found ) {
+			$this->cleanup_empty_nodes( $dom, $xpath );
+		}
+
 	}
 
 	/**
