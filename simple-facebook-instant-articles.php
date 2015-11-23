@@ -401,6 +401,9 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
+
+	}
+
 	/**
 	 * Some markup fixes for embeds.
 	 *
