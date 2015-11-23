@@ -230,6 +230,8 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_p' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_social_embed' ), 1000, 2 );
+
 	}
 
 	public function rss_permalink( $link ) {
@@ -399,6 +401,44 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
+	/**
+	 * Some markup fixes for embeds.
+	 *
+	 * @param DOMDocument $dom   DOM object generated for post content.
+	 * @param DOMXPath    $xpath DOMXpath object generated for post content.
+	 *
+	 * @return void
+	 */
+	public function fix_social_embed( \DOMDocument $dom, \DOMXPath $xpath ) {
+
+		// Matches all divs and spans that have class like ~=embed- and are children of figure.
+		// Unwrap, or remove if no children.
+		$items = $xpath->query( '//figure[contains(@class, \'op-social\')]//*[self::span or self::div][contains(@class, \'embed-\')]' );
+
+		foreach ( $items as $node ) {
+
+			if ( ! $node->hasChildNodes() ) {
+				$node->parentNode->removeChild( $node );
+			}
+
+			while ( $node->childNodes->length > 0 ) {
+				$node->parentNode->insertBefore(
+					$node->childNodes->item( $node->childNodes->length - 1 ),
+					$node
+				);
+			}
+
+			$node->parentNode->removeChild( $node );
+
+		}
+
+		// If the op-social embed iframe is the only child and direct decendant of another iframe, unwrap.
+		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe' ) as $node ) {
+			if ( $node->parentNode->childNodes->length === 1 ) {
+				$node->parentNode->parentNode->insertBefore( $node, $node->parentNode );
+			}
+		}
+
 	}
 
 	/**
