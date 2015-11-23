@@ -140,6 +140,9 @@ class Simple_FB_Instant_Articles {
 
 			$query->set( 'posts_per_rss', intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) ) );
 
+			// Orderby post modified date. Ensures updated posts get updated in FB IA.
+			$query->set( 'orderby', 'modified' );
+
 			// Allow easy access to modify query args for the FB IA feed.
 			do_action( 'simple_fb_pre_get_posts', $query );
 
