@@ -446,8 +446,8 @@ class Simple_FB_Instant_Articles {
 
 		// If the embed is any kind of facebook embed, try and load the Facebook SDK.
 		// Can't use precise regex, as we don't really know what WP.com is doing here!
-		if ( false !== strpos( $url, 'facebook.com' ) ) {
-
+		// Check this hasn't been added already.
+		if ( false !== strpos( $url, 'facebook.com' ) && false === strpos( $html, 'connect.facebook.net' ) ) {
 			$html .= '<div id="fb-root"></div> <script>(function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = "//connect.facebook.net/en_US/all.js#xfbml=1"; fjs.parentNode.insertBefore(js, fjs); }(document, "script", "facebook-jssdk"));</script>';
 		}
 
