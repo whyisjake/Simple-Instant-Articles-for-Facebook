@@ -177,38 +177,6 @@ class Simple_FB_Instant_Articles {
 			$num_posts = intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) );
 			$query->set( 'posts_per_rss', $num_posts );
 
-			// Meta query to exclude:
-			// 1) sponsored posts.
-			// 2) posts marked to be excluded from the feed.
-			$query->set( 'meta_query', array(
-				'relation' => 'AND',
-				array(
-					'relation' => 'OR',
-					array(
-						'key'     => '_format_sponsored_link',
-						'value'   => '',
-						'compare' => '=',
-					),
-					array(
-						'key'     => '_format_sponsored_link',
-						'compare' => 'NOT EXISTS',
-					),
-				),
-				array(
-					'relation' => 'OR',
-					array(
-						'key'     => '_lawrence_hide_on_fb_ia_feed',
-						'value'   => 0,
-						'compare' => '=',
-						'type'    => 'NUMERIC',
-					),
-					array(
-						'key'     => '_lawrence_hide_on_fb_ia_feed',
-						'compare' => 'NOT EXISTS',
-					),
-				),
-			) );
-
 			do_action( 'simple_fb_pre_get_posts', $query );
 		}
 	}
@@ -446,8 +414,8 @@ class Simple_FB_Instant_Articles {
 
 		// If the embed is any kind of facebook embed, try and load the Facebook SDK.
 		// Can't use precise regex, as we don't really know what WP.com is doing here!
-		if ( false !== strpos( $url, 'facebook.com' ) ) {
-
+		// Check this hasn't been added already.
+		if ( false !== strpos( $url, 'facebook.com' ) && false === strpos( $html, 'connect.facebook.net' ) ) {
 			$html .= '<div id="fb-root"></div> <script>(function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = "//connect.facebook.net/en_US/all.js#xfbml=1"; fjs.parentNode.insertBefore(js, fjs); }(document, "script", "facebook-jssdk"));</script>';
 		}
 
