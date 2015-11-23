@@ -438,7 +438,9 @@ class Simple_FB_Instant_Articles {
 		// If the op-social embed iframe is the only child and direct decendant of another iframe, unwrap.
 		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe' ) as $node ) {
 			if ( $node->parentNode->childNodes->length === 1 ) {
+				$parent = $node->parentNode;
 				$node->parentNode->parentNode->insertBefore( $node, $node->parentNode );
+				$parent->parentNode->removeChild( $parent );
 			}
 		}
 
