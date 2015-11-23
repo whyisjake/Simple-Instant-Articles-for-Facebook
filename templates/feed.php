@@ -39,6 +39,21 @@ echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) )
 
 	<?php if ( have_posts() ) : ?>
 		<?php while ( have_posts() ) : the_post(); ?>
+
+			<?php
+
+			// Skip if sponsored.
+			if ( class_exists( '\USAT\Sponsored_Posts' ) && \USAT\Sponsored_Posts::instance()->is_sponsored() )  {
+				continue;
+			}
+
+			// Skip if hidden from feed.
+			if ( (bool) get_post_meta( get_the_ID(), '_lawrence_hide_on_fb_ia_feed', true ) ) {
+				continue;
+			}
+
+			?>
+
 			<item>
 				<title><?php esc_html( the_title_rss() ); ?></title>
 				<link><?php the_permalink_rss(); ?></link>
