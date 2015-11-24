@@ -595,11 +595,15 @@ class Simple_FB_Instant_Articles {
 	public function cleanup_empty_nodes( \DOMDocument &$dom, \DOMXPath &$xpath ) {
 
 		$target_tags = array( 'p', 'a' );
-		$found       = false;
+
+		// Keep track of whether any empty nodes have been found.
+		$found = false;
 
 		foreach ( $target_tags as $target_tag ) {
 
 			$list  = $xpath->query( '//' . $target_tag . '[not(node())]' );
+
+			// Update found. But don't set back to false.
 			$found = $found || (bool) $list->length;
 
 			foreach ( $list as $node ) {
