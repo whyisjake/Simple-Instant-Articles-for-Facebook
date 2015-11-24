@@ -197,7 +197,7 @@ class Simple_FB_Instant_Articles {
 		add_shortcode( 'caption', array( $this, 'caption_shortcode' ) );
 
 		// Try and fix misc shortcodes.
-		$this->make_shortcode_figure_op_social( 'protected-iframe' );
+		$this->make_shortcode_figure_op_interactive( 'protected-iframe' );
 
 		// Shortcodes - custom galleries.
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
@@ -860,7 +860,7 @@ class Simple_FB_Instant_Articles {
 	 * @param  string $shortcode_tag Shortcode.
 	 * @return void
 	 */
-	protected function make_shortcode_figure_op_social( $shortcode_tag ) {
+	protected function make_shortcode_figure_op_interactive( $shortcode_tag ) {
 		global $shortcode_tags;
 
 		if ( ! isset( $shortcode_tags[ $shortcode_tag ] ) ) {
