@@ -400,7 +400,6 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
-
 	}
 
 	/**
@@ -419,10 +418,13 @@ class Simple_FB_Instant_Articles {
 
 		foreach ( $items as $node ) {
 
+			// Remove empty <span> and <div> nodes.
 			if ( ! $node->hasChildNodes() ) {
 				$node->parentNode->removeChild( $node );
 			}
 
+			// Insert inner content of <span> and <div> nodes just before themselves,
+			// So they are siblings (on the same level).
 			while ( $node->childNodes->length > 0 ) {
 				$node->parentNode->insertBefore(
 					$node->childNodes->item( $node->childNodes->length - 1 ),
@@ -430,6 +432,7 @@ class Simple_FB_Instant_Articles {
 				);
 			}
 
+			// Remove original <span> and <div> elements.
 			$node->parentNode->removeChild( $node );
 		}
 
