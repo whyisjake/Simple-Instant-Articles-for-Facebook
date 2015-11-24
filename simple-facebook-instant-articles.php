@@ -399,7 +399,13 @@ class Simple_FB_Instant_Articles {
 		}
 
 		$class      = 'op-interactive';
-		$regex_bits = implode( '|', array( 'youtu(\.be|be\.com)', 'facebook.com', 'twitter.com', 'instagr(\.am|am\.com)', 'vine.com' ) );
+		$regex_bits = implode( '|', array(
+			'youtu(\.be|be\.com)',
+			'facebook.com',
+			'twitter.com',
+			'instagr(\.am|am\.com)',
+			'vine.com',
+		) );
 
 		if ( preg_match( "/$regex_bits/", $url ) ) {
 			$class = 'op-social';
