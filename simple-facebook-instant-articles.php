@@ -422,15 +422,15 @@ class Simple_FB_Instant_Articles {
 			$this->unwrap_node( $node );
 		}
 
-		// If the op-social embed iframe is the only child and direct decendant of another iframe, unwrap.
-		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe' ) as $node ) {
-			if ( $node->parentNode->childNodes->length === 1 ) {
-				$parent = $node->parentNode;
-				$node->parentNode->parentNode->insertBefore( $node, $node->parentNode );
+		// If the op-social embed iframe is the only child of another iframe, unwrap.
+		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe' ) as $iframe ) {
+			if ( 1 === $iframe->parentNode->childNodes->length ) {
+				// Replace parent iframe with inner iframe.
+				$parent = $iframe->parentNode;
+				$iframe->parentNode->parentNode->insertBefore( $iframe, $iframe->parentNode );
 				$parent->parentNode->removeChild( $parent );
 			}
 		}
-
 	}
 
 	/**
