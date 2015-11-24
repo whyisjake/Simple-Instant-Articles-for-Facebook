@@ -407,6 +407,9 @@ class Simple_FB_Instant_Articles {
 	/**
 	 * Some markup fixes for embeds.
 	 *
+	 * Remove uneccessary divs/spans WP inserts.
+	 * Unwrap double iframes.
+	 *
 	 * @param DOMDocument $dom   DOM object generated for post content.
 	 * @param DOMXPath    $xpath DOMXpath object generated for post content.
 	 *
@@ -414,21 +417,15 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function fix_social_embed( \DOMDocument $dom, \DOMXPath $xpath ) {
 
-		// Matches all divs and spans that have class like ~=embed- and are children of figure.
-		// Unwrap, or remove if no children.
-		$items = $xpath->query( '//figure[contains(@class, \'op-social\')]//*[self::span or self::div][contains(@class, \'embed-\')]' );
-
-		foreach ( $items as $node ) {
+		// Matches all divs and spans that have class like ~=embed- and are decendants of figure.
+		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]//*[self::span or self::div][contains(@class, \'embed-\')]' ) as $node ) {
 			$this->unwrap_node( $node );
 		}
 
-		// If the op-social embed iframe is the only child of another iframe, unwrap.
+		// Try to avoid double iframes like: <iframe><iframe src=""></iframe></iframe>
 		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe' ) as $iframe ) {
 			if ( 1 === $iframe->parentNode->childNodes->length ) {
-				// Replace parent iframe with inner iframe.
-				$parent = $iframe->parentNode;
-				$iframe->parentNode->parentNode->insertBefore( $iframe, $iframe->parentNode );
-				$parent->parentNode->removeChild( $parent );
+				$this->unwrap_node( $iframe->parentNode );
 			}
 		}
 	}
