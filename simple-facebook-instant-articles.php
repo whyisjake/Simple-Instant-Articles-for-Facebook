@@ -230,6 +230,7 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_p' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_social_embed' ), 1000, 2 );
 	}
 
 	public function rss_permalink( $link ) {
@@ -399,6 +400,55 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
+	}
+
+	/**
+	 * Some markup fixes for embeds.
+	 *
+	 * @param DOMDocument $dom   DOM object generated for post content.
+	 * @param DOMXPath    $xpath DOMXpath object generated for post content.
+	 *
+	 * @return void
+	 */
+	public function fix_social_embed( \DOMDocument $dom, \DOMXPath $xpath ) {
+
+		// Matches all divs and spans that have class like ~=embed- and are descendants of figure.
+		// Unwrap, or remove if no children.
+		$items = $xpath->query( '//figure[contains(@class, \'op-social\')]//*[self::span or self::div][contains(@class, \'embed-\')]' );
+
+		foreach ( $items as $node ) {
+
+			// Remove empty <span> and <div> nodes.
+			if ( ! $node->hasChildNodes() ) {
+				$node->parentNode->removeChild( $node );
+			}
+
+			// Insert inner content of <span> and <div> nodes just before themselves,
+			// So they are siblings (on the same level).
+			while ( $node->childNodes->length > 0 ) {
+				$node->parentNode->insertBefore(
+					$node->childNodes->item( $node->childNodes->length - 1 ),
+					$node
+				);
+			}
+
+			// Remove original <span> and <div> elements.
+			$node->parentNode->removeChild( $node );
+		}
+
+		// If the op-social embed iframe is the only child of another iframe, unwrap.
+		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe' ) as $node ) {
+			if ( 1 === $node->parentNode->childNodes->length ) {
+
+				$outer_iframe = $node->parentNode;
+
+				// Insert inner <iframe> before outer <iframe> element - so they are both children of <figure>.
+				$node->parentNode->parentNode->insertBefore( $node, $node->parentNode );
+
+				// Remove outer <iframe>.
+				$outer_iframe->parentNode->removeChild( $outer_iframe );
+			}
+		}
 	}
 
 	/**
