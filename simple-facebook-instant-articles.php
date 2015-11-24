@@ -398,7 +398,15 @@ class Simple_FB_Instant_Articles {
 			return $html;
 		}
 
-		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
+		$class      = 'op-interactive';
+		$regex_bits = implode( '|', array( 'youtu(\.be|be\.com)', 'facebook.com', 'twitter.com', 'instagr(\.am|am\.com)', 'vine.com' ) );
+
+		if ( preg_match( "/$regex_bits/", $url ) ) {
+			$class = 'op-social';
+		}
+
+		return sprintf( '<figure class="%s"><iframe>%s</iframe></figure>', $class, $html );
+
 	}
 
 	/**
@@ -415,7 +423,7 @@ class Simple_FB_Instant_Articles {
 	public function fix_social_embed( \DOMDocument $dom, \DOMXPath $xpath ) {
 
 		// Matches all divs and spans that have class like ~=embed- and are descendants of figure.
-		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]//*[self::span or self::div][contains(@class, \'embed-\')]' ) as $node ) {
+		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\') or contains(@class, \'op-interactive\')]//*[self::span or self::div][contains(@class, \'embed-\')]' ) as $node ) {
 			$this->unwrap_node( $node );
 		}
 
@@ -857,7 +865,7 @@ class Simple_FB_Instant_Articles {
 
 		$shortcode_tags[ $shortcode_tag ] = function() use ( $old_callback ) {
 
-			$r = '<figure class="op-social"><iframe>';
+			$r = '<figure class="op-interactive"><iframe>';
 			$r .= call_user_func_array( $old_callback, func_get_args() );
 			$r .= '</iframe></figure>';
 			return $r;
