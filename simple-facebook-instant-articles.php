@@ -171,11 +171,10 @@ class Simple_FB_Instant_Articles {
 
 		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
 
-		// Customise FB IA feed query.
 		if ( $query->is_main_query() && $query->is_feed( $feed_slug ) ) {
 
-			$num_posts = intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) );
-			$query->set( 'posts_per_rss', $num_posts );
+			$query->set( 'posts_per_rss', 25 );
+			$query->set( 'orderby', 'modified' );
 
 			do_action( 'simple_fb_pre_get_posts', $query );
 		}
@@ -230,6 +229,7 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_nodes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_social_embed' ), 1000, 2 );
 	}
 
 	public function rss_permalink( $link ) {
@@ -399,6 +399,32 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
+	}
+
+	/**
+	 * Some markup fixes for embeds.
+	 *
+	 * Remove uneccessary divs/spans WP inserts.
+	 * Unwrap double iframes.
+	 *
+	 * @param DOMDocument $dom   DOM object generated for post content.
+	 * @param DOMXPath    $xpath DOMXpath object generated for post content.
+	 *
+	 * @return void
+	 */
+	public function fix_social_embed( \DOMDocument $dom, \DOMXPath $xpath ) {
+
+		// Matches all divs and spans that have class like ~=embed- and are descendants of figure.
+		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]//*[self::span or self::div][contains(@class, \'embed-\')]' ) as $node ) {
+			$this->unwrap_node( $node );
+		}
+
+		// Try to avoid double iframes like: <iframe><iframe src=""></iframe></iframe>
+		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe' ) as $iframe ) {
+			if ( 1 === $iframe->parentNode->childNodes->length ) {
+				$this->unwrap_node( $iframe->parentNode );
+			}
+		}
 	}
 
 	/**
@@ -843,6 +869,28 @@ class Simple_FB_Instant_Articles {
 		return $node_html;
 	}
 
+	/**
+	 * Unwrap node.
+	 *
+	 * @param  \DOMNode $node Node.
+	 *
+	 * @return void
+	 */
+	protected function unwrap_node( \DOMNode $node ) {
+
+		// Insert all child nodes before the current node.
+		// Note pluck from end to ensure order remains correct.
+		while ( $node->childNodes->length > 0 ) {
+			$node->parentNode->insertBefore(
+				$node->childNodes->item( $node->childNodes->length - 1 ),
+				$node
+			);
+		}
+
+		// Remove the now empty node.
+		$node->parentNode->removeChild( $node );
+
+	}
 }
 
 /**
