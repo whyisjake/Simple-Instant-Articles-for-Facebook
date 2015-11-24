@@ -575,12 +575,15 @@ class Simple_FB_Instant_Articles {
 		foreach ( $target_tags as $target_tag ) {
 
 			$list  = $xpath->query( '//' . $target_tag . '[not(node())]' );
-			$found = $found || (bool) $list->length;
+			$found = (bool) $list->length;
+
+			if ( ! $found ) {
+				return;
+			}
 
 			foreach ( $list as $node ) {
 				$node->parentNode->removeChild( $node );
 			}
-
 		}
 
 		// If we found anything, run this again.
@@ -588,7 +591,6 @@ class Simple_FB_Instant_Articles {
 		if ( $found ) {
 			$this->cleanup_empty_nodes( $dom, $xpath );
 		}
-
 	}
 
 	/**
