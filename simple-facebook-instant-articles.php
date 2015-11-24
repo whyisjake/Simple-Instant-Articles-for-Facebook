@@ -427,7 +427,8 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function fix_social_embed( \DOMDocument $dom, \DOMXPath $xpath ) {
 
-		// Matches all divs and spans that have class like ~=embed- and are descendants of figure.
+		// Matches all divs and spans that have class like ~=embed- and are descendants of figure with
+		// class op-social or op-interactive.
 		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\') or contains(@class, \'op-interactive\')]//*[self::span or self::div][contains(@class, \'embed-\')]' ) as $node ) {
 			$this->unwrap_node( $node );
 		}
