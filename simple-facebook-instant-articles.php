@@ -227,7 +227,7 @@ class Simple_FB_Instant_Articles {
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
-		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_p' ), 10, 2 );
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_nodes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_social_embed' ), 1000, 2 );
 	}
@@ -585,18 +585,39 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Remove all empty <p> elements.
+	 * Remove empty elements from list of tag names.
 	 *
 	 * @param  \DOMDocument &$dom   DOM object generated for post content.
 	 * @param  \DOMXPath    &$xpath XPATH object generated for post content.
 	 *
 	 * @return void
 	 */
-	public function cleanup_empty_p( \DOMDocument &$dom, \DOMXPath &$xpath ) {
+	public function cleanup_empty_nodes( \DOMDocument &$dom, \DOMXPath &$xpath ) {
 
-		foreach ( $xpath->query( '//p[not(node())]' ) as $node ) {
-			$node->parentNode->removeChild( $node );
+		$target_tags = array( 'p', 'a' );
+
+		// Keep track of whether any empty nodes have been found.
+		$found = false;
+
+		foreach ( $target_tags as $target_tag ) {
+
+			$list  = $xpath->query( '//' . $target_tag . '[not(node())]' );
+
+			// Update found. But don't set back to false.
+			$found = $found || (bool) $list->length;
+
+			foreach ( $list as $node ) {
+				$node->parentNode->removeChild( $node );
+			}
+
 		}
+
+		// If we found anything, run this again.
+		// Ensures we catch any empty nodes created whilst cleaning up.
+		if ( $found ) {
+			$this->cleanup_empty_nodes( $dom, $xpath );
+		}
+
 	}
 
 	/**
