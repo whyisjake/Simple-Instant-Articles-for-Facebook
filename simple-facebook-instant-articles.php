@@ -171,11 +171,10 @@ class Simple_FB_Instant_Articles {
 
 		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
 
-		// Customise FB IA feed query.
 		if ( $query->is_main_query() && $query->is_feed( $feed_slug ) ) {
 
-			$num_posts = intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 10 ) ) );
-			$query->set( 'posts_per_rss', $num_posts );
+			$query->set( 'posts_per_rss', 25 );
+			$query->set( 'orderby', 'modified' );
 
 			do_action( 'simple_fb_pre_get_posts', $query );
 		}
