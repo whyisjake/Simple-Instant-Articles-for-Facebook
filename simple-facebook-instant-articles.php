@@ -555,7 +555,6 @@ class Simple_FB_Instant_Articles {
 			}
 
 			$figure->appendChild( $node );
-
 		}
 	}
 
