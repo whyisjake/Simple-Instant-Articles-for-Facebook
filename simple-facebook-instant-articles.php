@@ -560,7 +560,7 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Remove all empty elements.
+	 * Remove empty elements from list of tag names.
 	 *
 	 * @param  \DOMDocument &$dom   DOM object generated for post content.
 	 * @param  \DOMXPath    &$xpath XPATH object generated for post content.
