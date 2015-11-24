@@ -419,20 +419,7 @@ class Simple_FB_Instant_Articles {
 		$items = $xpath->query( '//figure[contains(@class, \'op-social\')]//*[self::span or self::div][contains(@class, \'embed-\')]' );
 
 		foreach ( $items as $node ) {
-
-			if ( ! $node->hasChildNodes() ) {
-				$node->parentNode->removeChild( $node );
-			}
-
-			while ( $node->childNodes->length > 0 ) {
-				$node->parentNode->insertBefore(
-					$node->childNodes->item( $node->childNodes->length - 1 ),
-					$node
-				);
-			}
-
-			$node->parentNode->removeChild( $node );
-
+			$this->unwrap_node( $node );
 		}
 
 		// If the op-social embed iframe is the only child and direct decendant of another iframe, unwrap.
@@ -868,6 +855,28 @@ class Simple_FB_Instant_Articles {
 		return $node_html;
 	}
 
+	/**
+	 * Unwrap node.
+	 *
+	 * @param  \DOMNode $node Node.
+	 *
+	 * @return void
+	 */
+	protected function unwrap_node( \DOMNode $node ) {
+
+		// Insert all child nodes before the current node.
+		// Note pluck from end to ensure order remains correct.
+		while ( $node->childNodes->length > 0 ) {
+			$node->parentNode->insertBefore(
+				$node->childNodes->item( $node->childNodes->length - 1 ),
+				$node
+			);
+		}
+
+		// Remove the now empty node.
+		$node->parentNode->removeChild( $node );
+
+	}
 }
 
 /**
