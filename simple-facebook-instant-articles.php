@@ -231,7 +231,6 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_p' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_social_embed' ), 1000, 2 );
-
 	}
 
 	public function rss_permalink( $link ) {
@@ -401,7 +400,6 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
-
 	}
 
 	/**
@@ -417,7 +415,7 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function fix_social_embed( \DOMDocument $dom, \DOMXPath $xpath ) {
 
-		// Matches all divs and spans that have class like ~=embed- and are decendants of figure.
+		// Matches all divs and spans that have class like ~=embed- and are descendants of figure.
 		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]//*[self::span or self::div][contains(@class, \'embed-\')]' ) as $node ) {
 			$this->unwrap_node( $node );
 		}
