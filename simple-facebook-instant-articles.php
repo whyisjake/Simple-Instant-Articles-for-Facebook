@@ -425,6 +425,19 @@ class Simple_FB_Instant_Articles {
 				$this->unwrap_node( $iframe->parentNode );
 			}
 		}
+
+		// Try to avoid double iframes for vine embeds. Shows them full width.
+		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe[contains(@class, \'vine-embed\')]' ) as $iframe ) {
+
+			// Strip scripts.
+			$scripts = $iframe->parentNode->getElementsByTagName( 'script' );
+			while ( $scripts->length > 0 ) {
+				$item = $scripts->item( 0 );
+				$item->parentNode->removeChild( $item );
+			}
+
+			$this->unwrap_node( $iframe->parentNode );
+		}
 	}
 
 	/**
