@@ -542,7 +542,7 @@ class Simple_FB_Instant_Articles {
 
 			// If image node is not a direct child of the body, we need to move it there.
 			// Recurse up the tree looking for highest level parent/grandparent node.
-			while ( $top_node->parentNode && 'body' !== $top_node->parentNode->tagName ) {
+			while ( $top_node->parentNode && 'body' !== $top_node->parentNode->nodeName ) {
 				$top_node = $top_node->parentNode;
 			}
 
