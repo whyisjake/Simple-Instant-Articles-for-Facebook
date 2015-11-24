@@ -231,7 +231,6 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_p' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_social_embed' ), 1000, 2 );
-
 	}
 
 	public function rss_permalink( $link ) {
@@ -432,18 +431,21 @@ class Simple_FB_Instant_Articles {
 			}
 
 			$node->parentNode->removeChild( $node );
-
 		}
 
-		// If the op-social embed iframe is the only child and direct decendant of another iframe, unwrap.
+		// If the op-social embed iframe is the only child of another iframe, unwrap.
 		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe' ) as $node ) {
-			if ( $node->parentNode->childNodes->length === 1 ) {
-				$parent = $node->parentNode;
+			if ( 1 === $node->parentNode->childNodes->length ) {
+
+				$outer_iframe = $node->parentNode;
+
+				// Insert inner <iframe> before outer <iframe> element - so they are both children of <figure>.
 				$node->parentNode->parentNode->insertBefore( $node, $node->parentNode );
-				$parent->parentNode->removeChild( $parent );
+
+				// Remove outer <iframe>.
+				$outer_iframe->parentNode->removeChild( $outer_iframe );
 			}
 		}
-
 	}
 
 	/**
