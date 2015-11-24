@@ -567,7 +567,7 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @return void
 	 */
-	public function cleanup_empty_p( \DOMDocument &$dom, \DOMXPath &$xpath ) {
+	public function cleanup_empty_nodes( \DOMDocument &$dom, \DOMXPath &$xpath ) {
 
 		$target_tags = array( 'p', 'a' );
 		$found       = false;
