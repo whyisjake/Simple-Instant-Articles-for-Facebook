@@ -412,7 +412,6 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return sprintf( '<figure class="%s"><iframe>%s</iframe></figure>', $class, $html );
-
 	}
 
 	/**
