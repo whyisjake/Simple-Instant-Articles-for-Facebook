@@ -419,8 +419,8 @@ class Simple_FB_Instant_Articles {
 			$this->unwrap_node( $node );
 		}
 
-		// Try to avoid double iframes like: <iframe><iframe src=""></iframe></iframe>
-		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe' ) as $iframe ) {
+		// Try to avoid double iframes for youtube videos. Shows them full width.
+		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe[contains(@class, \'youtube-player\')]' ) as $iframe ) {
 			if ( 1 === $iframe->parentNode->childNodes->length ) {
 				$this->unwrap_node( $iframe->parentNode );
 			}
