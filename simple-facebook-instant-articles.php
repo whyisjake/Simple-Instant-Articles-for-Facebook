@@ -197,7 +197,7 @@ class Simple_FB_Instant_Articles {
 		add_shortcode( 'caption', array( $this, 'caption_shortcode' ) );
 
 		// Try and fix misc shortcodes.
-		$this->make_shortcode_figure_op_social( 'protected-iframe' );
+		$this->sandbox_shortcode_output( 'protected-iframe' );
 
 		// Shortcodes - custom galleries.
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
@@ -397,7 +397,20 @@ class Simple_FB_Instant_Articles {
 			return $html;
 		}
 
-		return sprintf( '<figure class="op-social"><iframe>%s</iframe></figure>', $html );
+		$class      = 'op-interactive';
+		$regex_bits = implode( '|', array(
+			'youtu(\.be|be\.com)',
+			'facebook\.com',
+			'twitter\.com',
+			'instagr(\.am|am\.com)',
+			'vine\.com',
+		) );
+
+		if ( preg_match( "/$regex_bits/", $url ) ) {
+			$class = 'op-social';
+		}
+
+		return sprintf( '<figure class="%s"><iframe>%s</iframe></figure>', $class, $html );
 	}
 
 	/**
@@ -413,8 +426,9 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function fix_social_embed( \DOMDocument $dom, \DOMXPath $xpath ) {
 
-		// Matches all divs and spans that have class like ~=embed- and are descendants of figure.
-		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]//*[self::span or self::div][contains(@class, \'embed-\')]' ) as $node ) {
+		// Matches all divs and spans that have class like ~=embed- and are descendants of figure with
+		// class op-social or op-interactive.
+		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\') or contains(@class, \'op-interactive\')]//*[self::span or self::div][contains(@class, \'embed-\')]' ) as $node ) {
 			$this->unwrap_node( $node );
 		}
 
@@ -716,11 +730,8 @@ class Simple_FB_Instant_Articles {
 	protected function get_simple_reach_analytics_code() {
 
 		if ( function_exists( 'lawrence_simple_reach_analytics' ) ) {
-
-			$script = array( 'lawrence_simple_reach_analytics' );
-
 			ob_start();
-			require( trailingslashit( $this->template_path ) . 'tracking-script-wrapper.php' );
+			require( trailingslashit( $this->template_path ) . 'script-simple-reach.php' );
 			return ob_get_clean();
 		}
 	}
@@ -746,7 +757,7 @@ class Simple_FB_Instant_Articles {
 			);
 
 			ob_start();
-			require( trailingslashit( $this->template_path ) . 'tracking-script-wrapper.php' );
+			require( trailingslashit( $this->template_path ) . 'script-simple-reach.php' );
 			return ob_get_clean();
 		}
 	}
@@ -877,14 +888,14 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Wrap shortcode output in figure op-social + iframe markup to sandbox functionality.
+	 * Wrap shortcode output in figure op-interactive + iframe markup to sandbox functionality.
 	 *
 	 * Used to handle generic shortcodes that we don't really want to mess with might be broken.
 	 *
 	 * @param  string $shortcode_tag Shortcode.
 	 * @return void
 	 */
-	protected function make_shortcode_figure_op_social( $shortcode_tag ) {
+	protected function sandbox_shortcode_output( $shortcode_tag ) {
 		global $shortcode_tags;
 
 		if ( ! isset( $shortcode_tags[ $shortcode_tag ] ) ) {
@@ -894,8 +905,7 @@ class Simple_FB_Instant_Articles {
 		$old_callback = $shortcode_tags[ $shortcode_tag ];
 
 		$shortcode_tags[ $shortcode_tag ] = function() use ( $old_callback ) {
-
-			$r = '<figure class="op-social"><iframe>';
+			$r = '<figure class="op-interactive"><iframe>';
 			$r .= call_user_func_array( $old_callback, func_get_args() );
 			$r .= '</iframe></figure>';
 			return $r;
