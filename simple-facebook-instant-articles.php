@@ -680,6 +680,7 @@ class Simple_FB_Instant_Articles {
 		$post_content .= $this->get_google_analytics_code();
 		$post_content .= $this->get_simple_reach_analytics_code();
 		$post_content .= $this->get_omniture_code( $post_id );
+		$post_content .= $this->get_chartbeat_analytics_code();
 
 		return $post_content;
 	}
@@ -717,6 +718,32 @@ class Simple_FB_Instant_Articles {
 		if ( function_exists( 'lawrence_simple_reach_analytics' ) ) {
 
 			$script = array( 'lawrence_simple_reach_analytics' );
+
+			ob_start();
+			require( trailingslashit( $this->template_path ) . 'tracking-script-wrapper.php' );
+			return ob_get_clean();
+		}
+	}
+
+	/**
+	 * Get Chartbeat script in the FB IA format.
+	 *
+	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/analytics
+	 *
+	 * @return string Chartbeat script in FB IA format.
+	 */
+	protected function get_chartbeat_analytics_code() {
+
+		if (
+			lawrence_option_enabled( 'usat_chartbeat_enabled' )
+			&& function_exists( 'usat_chartbeat_add_header' )
+			&& function_exists( 'usat_chartbeat_add_footer' )
+		) {
+
+			$script = array(
+				'usat_chartbeat_add_header',
+				'usat_chartbeat_add_footer',
+			);
 
 			ob_start();
 			require( trailingslashit( $this->template_path ) . 'tracking-script-wrapper.php' );
