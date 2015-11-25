@@ -750,14 +750,8 @@ class Simple_FB_Instant_Articles {
 			&& function_exists( 'usat_chartbeat_add_header' )
 			&& function_exists( 'usat_chartbeat_add_footer' )
 		) {
-
-			$script = array(
-				'usat_chartbeat_add_header',
-				'usat_chartbeat_add_footer',
-			);
-
 			ob_start();
-			require( trailingslashit( $this->template_path ) . 'script-simple-reach.php' );
+			require( trailingslashit( $this->template_path ) . 'script-chartbeat.php' );
 			return ob_get_clean();
 		}
 	}
