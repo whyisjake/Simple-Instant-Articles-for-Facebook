@@ -510,11 +510,20 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function load_brightcove_scripts( $embed, $matches, $attr, $url ) {
 
-		ob_start();
-		do_action( 'wp_enqueue_scripts' );
-		wp_print_scripts( 'brightcove' );
+		global $wp_scripts;
 
-		$embed .= ob_get_clean();
+		// Ensure scripts are registered.
+		if ( ! did_action( 'wp_enqueue_scripts' ) ) {
+			do_action( 'wp_enqueue_scripts' );
+		}
+
+		// Check brightcove scripts are registered.
+		if ( ! wp_script_is( 'brightcove', 'registered' ) ) {
+			return $embed;
+		}
+
+		// Manually build script. Ensures always loaded, including multiple times.
+		$embed .= sprintf( '<script src="%s"></script>', $wp_scripts->registered['brightcove']->src );
 
 		$embed .= '<style>';
 		$embed .= '.brightcove-embed { position: relative; padding-bottom: 56.25%; /* 16/9 ratio */ height: 0; overflow: hidden; }';
