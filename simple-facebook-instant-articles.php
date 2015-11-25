@@ -218,6 +218,7 @@ class Simple_FB_Instant_Articles {
 		add_action( 'the_content', array( $this, 'prepend_full_width_media' ), 50 );
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_action( 'the_content', array( $this, 'append_google_analytics_code' ), 1100 );
+		add_action( 'the_content', array( $this, 'append_simple_reach_analytics_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_omniture_code' ), 1100 );
 
@@ -698,6 +699,37 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		require( $analytics_template_file );
 		return ob_get_clean();
+	}
+
+	/**
+	 * Append Simple Reach (SR) script in the FB IA format to the post content.
+	 *
+	 * @param string $post_content Post content.
+	 *
+	 * @return string Post content with added SR script in FB IA format.
+	 */
+	public function append_simple_reach_analytics_code( $post_content ) {
+
+		$post_content .= $this->get_simple_reach_analytics_code();
+		return $post_content;
+	}
+
+	/**
+	 * Get Simple Reach (SR) script in the FB IA format.
+	 *
+	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/analytics
+	 *
+	 * @return string SR script in FB IA format.
+	 */
+	protected function get_simple_reach_analytics_code() {
+
+		if ( function_exists( 'lawrence_simple_reach_analytics' ) ) {
+
+			$script = 'lawrence_simple_reach_analytics';
+			ob_start();
+			require( trailingslashit( $this->template_path ) . 'tracking-script-wrapper.php' );
+			return ob_get_clean();
+		}
 	}
 
 	/**
