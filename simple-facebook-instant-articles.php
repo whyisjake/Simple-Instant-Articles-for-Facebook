@@ -716,7 +716,8 @@ class Simple_FB_Instant_Articles {
 
 		if ( function_exists( 'lawrence_simple_reach_analytics' ) ) {
 
-			$script = 'lawrence_simple_reach_analytics';
+			$script = array( 'lawrence_simple_reach_analytics' );
+
 			ob_start();
 			require( trailingslashit( $this->template_path ) . 'tracking-script-wrapper.php' );
 			return ob_get_clean();
