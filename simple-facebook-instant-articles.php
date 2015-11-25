@@ -715,10 +715,8 @@ class Simple_FB_Instant_Articles {
 	protected function get_simple_reach_analytics_code() {
 
 		if ( function_exists( 'lawrence_simple_reach_analytics' ) ) {
-
-			$script = 'lawrence_simple_reach_analytics';
 			ob_start();
-			require( trailingslashit( $this->template_path ) . 'tracking-script-wrapper.php' );
+			require( trailingslashit( $this->template_path ) . 'script-simple-reach.php' );
 			return ob_get_clean();
 		}
 	}
