@@ -219,7 +219,6 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_action( 'the_content', array( $this, 'append_analytics_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
-		add_action( 'the_content', array( $this, 'append_omniture_code' ), 1100 );
 
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
@@ -669,14 +668,19 @@ class Simple_FB_Instant_Articles {
 	 * Append all available analytics tracking scripts in the FB IA format
 	 * to the post content.
 	 *
-	 * @param string $post_content Post content.
+	 * @param string   $post_content Post content.
+	 * @param null|int $post_id      Post ID.
 	 *
 	 * @return string Post content with added analytics scripts in FB IA format.
 	 */
-	public function append_analytics_code( $post_content ) {
+	public function append_analytics_code( $post_content, $post_id = null ) {
+
+		$post_id  = $post_id ?: get_the_ID();
 
 		$post_content .= $this->get_google_analytics_code();
 		$post_content .= $this->get_simple_reach_analytics_code();
+		$post_content .= $this->get_omniture_code( $post_id );
+
 		return $post_content;
 	}
 
@@ -766,19 +770,6 @@ class Simple_FB_Instant_Articles {
 		);
 
 		return $targeting_params;
-	}
-
-	/**
-	 * Append the omniture code.
-	 *
-	 * @param string $content Post content HTML string.
-	 * @param mixed $post_id  Post ID.
-	 *
-	 * @return string $content Post content HTML string.
-	 */
-	function append_omniture_code( $content, $post_id = null ) {
-		$post_id  = $post_id ?: get_the_ID();
-		return $content . $this->get_omniture_code( $post_id );
 	}
 
 	/**
