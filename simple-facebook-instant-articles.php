@@ -217,8 +217,7 @@ class Simple_FB_Instant_Articles {
 		// Modify the content.
 		add_action( 'the_content', array( $this, 'prepend_full_width_media' ), 50 );
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
-		add_action( 'the_content', array( $this, 'append_google_analytics_code' ), 1100 );
-		add_action( 'the_content', array( $this, 'append_simple_reach_analytics_code' ), 1100 );
+		add_action( 'the_content', array( $this, 'append_analytics_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
 		add_action( 'the_content', array( $this, 'append_omniture_code' ), 1100 );
 
@@ -667,16 +666,17 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Append Google Analytics (GA) script in the FB IA format
+	 * Append all available analytics tracking scripts in the FB IA format
 	 * to the post content.
 	 *
 	 * @param string $post_content Post content.
 	 *
-	 * @return string Post content with added GA script in FB IA format.
+	 * @return string Post content with added analytics scripts in FB IA format.
 	 */
-	public function append_google_analytics_code( $post_content ) {
+	public function append_analytics_code( $post_content ) {
 
 		$post_content .= $this->get_google_analytics_code();
+		$post_content .= $this->get_simple_reach_analytics_code();
 		return $post_content;
 	}
 
@@ -699,19 +699,6 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		require( $analytics_template_file );
 		return ob_get_clean();
-	}
-
-	/**
-	 * Append Simple Reach (SR) script in the FB IA format to the post content.
-	 *
-	 * @param string $post_content Post content.
-	 *
-	 * @return string Post content with added SR script in FB IA format.
-	 */
-	public function append_simple_reach_analytics_code( $post_content ) {
-
-		$post_content .= $this->get_simple_reach_analytics_code();
-		return $post_content;
 	}
 
 	/**
