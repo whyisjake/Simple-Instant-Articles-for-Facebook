@@ -454,7 +454,7 @@ class Simple_FB_Instant_Articles {
 		}
 
 		// Remove P and <br> tags from brightcove embed.
-		foreach ( $xpath->query( '//div[contains(@class, \'brightcove-embed\')]' ) as $node ) {
+		foreach ( $xpath->query( '//div[contains(@class, \'brightcove-embed\')]' ) as $brightcove ) {
 
 			$br_nodes = $brightcove->parentNode->getElementsByTagName( 'br' );
 			$p_nodes  = $brightcove->parentNode->getElementsByTagName( 'p' );
