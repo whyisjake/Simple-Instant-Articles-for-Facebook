@@ -509,7 +509,6 @@ class Simple_FB_Instant_Articles {
 	 * @return string Embed markup.
 	 */
 	public function load_brightcove_scripts( $embed, $matches, $attr, $url ) {
-
 		global $wp_scripts;
 
 		// Ensure scripts are registered.
