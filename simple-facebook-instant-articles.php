@@ -451,6 +451,30 @@ class Simple_FB_Instant_Articles {
 
 			$this->unwrap_node( $iframe->parentNode );
 		}
+
+		// Remove P and <br> tags from brightcove embed.
+		foreach ( $xpath->query( '//div[contains(@class, \'brightcove-embed\')]' ) as $brightcove ) {
+
+			$br_nodes = $brightcove->parentNode->getElementsByTagName( 'br' );
+			$p_nodes  = $brightcove->parentNode->getElementsByTagName( 'p' );
+
+			while ( $br_nodes->length > 0 ) {
+				$br_nodes->item( 0 )->parentNode->removeChild( $br_nodes->item( 0 ) );
+			}
+
+			while ( $p_nodes->length > 0 ) {
+				$this->unwrap_node( $p_nodes->item(0) );
+			}
+
+		}
+
+		// Remove brightcove width/height params.
+		foreach ( $xpath->query( '//div[contains(@class, \'brightcove-embed\')]//param[@name="width" or @name="height"]' ) as $node ) {
+			if ( $node->parentNode ) {
+				$node->parentNode->removeChild( $node );
+			}
+		}
+
 	}
 
 	/**
@@ -489,7 +513,13 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		do_action( 'wp_enqueue_scripts' );
 		wp_print_scripts( 'brightcove' );
+
 		$embed .= ob_get_clean();
+
+		$embed .= '<style>';
+		$embed .= '.brightcove-embed { position: relative; padding-bottom: 56.25%; /* 16/9 ratio */ height: 0; overflow: hidden; }';
+		$embed .= '.brightcove-embed object { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }';
+		$embed .= '</style>';
 
 		return $embed;
 	}
