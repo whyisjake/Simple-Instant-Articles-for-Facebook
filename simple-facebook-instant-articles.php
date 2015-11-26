@@ -738,16 +738,11 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function get_google_analytics_code() {
 
-		$analytics_template_file = trailingslashit( $this->template_path ) . 'script-ga.php';
-		$ga_profile_id           = get_option( 'lawrence_ga_tracking_id' );
-
-		if ( ! $ga_profile_id ) {
+		if ( ! $ga_profile_id = get_option( 'lawrence_ga_tracking_id' ) ) {
 			return;
 		}
 
-		ob_start();
-		require( $analytics_template_file );
-		return ob_get_clean();
+		$this->render_template( 'script-ga' );
 	}
 
 	/**
@@ -760,9 +755,7 @@ class Simple_FB_Instant_Articles {
 	protected function get_simple_reach_analytics_code() {
 
 		if ( function_exists( 'lawrence_simple_reach_analytics' ) ) {
-			ob_start();
-			require( trailingslashit( $this->template_path ) . 'script-simple-reach.php' );
-			return ob_get_clean();
+			$this->render_template( 'script-simple-reach' );
 		}
 	}
 
@@ -780,9 +773,7 @@ class Simple_FB_Instant_Articles {
 			&& function_exists( 'usat_chartbeat_add_header' )
 			&& function_exists( 'usat_chartbeat_add_footer' )
 		) {
-			ob_start();
-			require( trailingslashit( $this->template_path ) . 'script-chartbeat.php' );
-			return ob_get_clean();
+			$this->render_template( 'script-chartbeat' );
 		}
 	}
 
@@ -795,20 +786,8 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function append_ad_code( $post_content ) {
 
-		$post_content .= $this->get_ad_code();
+		$post_content .= $this->render_template( 'ad' );
 		return $post_content;
-	}
-
-	/**
-	 * Get Ad code in the FB IA format.
-	 *
-	 * @return string Ad script in FB IA format.
-	 */
-	public function get_ad_code() {
-
-		ob_start();
-		require( trailingslashit( $this->template_path ) . 'ad.php' );
-		return ob_get_clean();
 	}
 
 	/**
@@ -865,9 +844,7 @@ class Simple_FB_Instant_Articles {
 
 		$url_bits = parse_url( home_url() );
 
-		ob_start();
-		require( trailingslashit( $this->template_path ) . 'omniture.php' );
-		return ob_get_clean();
+		$this->render_template( 'omniture' );
 	}
 
 	/**
@@ -976,6 +953,26 @@ class Simple_FB_Instant_Articles {
 		// Remove the now empty node.
 		$node->parentNode->removeChild( $node );
 
+	}
+
+	/**
+	 * Return template code/markup.
+	 *
+	 * @param string $template_name Template file name that resides in 'templates' folder
+	 *                              without extension.
+	 *
+	 * @return string               Template code/markup.
+	 */
+	protected function render_template( $template_name ) {
+
+		$template_name = str_replace( '.php', '', $template_name );
+		$template_path = trailingslashit( $this->template_path ) . $template_name . '.php';
+
+		if ( 0 === validate_file( $template_path ) ) {
+			ob_start();
+			require( $template_path );
+			return ob_get_clean();
+		}
 	}
 }
 
