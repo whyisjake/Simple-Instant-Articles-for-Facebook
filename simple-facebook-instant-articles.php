@@ -750,7 +750,7 @@ class Simple_FB_Instant_Articles {
 			return;
 		}
 
-		return $this->render_template( 'script-ga' );
+		return $this->render_template( 'script-ga', array( 'ga_profile_id' => $ga_profile_id ) );
 	}
 
 	/**
@@ -852,7 +852,7 @@ class Simple_FB_Instant_Articles {
 
 		$url_bits = parse_url( home_url() );
 
-		return $this->render_template( 'omniture' );
+		return $this->render_template( 'omniture', array( 'omniture_data' => $omniture_data ) );
 	}
 
 	/**
@@ -968,10 +968,11 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @param string $template_name Template file name that resides in 'templates' folder
 	 *                              without extension.
+	 * @param array $data           Variables to be passed to template.
 	 *
 	 * @return string               Template code/markup.
 	 */
-	protected function render_template( $template_name ) {
+	protected function render_template( $template_name, $data = array() ) {
 
 		$template_name = str_replace( '.php', '', $template_name );
 		$template_path = trailingslashit( $this->template_path ) . $template_name . '.php';
