@@ -30,7 +30,7 @@ To install the plugin and get it working:
 
 1. Upload simple-fb-instant-articles to the /wp-content/plugins/ directory.
 2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. The Facebook Instant version of each post should be available when you append 'fb-instant' to the URL, for example http://mydomain.com/post-slug/fb-instant. The feed of Facebook Instant articles should be accessible at your domain with 'simple_fb_feed_slug' appended, for example http://mydomain.com/simple_fb_feed_slug. You may need to flush your WordPress rewrite rules to get the URLs to work - see the WordPress Codex (https://codex.wordpress.org/Rewrite_API/flush_rules) for more information.
+3. The Facebook Instant version of each post should be available when you append 'fb-instant' to the URL, for example http://mydomain.com/post-slug/fb-instant. The feed of Facebook Instant articles should be accessible at your domain with 'fb' appended, for example http://mydomain.com/fb. You may need to flush your WordPress rewrite rules to get the URLs to work - see the WordPress Codex (https://codex.wordpress.org/Rewrite_API/flush_rules) for more information.
 4. To make your Facebook Instant content accessible to Facebook you'll need to enter the URL for the feed in your Facebook app settings and do other configuration. You can find more info about the necessary steps at https://developers.facebook.com/docs/instant-articles/publishing.
 
 === Changelog ===
