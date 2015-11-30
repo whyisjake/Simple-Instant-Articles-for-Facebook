@@ -6,7 +6,7 @@
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-			ga('create', <?php echo wp_json_encode( $ga_profile_id ); ?>, 'auto');
+			ga('create', <?php echo wp_json_encode( $data['ga_profile_id'] ); ?>, 'auto');
 			ga('send', 'pageview');
 		</script>
 	</iframe>

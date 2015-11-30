@@ -215,10 +215,10 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'embed_brightcove', array( $this, 'load_brightcove_scripts' ), 10, 4 );
 
 		// Modify the content.
-		add_action( 'the_content', array( $this, 'prepend_full_width_media' ), 50 );
+		add_filter( 'the_content', array( $this, 'prepend_full_width_media' ), 50 );
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
-		add_action( 'the_content', array( $this, 'append_analytics_code' ), 1100 );
-		add_action( 'the_content', array( $this, 'append_ad_code' ), 1100 );
+		add_filter( 'the_content', array( $this, 'append_analytics_code' ), 1100 );
+		add_filter( 'the_content', array( $this, 'append_ad_code' ), 1100 );
 
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
@@ -750,7 +750,7 @@ class Simple_FB_Instant_Articles {
 			return;
 		}
 
-		$this->render_template( 'script-ga' );
+		return $this->render_template( 'script-ga', array( 'ga_profile_id' => $ga_profile_id ) );
 	}
 
 	/**
@@ -763,7 +763,7 @@ class Simple_FB_Instant_Articles {
 	protected function get_simple_reach_analytics_code() {
 
 		if ( function_exists( 'lawrence_simple_reach_analytics' ) ) {
-			$this->render_template( 'script-simple-reach' );
+			return $this->render_template( 'script-simple-reach' );
 		}
 	}
 
@@ -781,7 +781,7 @@ class Simple_FB_Instant_Articles {
 			&& function_exists( 'usat_chartbeat_add_header' )
 			&& function_exists( 'usat_chartbeat_add_footer' )
 		) {
-			$this->render_template( 'script-chartbeat' );
+			return $this->render_template( 'script-chartbeat' );
 		}
 	}
 
@@ -794,7 +794,7 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function append_ad_code( $post_content ) {
 
-		$post_content .= $this->render_template( 'ad' );
+		$post_content .= $this->render_template( 'script-ad' );
 		return $post_content;
 	}
 
@@ -852,7 +852,7 @@ class Simple_FB_Instant_Articles {
 
 		$url_bits = parse_url( home_url() );
 
-		$this->render_template( 'omniture' );
+		return $this->render_template( 'script-omniture', array( 'omniture_data' => $omniture_data ) );
 	}
 
 	/**
@@ -968,10 +968,11 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @param string $template_name Template file name that resides in 'templates' folder
 	 *                              without extension.
+	 * @param array $data           Variables to be passed to template.
 	 *
 	 * @return string               Template code/markup.
 	 */
-	protected function render_template( $template_name ) {
+	protected function render_template( $template_name, $data = array() ) {
 
 		$template_name = str_replace( '.php', '', $template_name );
 		$template_path = trailingslashit( $this->template_path ) . $template_name . '.php';
