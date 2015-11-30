@@ -750,7 +750,7 @@ class Simple_FB_Instant_Articles {
 			return;
 		}
 
-		$this->render_template( 'script-ga' );
+		return $this->render_template( 'script-ga' );
 	}
 
 	/**
@@ -763,7 +763,7 @@ class Simple_FB_Instant_Articles {
 	protected function get_simple_reach_analytics_code() {
 
 		if ( function_exists( 'lawrence_simple_reach_analytics' ) ) {
-			$this->render_template( 'script-simple-reach' );
+			return $this->render_template( 'script-simple-reach' );
 		}
 	}
 
@@ -781,7 +781,7 @@ class Simple_FB_Instant_Articles {
 			&& function_exists( 'usat_chartbeat_add_header' )
 			&& function_exists( 'usat_chartbeat_add_footer' )
 		) {
-			$this->render_template( 'script-chartbeat' );
+			return $this->render_template( 'script-chartbeat' );
 		}
 	}
 
@@ -852,7 +852,7 @@ class Simple_FB_Instant_Articles {
 
 		$url_bits = parse_url( home_url() );
 
-		$this->render_template( 'omniture' );
+		return $this->render_template( 'omniture' );
 	}
 
 	/**
