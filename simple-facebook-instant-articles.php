@@ -794,7 +794,7 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function append_ad_code( $post_content ) {
 
-		$post_content .= $this->render_template( 'ad' );
+		$post_content .= $this->render_template( 'script-ad' );
 		return $post_content;
 	}
 
@@ -852,7 +852,7 @@ class Simple_FB_Instant_Articles {
 
 		$url_bits = parse_url( home_url() );
 
-		return $this->render_template( 'omniture', array( 'omniture_data' => $omniture_data ) );
+		return $this->render_template( 'script-omniture', array( 'omniture_data' => $omniture_data ) );
 	}
 
 	/**
