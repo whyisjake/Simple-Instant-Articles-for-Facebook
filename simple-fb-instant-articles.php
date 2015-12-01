@@ -9,6 +9,7 @@ Author URI: http://jakespurlock.com
 
 require_once( 'includes/functions.php' );
 require_once( 'includes/shortcodes.php' );
+require_once( 'taxonomies/style.php' );
 class Simple_FB_Instant_Articles {
 	/**
 	 * The one instance of Simple_FB_Instant_Articles.
