@@ -211,7 +211,7 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
 
 		// Fix embeds that need some extra attention.
-		add_filter( 'embed_handler_html', array( $this, 'load_facebook_scripts' ), 5, 3 );
+		add_filter( 'embed_handler_html', array( $this, 'reformat_facebook_embed' ), 5, 3 );
 		add_filter( 'embed_brightcove', array( $this, 'load_brightcove_scripts' ), 10, 4 );
 
 		// Modify the content.
@@ -478,7 +478,10 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Ensure facebook scripts are loaded for facebook embeds.
+	 * Ensure Facebook embedded posts are of correct format (i.e. FB embedded post).
+	 * Load FB scripts for embeds.
+	 *
+	 * Ref: https://developers.facebook.com/docs/plugins/embedded-posts
 	 *
 	 * @param string   $html    HTML markup to be embeded into post content.
 	 * @param string   $url     The attempted embed URL.
@@ -486,12 +489,20 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @return string           Facebook embed code with required script.
 	 */
-	public function load_facebook_scripts( $html, $url, $attr ) {
+	public function reformat_facebook_embed( $html, $url, $attr ) {
 
-		// If the embed is any kind of facebook embed, try and load the Facebook SDK.
+		// If the embed is any kind of facebook embed - replace its markup with FB embedded post.
+		// i.e. ignore original markup and replace with correct one.
 		// Can't use precise regex, as we don't really know what WP.com is doing here!
-		// Check this hasn't been added already.
-		if ( false !== strpos( $url, 'facebook.com' ) && false === strpos( $html, 'connect.facebook.net' ) ) {
+		if ( false !== strpos( $url, 'facebook.com' ) ) {
+
+			// Replace markup to FB embedded post.
+			$html = sprintf(
+				'<div class="fb-post" data-href="%s"></div>',
+				esc_url( $url )
+			);
+
+			// Add FB SDK script.
 			$html .= '<div id="fb-root"></div> <script>(function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = "//connect.facebook.net/en_US/all.js#xfbml=1"; fjs.parentNode.insertBefore(js, fjs); }(document, "script", "facebook-jssdk"));</script>';
 		}
 
