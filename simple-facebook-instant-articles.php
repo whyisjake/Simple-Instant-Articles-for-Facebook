@@ -195,6 +195,7 @@ class Simple_FB_Instant_Articles {
 		// Shortcodes - overwrite WP native ones with FB IA format.
 		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
 		add_shortcode( 'caption', array( $this, 'caption_shortcode' ) );
+		add_shortcode( 'polldaddy', array( $this, 'polldaddy_shortcode' ) );
 
 		// Try and fix misc shortcodes.
 		$this->sandbox_shortcode_output( 'protected-iframe' );
@@ -289,6 +290,20 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		$this->render_image_markup( $attachment_id, $caption );
 		return ob_get_clean();
+	}
+
+	public function polldaddy_shortcode( $atts ) {
+
+		if ( ! class_exists( 'PolldaddyShortcode' ) ) {
+			return;
+		}
+
+		$polldaddy = new PolldaddyShortcode();
+
+		return sprintf(
+			'<figure class="op-interactive"><iframe>%s</iframe></figure>',
+			$polldaddy->polldaddy_shortcode( $atts )
+		);
 	}
 
 	/**
