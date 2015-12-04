@@ -292,6 +292,17 @@ class Simple_FB_Instant_Articles {
 		return ob_get_clean();
 	}
 
+	/**
+	 * Polldaddy shortcode.
+	 *
+	 * Overwrite jetpack native shortcode.
+	 * Add the script for each shortcode. Convert in FB IA markup.
+	 *
+	 * @param array  $atts    Array of attributes passed to shortcode.
+	 *
+	 * @return string|void    FB IA formatted polldaddy markup.
+	 *                        Nothing if polldaddy functionality doesn't exist.
+	 */
 	public function polldaddy_shortcode( $atts ) {
 
 		if ( ! class_exists( 'PolldaddyShortcode' ) ) {
@@ -300,9 +311,17 @@ class Simple_FB_Instant_Articles {
 
 		$polldaddy = new PolldaddyShortcode();
 
+		// Get polldaddy markup. Needs to be run first so script vars are set.
+		$html = $polldaddy->polldaddy_shortcode( $atts );
+
+		// Get scripts as they are echo-ed not returned.
+		ob_start();
+		$polldaddy->generate_scripts();
+		$scripts = ob_get_clean();
+
 		return sprintf(
 			'<figure class="op-interactive"><iframe>%s</iframe></figure>',
-			$polldaddy->polldaddy_shortcode( $atts )
+			$html . $scripts
 		);
 	}
 
