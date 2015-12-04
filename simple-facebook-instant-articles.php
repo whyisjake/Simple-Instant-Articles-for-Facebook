@@ -195,6 +195,7 @@ class Simple_FB_Instant_Articles {
 		// Shortcodes - overwrite WP native ones with FB IA format.
 		add_shortcode( 'gallery', array( $this, 'gallery_shortcode' ) );
 		add_shortcode( 'caption', array( $this, 'caption_shortcode' ) );
+		add_shortcode( 'polldaddy', array( $this, 'polldaddy_shortcode' ) );
 
 		// Try and fix misc shortcodes.
 		$this->sandbox_shortcode_output( 'protected-iframe' );
@@ -289,6 +290,39 @@ class Simple_FB_Instant_Articles {
 		ob_start();
 		$this->render_image_markup( $attachment_id, $caption );
 		return ob_get_clean();
+	}
+
+	/**
+	 * Polldaddy shortcode.
+	 *
+	 * Overwrite jetpack native shortcode.
+	 * Add the script for each shortcode. Convert in FB IA markup.
+	 *
+	 * @param array  $atts    Array of attributes passed to shortcode.
+	 *
+	 * @return string|void    FB IA formatted polldaddy markup.
+	 *                        Nothing if polldaddy functionality doesn't exist.
+	 */
+	public function polldaddy_shortcode( $atts ) {
+
+		if ( ! class_exists( 'PolldaddyShortcode' ) ) {
+			return;
+		}
+
+		$polldaddy = new PolldaddyShortcode();
+
+		// Get polldaddy markup. Needs to be run first so script vars are set.
+		$html = $polldaddy->polldaddy_shortcode( $atts );
+
+		// Get scripts as they are echo-ed not returned.
+		ob_start();
+		$polldaddy->generate_scripts();
+		$scripts = ob_get_clean();
+
+		return sprintf(
+			'<figure class="op-interactive"><iframe>%s</iframe></figure>',
+			$html . $scripts
+		);
 	}
 
 	/**
