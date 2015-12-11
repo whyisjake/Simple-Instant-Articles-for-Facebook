@@ -432,7 +432,6 @@ class Simple_FB_Instant_Articles {
 		}
 
 		$class  = 'op-interactive';
-		$script = '';
 
 		// FB IA recognised social embeds.
 		$regex_bits = implode( '|', array(
@@ -446,13 +445,13 @@ class Simple_FB_Instant_Articles {
 		if ( preg_match( "/$regex_bits/", $url, $matches ) ) {
 			$class  = 'op-social';
 
-			// Add JS file.
+			// Add JS file to embed markup.
 			if ( false !== strpos( $matches[0], 'instagram' ) ) {
-				$script = $this->return_result_of_print_function( 'jetpack_instagram_add_script' );
+				$html .= $this->return_result_of_print_function( 'jetpack_instagram_add_script' );
 			}
 		}
 
-		return sprintf( '<figure class="%s"><iframe>%s</iframe></figure>', $class, $html . $script );
+		return sprintf( '<figure class="%s"><iframe>%s</iframe></figure>', $class, $html );
 	}
 
 	/**
