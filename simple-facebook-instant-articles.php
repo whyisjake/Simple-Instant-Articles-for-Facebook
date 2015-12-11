@@ -445,28 +445,14 @@ class Simple_FB_Instant_Articles {
 
 		if ( preg_match( "/$regex_bits/", $url, $matches ) ) {
 			$class  = 'op-social';
-			$script = $this->maybe_add_social_embed_script( $matches[0] );
+
+			// Add JS file.
+			if ( false !== strpos( $matches[0], 'instagram' ) ) {
+				$script = $this->return_result_of_print_function( 'jetpack_instagram_add_script' );
+			}
 		}
 
 		return sprintf( '<figure class="%s"><iframe>%s</iframe></figure>', $class, $html . $script );
-	}
-
-	/**
-	 * Include JS to social embeds, don't rely on FB anymore to do this.
-	 *
-	 * @param string $provider Social embed provider name/url.
-	 *
-	 * @return string|void     Return HTML markup with social embed script if it exists,
-	 *                         Nothing otherwise.
-	 */
-	protected function maybe_add_social_embed_script( $provider ) {
-
-		// Instagram JS.
-		if ( false !== strpos( $provider, 'instagram' ) ) {
-			return $this->return_result_of_print_function( 'jetpack_instagram_add_script' );
-		}
-
-		return '';
 	}
 
 	/**
