@@ -437,7 +437,7 @@ class Simple_FB_Instant_Articles {
 			'facebook\.com',
 			'twitter\.com',
 			'instagr(\.am|am\.com)',
-			'vine\.com',
+			'vine\.co',
 		) );
 
 		if ( preg_match( "/$regex_bits/", $url ) ) {
