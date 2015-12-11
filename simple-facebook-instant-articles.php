@@ -431,7 +431,10 @@ class Simple_FB_Instant_Articles {
 			return $html;
 		}
 
-		$class      = 'op-interactive';
+		$class  = 'op-interactive';
+		$script = '';
+
+		// FB IA recognised social embeds.
 		$regex_bits = implode( '|', array(
 			'youtu(\.be|be\.com)',
 			'facebook\.com',
@@ -440,11 +443,30 @@ class Simple_FB_Instant_Articles {
 			'vine\.co',
 		) );
 
-		if ( preg_match( "/$regex_bits/", $url ) ) {
-			$class = 'op-social';
+		if ( preg_match( "/$regex_bits/", $url, $matches ) ) {
+			$class  = 'op-social';
+			$script = $this->maybe_add_social_embed_script( $matches[0] );
 		}
 
-		return sprintf( '<figure class="%s"><iframe>%s</iframe></figure>', $class, $html );
+		return sprintf( '<figure class="%s"><iframe>%s</iframe></figure>', $class, $html . $script );
+	}
+
+	/**
+	 * Include JS to social embeds, don't rely on FB anymore to do this.
+	 *
+	 * @param string $provider Social embed provider name/url.
+	 *
+	 * @return string|void     Return HTML markup with social embed script if it exists,
+	 *                         Nothing otherwise.
+	 */
+	protected function maybe_add_social_embed_script( $provider ) {
+
+		// Instagram JS.
+		if ( false !== strpos( $provider, 'instagram' ) ) {
+			return $this->return_result_of_print_function( 'jetpack_instagram_add_script' );
+		}
+
+		return '';
 	}
 
 	/**
@@ -1028,6 +1050,29 @@ class Simple_FB_Instant_Articles {
 			return ob_get_clean();
 		}
 	}
+
+	/**
+	 * Returns the result of a function that outputs,
+	 * to be used further.
+	 *
+	 * Mainly used for returning JS markup that it's otherwise output.
+	 *
+	 * @param $function_name Function name the output of which to return.
+	 *
+	 * @return string|void   Returns output of a function if it exists,
+	 *                       Nothing otherwise.
+	 */
+	protected function return_result_of_print_function( $function_name ) {
+
+		if ( ! function_exists( $function_name ) ) {
+			return;
+		}
+
+		ob_start();
+		call_user_func( $function_name );
+		return ob_get_clean();
+	}
+
 }
 
 /**
