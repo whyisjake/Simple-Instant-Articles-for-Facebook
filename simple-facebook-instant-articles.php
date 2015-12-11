@@ -467,14 +467,14 @@ class Simple_FB_Instant_Articles {
 		}
 
 		// Try to avoid double iframes for youtube videos. Shows them full width.
-		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe[contains(@class, \'youtube-player\')]' ) as $iframe ) {
+		foreach ( $xpath->query( '//figure[starts-with(@class, \'op-\')]/iframe/iframe[contains(@class, \'youtube-player\')]' ) as $iframe ) {
 			if ( 1 === $iframe->parentNode->childNodes->length ) {
 				$this->unwrap_node( $iframe->parentNode );
 			}
 		}
 
 		// Try to avoid double iframes for vine embeds. Shows them full width.
-		foreach ( $xpath->query( '//figure[contains(@class, \'op-social\')]/iframe/iframe[contains(@class, \'vine-embed\')]' ) as $iframe ) {
+		foreach ( $xpath->query( '//figure[starts-with(@class, \'op-\')]/iframe/iframe[contains(@class, \'vine-embed\')]' ) as $iframe ) {
 
 			// Strip scripts.
 			$scripts = $iframe->parentNode->getElementsByTagName( 'script' );
