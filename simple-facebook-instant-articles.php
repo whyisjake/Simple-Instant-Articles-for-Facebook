@@ -447,7 +447,7 @@ class Simple_FB_Instant_Articles {
 
 			// Add JS file to embed markup.
 			if ( false !== strpos( $matches[0], 'instagram' ) ) {
-				$html .= $this->return_result_of_print_function( 'jetpack_instagram_add_script' );
+				$html .= '<script async defer src="//platform.instagram.com/en_US/embeds.js"></script>';
 			}
 		}
 
@@ -1034,28 +1034,6 @@ class Simple_FB_Instant_Articles {
 			require( $template_path );
 			return ob_get_clean();
 		}
-	}
-
-	/**
-	 * Returns the result of a function that outputs,
-	 * to be used further.
-	 *
-	 * Mainly used for returning JS markup that it's otherwise output.
-	 *
-	 * @param $function_name Function name the output of which to return.
-	 *
-	 * @return string|void   Returns output of a function if it exists,
-	 *                       Nothing otherwise.
-	 */
-	protected function return_result_of_print_function( $function_name ) {
-
-		if ( ! function_exists( $function_name ) ) {
-			return;
-		}
-
-		ob_start();
-		call_user_func( $function_name );
-		return ob_get_clean();
 	}
 
 }
