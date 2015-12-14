@@ -14,7 +14,6 @@ $_scripts->done = array();
 ?>
 
 <figure class="op-tracker">
-<h1>Simple Reach </h1>
 	<iframe>
 		<?php lawrence_simple_reach_analytics(); ?>
 		<?php $_scripts->do_items( 'simple-reach-script' ); ?>
