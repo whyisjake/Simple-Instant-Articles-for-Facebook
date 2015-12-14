@@ -7,6 +7,7 @@
 <html lang="en" prefix="op: http://media.facebook.com/op#">
 <head>
 	<meta property="op:markup_version" content="v1.0">
+	<meta property="fb:use_automatic_ad_placement" content="true">
 	<link rel="canonical" href="<?php the_permalink(); ?>">
 </head>
 <body>
