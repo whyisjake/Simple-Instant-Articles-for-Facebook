@@ -1,21 +1,17 @@
-<?php
-
-global $wp_scripts;
-
-if ( ! did_action( 'wp_enqueue_scripts' ) ) {
-	do_action( 'wp_enqueue_scripts' );
-}
-
-// Clone the global $wp_scripts object.
-// Reset it, ready for outputting.
-$_scripts = clone $wp_scripts;
-$_scripts->done = array();
-
-?>
-
 <figure class="op-tracker">
 	<iframe>
+
 		<?php lawrence_simple_reach_analytics(); ?>
-		<?php $_scripts->do_items( 'simple-reach-script' ); ?>
+
+		<script type="text/javascript">
+			(function(){
+				var s = document.createElement('script');
+				s.async = true;
+				s.type = 'text/javascript';
+				s.src = document.location.protocol + '//d8rk54i4mohrb.cloudfront.net/js/reach.js';
+				(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(s);
+			})();
+		</script>
+
 	</iframe>
 </figure>
