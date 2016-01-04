@@ -42,4 +42,14 @@
 	<time class="op-published" dateTime="<?php echo esc_attr( get_the_time( 'c' ) ); ?>"><?php echo esc_html( lawrence_display_date() ); ?></time>
 	<time class="op-modified" dateTime="<?php echo esc_attr( get_the_modified_time( 'c' ) ); ?>"><?php echo esc_html( lawrence_display_date() ); ?></time>
 
+	<?php
+
+	$ad_template = __DIR__ . '/script-ad.php';
+
+	if ( file_exists( $ad_template ) ) {
+		include( $ad_template );
+	}
+
+	?>
+
 </header>

@@ -219,7 +219,6 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'the_content', array( $this, 'prepend_full_width_media' ), 50 );
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_filter( 'the_content', array( $this, 'append_analytics_code' ), 1100 );
-		add_filter( 'the_content', array( $this, 'append_ad_code' ), 1100 );
 
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
@@ -835,19 +834,6 @@ class Simple_FB_Instant_Articles {
 		) {
 			return $this->render_template( 'script-chartbeat' );
 		}
-	}
-
-	/**
-	 * Append Ad script in the FB IA format to the post content.
-	 *
-	 * @param string $post_content Post content.
-	 *
-	 * @return string Post content with added ad script in FB IA format.
-	 */
-	public function append_ad_code( $post_content ) {
-
-		$post_content .= $this->render_template( 'script-ad' );
-		return $post_content;
 	}
 
 	/**
