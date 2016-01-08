@@ -43,7 +43,7 @@ echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) )
 			<?php
 
 			// Skip if sponsored.
-			if ( class_exists( '\USAT\Sponsored_Posts' ) && \USAT\Sponsored_Posts::instance()->is_sponsored() )  {
+			if ( class_exists( '\USAT\Sponsored_Posts' ) && \USAT\Sponsored_Posts::instance()->is_sponsored() ) {
 				continue;
 			}
 

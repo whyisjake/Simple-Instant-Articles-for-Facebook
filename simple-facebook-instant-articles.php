@@ -446,6 +446,7 @@ class Simple_FB_Instant_Articles {
 
 			// Add JS file to embed markup.
 			if ( false !== strpos( $matches[0], 'instagram' ) ) {
+				// @codingStandardsIgnoreLine
 				$html .= '<script async defer src="//platform.instagram.com/en_US/embeds.js"></script>';
 			}
 		}
@@ -503,7 +504,7 @@ class Simple_FB_Instant_Articles {
 			}
 
 			while ( $p_nodes->length > 0 ) {
-				$this->unwrap_node( $p_nodes->item(0) );
+				$this->unwrap_node( $p_nodes->item( 0 ) );
 			}
 
 		}
@@ -573,6 +574,7 @@ class Simple_FB_Instant_Articles {
 		}
 
 		// Manually build script. Ensures always loaded, including multiple times.
+		// @codingStandardsIgnoreLine
 		$embed .= sprintf( '<script src="%s"></script>', $wp_scripts->registered['brightcove']->src );
 
 		$embed .= '<style>';
@@ -595,17 +597,20 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function reformat_post_content( $post_content ) {
 
-		$dom = new \DomDocument();
+		$dom       = new \DomDocument();
+		$old_value = libxml_use_internal_errors( true );
 
 		// Parse post content to generate DOM document.
 		// Use loadHTML as it doesn't need to be well-formed to load.
 		// Charset meta tag required to ensure it correctly detects the encoding.
-		@$dom->loadHTML( sprintf(
+		$dom->loadHTML( sprintf(
 			'<html><head><meta http-equiv="Content-Type" content="%s" charset="%s"/></head><body>%s</body></html>',
 			get_bloginfo( 'html_type' ),
 			get_bloginfo( 'charset' ),
 			$post_content
 		) );
+
+		libxml_use_internal_errors( $old_value );
 
 		// Stop - if dom isn't generated.
 		if ( ! $dom ) {
@@ -637,7 +642,7 @@ class Simple_FB_Instant_Articles {
 
 			// Get and remove <cite> element.
 			$cite = $node->getElementsByTagName( 'cite' )->item( 0 );
-			@$cite->parentNode->removeChild( $cite );
+			$cite->parentNode->removeChild( $cite );
 
 			$pull_quote_html = $this->get_node_inner_html( $node );
 
@@ -649,7 +654,7 @@ class Simple_FB_Instant_Articles {
 						'em'     => array(),
 						'i'      => array(),
 						'b'      => array(),
-						'strong' => array()
+						'strong' => array(),
 					)
 				),
 				esc_html( $cite->nodeValue )
@@ -691,7 +696,7 @@ class Simple_FB_Instant_Articles {
 			// Workaround to handle the fact only insertBefore exists.
 			try {
 				$top_node->parentNode->insertBefore( $figure, $top_node->nextSibling );
-			} catch( \Exception $e ) {
+			} catch ( \Exception $e ) {
 				$top_node->parentNode->appendChild( $figure );
 			}
 
@@ -867,7 +872,7 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * @return string HTML string.
 	 */
-	function get_omniture_code( $post_id ) {
+	public function get_omniture_code( $post_id ) {
 
 		$tags     = wp_list_pluck( (array) get_the_terms( $post_id, 'post_tag' ), 'name' );
 		$cats     = wp_list_pluck( (array) get_the_terms( $post_id, 'category' ), 'name' );
@@ -885,7 +890,7 @@ class Simple_FB_Instant_Articles {
 			'pathName'         => get_permalink( $post_id ),
 			'taxonomykeywords' => implode( ',', $keywords ),
 			'topic'            => 'sports',
-			'videoincluded'    => 'No'
+			'videoincluded'    => 'No',
 		);
 
 		$url_bits = parse_url( home_url() );

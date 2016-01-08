@@ -16,6 +16,7 @@
 <header>
 
 	<?php
+
 	$full_width_video  = get_post_meta( get_the_ID(), '_format_video_embed', true );
 	$has_article_cover = ! empty( $full_width_video );
 	$thumbnail_id      = get_post_thumbnail_id();
@@ -24,13 +25,14 @@
 	if ( ! $has_article_cover && $thumbnail_id ) {
 		Simple_FB_Instant_Articles::instance()->render_image_markup( $thumbnail_id );
 	}
-	?>
 
-	<?php the_title( '<h1>', '</h1>' ); ?>
+	the_title( '<h1>', '</h1>' );
 
-	<?php if ( function_exists( 'the_subheading' ) ) {
+	if ( function_exists( 'the_subheading' ) ) {
 		the_subheading( '<h2>', '</h2>' );
-	} ?>
+	}
+
+	?>
 
 	<?php if ( function_exists( 'coauthors' ) ) : ?>
 		<?php coauthors( '</address>, <address>', ' </address> and <address> ', '<address>', '</address>' ); ?>
