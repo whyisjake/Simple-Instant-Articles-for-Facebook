@@ -818,7 +818,10 @@ class Simple_FB_Instant_Articles {
 	 */
 	protected function get_simple_reach_analytics_code() {
 
-		if ( function_exists( 'lawrence_simple_reach_analytics' ) ) {
+		if (
+			lawrence_option_enabled( 'lawrence_simple_reach' ) &&
+			get_option( 'lawrence_simple_reach_id' )
+		) {
 			return $this->render_template( 'script-simple-reach' );
 		}
 	}
