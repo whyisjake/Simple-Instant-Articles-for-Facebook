@@ -9,9 +9,9 @@
 		<?php // Kickers aren't really a universal thing on WordPress, so let's just add a filter here for people to hook onto. ?>
 		<?php $kicker = apply_filters( 'simple_fb_kicker', '' ); ?>
 		<?php if ( ! empty( $kicker ) ) : ?>
-			<details>
-				<summary><?php echo esc_html( $kicker ); ?></summary>
-			</details>
+			<h3 class="op-kicker">
+				<?php echo esc_html( $kicker ); ?>
+			</h3>
 		<?php endif; ?>
 
 		<time class="op-published" dateTime="<?php echo esc_attr( get_post_time( 'Y-m-d\TH:i:s\Z' ) ); ?>"><?php echo esc_html( get_post_time( get_option( 'date_format' ) ) ); ?></time>
