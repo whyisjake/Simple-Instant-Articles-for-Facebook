@@ -60,6 +60,7 @@ class Simple_FB_Instant_Articles {
 		$this->file = $file;
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
 		$this->home_url = trailingslashit( home_url() );
+		$this->endpoint = apply_filters( 'simple_fb_article_endpoint', 'fb-instant');
 
 	}
 
@@ -68,7 +69,6 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	public function init() {
-		$this->endpoint = apply_filters( 'simple_fb_article_endpoint', 'fb-instant');
 		if ( $this->is_redirectable_endpoint() ){
 			add_rewrite_endpoint( $this->endpoint, EP_PERMALINK );
 		}
