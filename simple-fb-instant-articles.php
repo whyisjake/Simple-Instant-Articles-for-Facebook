@@ -69,6 +69,7 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	public function init() {
+		
 		if ( $this->is_redirectable_endpoint() ){
 			add_rewrite_endpoint( $this->endpoint, EP_PERMALINK );
 		}
