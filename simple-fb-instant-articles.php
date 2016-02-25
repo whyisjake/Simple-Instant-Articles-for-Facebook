@@ -23,11 +23,6 @@ class Simple_FB_Instant_Articles {
 	private $token = 'fb';
 
 	/**
-	 * Endpoint query var
-	 */
-	private $endpoint = 'fb-instant';
-
-	/**
 	 * Instantiate or return the one Simple_FB_Instant_Articles instance.
 	 *
 	 * @return Simple_FB_Instant_Articles
@@ -65,6 +60,7 @@ class Simple_FB_Instant_Articles {
 		$this->file = $file;
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
 		$this->home_url = trailingslashit( home_url() );
+		$this->endpoint = apply_filters( 'simple_fb_article_endpoint', 'fb-instant');
 
 	}
 
@@ -73,7 +69,9 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	public function init() {
-		add_rewrite_endpoint( $this->endpoint, EP_PERMALINK );
+		if ( $this->is_redirectable_endpoint() ){
+			add_rewrite_endpoint( $this->endpoint, EP_PERMALINK );
+		}
 		register_activation_hook( __FILE__,   'flush_rewrite_rules' );
 		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 	}
@@ -86,8 +84,16 @@ class Simple_FB_Instant_Articles {
 			return;
 		}
 
-		if ( false !== get_query_var( $this->endpoint, false ) ) {
+		if ( false !== get_query_var( $this->endpoint, false ) && $this->is_redirectable_endpoint() ) {
 			add_action( 'template_redirect', array( $this, 'template_redirect' ) );
+		}
+	}
+
+	function is_redirectable_endpoint(){
+		if ('' === $this->endpoint || 0 == strpos($this->endpoint, '?') ){
+			return false;
+		} else {
+			return true;
 		}
 	}
 
@@ -195,7 +201,11 @@ class Simple_FB_Instant_Articles {
 	}
 
 	public function rss_permalink( $link ) {
-		return trailingslashit( $link ) . $this->endpoint;
+		if ( '' !== $this->endpoint ){
+			return trailingslashit( $link ) . $this->endpoint;
+		} else {
+			return $link;
+		}
 	}
 
 	/**
