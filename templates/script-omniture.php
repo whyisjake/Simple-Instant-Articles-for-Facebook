@@ -6,7 +6,7 @@
 		</script>
 
 		<?php // @codingStandardsIgnoreLine ?>
-		<script type="text/javascript" src="http://tealium.hs.llnwd.net/o43/utag/gci/usat-cobrand/prod/utag.js"></script>
+		<script type="text/javascript" src="<?php echo $data['omniture_data']['url']; ?>"></script>
 
 	</iframe>
 </figure>

@@ -381,54 +381,6 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Convert custom gallery shortcode - sigallery,
-	 * into FB IA image gallery format.
-	 *
-	 * @param $atts        Array of attributes passed to shortcode.
-	 *
-	 * @return string|void Return FB IA image gallery markup for sigallery shortcode,
-	 *                     On error - nothing.
-	 */
-	public function api_galleries_shortcode( $atts ) {
-
-		// Stop - if gallery ID is empty.
-		if ( empty( $atts['id'] ) ) {
-			return;
-		}
-
-		$gallery = null;
-
-		if ( function_exists( 'usat_newscred_get_gallery' ) ) {
-			$gallery = usat_newscred_get_gallery( $atts['id'], 'sigallery' );
-		} elseif ( function_exists( '\USAT\API_Galleries\get_gallery' ) ) {
-			$gallery = \USAT\API_Galleries\get_gallery( $atts['id'] );
-		}
-
-		if ( ! $gallery ) {
-			return;
-		}
-
-		ob_start();
-
-		echo '<figure class="op-slideshow">';
-
-		foreach ( $gallery->images as $key => $image ) {
-
-			$caption = $image->custom_caption ? $image->custom_caption : $image->caption;
-
-			$this->render_image_markup( $image->url, $caption );
-		}
-
-		if ( $atts['title'] ) {
-			printf( '<figcaption><h1>%s</h1></figcaption>', esc_html( $atts['title'] ) );
-		}
-
-		echo '</figure>';
-
-		return ob_get_clean();
-	}
-
-	/**
 	 * Render social embeds into FB IA format.
 	 *
 	 * Social embeds Ref: https://developers.facebook.com/docs/instant-articles/reference/social
@@ -804,9 +756,7 @@ class Simple_FB_Instant_Articles {
 		$post_id  = $post_id ?: get_the_ID();
 
 		$post_content .= $this->get_google_analytics_code();
-		$post_content .= $this->get_simple_reach_analytics_code();
 		$post_content .= $this->get_omniture_code( $post_id );
-		$post_content .= $this->get_chartbeat_analytics_code();
 
 		return $post_content;
 	}
@@ -825,24 +775,6 @@ class Simple_FB_Instant_Articles {
 		}
 
 		return $this->render_template( 'script-ga', array( 'ga_profile_id' => $ga_profile_id ) );
-	}
-
-	/**
-	 * Get Chartbeat script in the FB IA format.
-	 *
-	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/analytics
-	 *
-	 * @return string Chartbeat script in FB IA format.
-	 */
-	protected function get_chartbeat_analytics_code() {
-
-		if (
-			lawrence_option_enabled( 'usat_chartbeat_enabled' )
-			&& function_exists( 'usat_chartbeat_add_header' )
-			&& function_exists( 'usat_chartbeat_add_footer' )
-		) {
-			return $this->render_template( 'script-chartbeat' );
-		}
 	}
 
 	/**
@@ -878,24 +810,16 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function get_omniture_code( $post_id ) {
 
-		$tags     = wp_list_pluck( (array) get_the_terms( $post_id, 'post_tag' ), 'name' );
-		$cats     = wp_list_pluck( (array) get_the_terms( $post_id, 'category' ), 'name' );
-		$keywords = array_values( array_unique( array_merge( $cats, $tags ) ) );
-
 		$omniture_data = array(
 			'cobrand_vendor'   => 'facebookinstantarticle',
 			'assetid'          => $post_id,
-			'byline'           => coauthors( ',', ' and ', null, null, false ),
-			'contenttype'      => 'text',
-			'cst'              => 'sports/ftw',
-			'eventtype'        => 'page:load',
-			'linkTrackVars'    => 'prop1',
-			'ssts'             => 'sports/ftw',
-			'pathName'         => get_permalink( $post_id ),
-			'taxonomykeywords' => implode( ',', $keywords ),
-			'topic'            => 'sports',
-			'videoincluded'    => 'No',
+			'pathName'         => get_permalink( $post_id )
 		);
+
+		$omniture_data = apply_filters('simple_fb_omniture_data', $omniture_data);
+		if ( empty( $omniture_data['url'] ) ){
+			return;
+		}
 
 		$url_bits = parse_url( home_url() );
 
@@ -1022,14 +946,13 @@ class Simple_FB_Instant_Articles {
 	protected function render_template( $template_name, $data = array() ) {
 
 		$template_name = str_replace( '.php', '', $template_name );
-		$user_template_file = apply_filters('simple_fb_article_template_'.$template_name, $template_name);
+		$user_template_file = apply_filters('simple_fb_template_'.$template_name, $template_name);
 		$user_template_file = str_replace( '.php', '', $user_template_file );
 		if ( file_exists( $user_template_file . '.php') ) {
 			$template_path = $user_template_file.'.php';
 		} else {
 			$template_path = trailingslashit( $this->template_path ) . $template_name . '.php';
 		}
-		
 
 		if ( 0 === validate_file( $template_path ) ) {
 			ob_start();
