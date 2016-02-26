@@ -820,28 +820,11 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function get_google_analytics_code() {
 
-		if ( ! $ga_profile_id = get_option( 'lawrence_ga_tracking_id' ) ) {
+		if ( ! $ga_profile_id = apply_filters( 'simple_fb_article_ga' , get_option( 'fbia_ga_tracking_id' ) ) ) {
 			return;
 		}
 
 		return $this->render_template( 'script-ga', array( 'ga_profile_id' => $ga_profile_id ) );
-	}
-
-	/**
-	 * Get Simple Reach (SR) script in the FB IA format.
-	 *
-	 * Ref: https://developers.facebook.com/docs/instant-articles/reference/analytics
-	 *
-	 * @return string SR script in FB IA format.
-	 */
-	protected function get_simple_reach_analytics_code() {
-
-		if (
-			lawrence_option_enabled( 'lawrence_simple_reach' ) &&
-			get_option( 'lawrence_simple_reach_id' )
-		) {
-			return $this->render_template( 'script-simple-reach' );
-		}
 	}
 
 	/**
