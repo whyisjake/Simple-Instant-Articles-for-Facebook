@@ -203,6 +203,8 @@ class Simple_FB_Instant_Articles {
 	 * Hooked in just before the content is rendered in both feeds and single post view
 	 * for Facebook IA only.
 	 *
+	 * Was once pre_render
+	 *
 	 * This function is added to the following actions:
 	 * 1) simple_fb_pre_render
 	 * 2) simple_fb_before_feed
@@ -245,8 +247,11 @@ class Simple_FB_Instant_Articles {
 	}
 
 	public function rss_permalink( $link ) {
-
-		return trailingslashit( $link ) . $this->endpoint;
+		if ( '' !== $this->endpoint ){
+			return trailingslashit( $link ) . $this->endpoint;
+		} else {
+			return $link;
+		}
 	}
 
 	/**
