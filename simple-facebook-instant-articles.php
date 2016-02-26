@@ -1022,7 +1022,14 @@ class Simple_FB_Instant_Articles {
 	protected function render_template( $template_name, $data = array() ) {
 
 		$template_name = str_replace( '.php', '', $template_name );
-		$template_path = trailingslashit( $this->template_path ) . $template_name . '.php';
+		$user_template_file = apply_filters('simple_fb_article_template_'.$template_name, $template_name);
+		$user_template_file = str_replace( '.php', '', $user_template_file );
+		if ( file_exists( $user_template_file . '.php') ) {
+			$template_path = $user_template_file.'.php';
+		} else {
+			$template_path = trailingslashit( $this->template_path ) . $template_name . '.php';
+		}
+		
 
 		if ( 0 === validate_file( $template_path ) ) {
 			ob_start();
