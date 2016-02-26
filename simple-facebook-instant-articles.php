@@ -80,7 +80,12 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	public function init() {
-		add_rewrite_endpoint( $this->endpoint, EP_PERMALINK );
+		if ( $this->is_redirectable_endpoint() ){
+			add_rewrite_endpoint( $this->endpoint, EP_PERMALINK );
+		}
+		// Do these work? They don't seem to work.
+		register_activation_hook( __FILE__,   'flush_rewrite_rules' );
+		register_deactivation_hook( __FILE__, 'flush_rewrite_rules' );
 	}
 
 	/**
@@ -91,8 +96,17 @@ class Simple_FB_Instant_Articles {
 			return;
 		}
 
-		if ( false !== get_query_var( $this->endpoint, false ) ) {
+		if ( false !== get_query_var( $this->endpoint, false ) && $this->is_redirectable_endpoint() ) {
 			add_action( 'template_redirect', array( $this, 'template_redirect' ) );
+		}
+	}
+
+	/** Check if the endpoint is valid to be assigned a redirect, or non-existent/query var */
+	function is_redirectable_endpoint(){
+		if ('' === $this->endpoint || 0 == strpos($this->endpoint, '?') ){
+			return false;
+		} else {
+			return true;
 		}
 	}
 
@@ -136,6 +150,28 @@ class Simple_FB_Instant_Articles {
 		add_feed( $feed_slug, array( $this, 'feed_template' ) );
 	}
 
+
+	/**
+	 * Set WP query variables for FB IA feed, so we can customise
+	 * what posts are considered for the feed.
+	 *
+	 * Was once pre_get_posts
+	 *
+	 * @param $query WP_Query object.
+	 */
+	public function customise_feed_query( $query ) {
+
+		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
+
+		if ( $query->is_main_query() && $query->is_feed( $feed_slug ) ) {
+
+			$query->set( 'posts_per_rss', intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 25 ) ) ) );
+			$query->set( 'orderby', 'modified' );
+
+			do_action( 'simple_fb_pre_get_posts', $query );
+		}
+	}
+
 	/**
 	 * Load feed template.
 	 *
@@ -159,25 +195,6 @@ class Simple_FB_Instant_Articles {
 
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_after_feed' );
-	}
-
-	/**
-	 * Set WP query variables for FB IA feed, so we can customise
-	 * what posts are considered for the feed.
-	 *
-	 * @param $query WP_Query object.
-	 */
-	public function customise_feed_query( $query ) {
-
-		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
-
-		if ( $query->is_main_query() && $query->is_feed( $feed_slug ) ) {
-
-			$query->set( 'posts_per_rss', 25 );
-			$query->set( 'orderby', 'modified' );
-
-			do_action( 'simple_fb_pre_get_posts', $query );
-		}
 	}
 
 	/**
