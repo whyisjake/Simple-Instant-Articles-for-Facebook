@@ -20,11 +20,6 @@ class Simple_FB_Instant_Articles {
 	 */
 	private $token = 'fb';
 
-	/**
-	 * Endpoint query var.
-	 */
-	private $endpoint = 'fb-instant';
-
 
 	/**
 	 * Image Size - 2048x2048 recommended resolution.
@@ -72,6 +67,7 @@ class Simple_FB_Instant_Articles {
 		$this->file          = $file;
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
 		$this->home_url      = trailingslashit( home_url() );
+		$this->endpoint = apply_filters( 'simple_fb_article_endpoint', 'fb-instant');
 	}
 
 	/**
