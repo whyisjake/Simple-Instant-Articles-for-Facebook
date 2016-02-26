@@ -220,10 +220,6 @@ class Simple_FB_Instant_Articles {
 		// Shortcodes - custom galleries.
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
 
-		// Shortcodes - remove related lawrence content.
-		add_shortcode( 'lawrence-related', '__return_empty_string' );
-		add_shortcode( 'lawrence-auto-related', '__return_empty_string' );
-
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
 		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
