@@ -15,6 +15,14 @@
 ?>
 <header>
 
+	<?php // Kickers aren't really a universal thing on WordPress, so let's just add a filter here for people to hook onto. ?>
+	<?php $kicker = apply_filters( 'simple_fb_kicker', '', get_the_ID() ); ?>
+	<?php if ( ! empty( $kicker ) ) : ?>
+		<details>
+			<summary><?php echo esc_html( $kicker ); ?></summary>
+		</details>
+	<?php endif; ?>
+
 	<?php
 
 	$full_width_video  = get_post_meta( get_the_ID(), '_format_video_embed', true );

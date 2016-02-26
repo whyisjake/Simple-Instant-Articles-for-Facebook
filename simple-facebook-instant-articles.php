@@ -778,30 +778,6 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Get Ad targeting args.
-	 *
-	 * @return array Targeting params.
-	 */
-	protected function get_ad_targeting_params() {
-
-		// Note use of get_the_terms + wp_list_pluck as these are cached ang get_the_* is not.
-		$tags    = wp_list_pluck( (array) get_the_terms( get_the_ID(), 'post_tag' ), 'name' );
-		$cats    = wp_list_pluck( (array) get_the_terms( get_the_ID(), 'category' ), 'name' );
-		$authors = wp_list_pluck( get_coauthors( get_the_ID() ), 'display_name' );
-
-		$url_bits = parse_url( home_url() );
-
-		$targeting_params = array(
-			// Merge, Remove dupes, and fix keys order.
-			'kw'         => array_values( array_unique( array_merge( $cats, $tags, $authors ) ) ),
-			'category'   => $cats,
-			'domainName' => isset( $url_bits['host'] ) ? $url_bits['host'] : '',
-		);
-
-		return $targeting_params;
-	}
-
-	/**
 	 * Get the omniture code markup.
 	 *
 	 * @param mixed $post_id  Post ID.
@@ -824,18 +800,6 @@ class Simple_FB_Instant_Articles {
 		$url_bits = parse_url( home_url() );
 
 		return $this->render_template( 'script-omniture', array( 'omniture_data' => $omniture_data ) );
-	}
-
-	/**
-	 * Output Ad targeting JS.
-	 *
-	 * @return void
-	 */
-	public function ad_targeting_js() {
-
-		foreach ( $this->get_ad_targeting_params() as $key => $value ) {
-			printf( ".setTargeting( '%s', %s )", esc_js( $key ), wp_json_encode( $value ) );
-		}
 	}
 
 	/**
