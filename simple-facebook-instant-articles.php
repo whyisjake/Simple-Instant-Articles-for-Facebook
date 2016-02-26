@@ -184,10 +184,19 @@ class Simple_FB_Instant_Articles {
 		$wp_query->is_404 = false;
 		status_header( 200 );
 
+		$file_name = 'feed.php';
+		$user_template_file = apply_filters( 'simple_fb_feed_template_file', trailingslashit( get_template_directory() ) . $file_name );
+
+		// Load user feed template if it exists, otherwise use plugin template
+		if ( file_exists( $user_template_file ) ) {
+			$template = $user_template_file;
+		} else {
+			$template = trailingslashit( $this->template_path ) . 'feed.php';
+		}
+
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_before_feed' );
 
-		$template = trailingslashit( $this->template_path ) . 'feed.php';
 
 		if ( 0 === validate_file( $template ) ) {
 			require( $template );
