@@ -223,9 +223,6 @@ class Simple_FB_Instant_Articles {
 		// Try and fix misc shortcodes.
 		$this->sandbox_shortcode_output( 'protected-iframe' );
 
-		// Shortcodes - custom galleries.
-		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
-
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
 		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
