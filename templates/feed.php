@@ -8,11 +8,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Set RSS header
+// Set RSS header.
 header( 'Content-Type: ' . feed_content_type( 'rss-http' ) . '; charset=' . get_option( 'blog_charset' ), true );
 
-// Use `echo` for first line to prevent any extra characters at start of document
-echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) ) . '"?'.'>'; ?>
+// Use `echo` for first line to prevent any extra characters at start of document.
+echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) ) . '"?>'; ?>
 
 <rss version="2.0"
 	xmlns:content="http://purl.org/rss/1.0/modules/content/"
@@ -40,7 +40,11 @@ echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) )
 				<title><?php esc_html( the_title_rss() ); ?></title>
 				<link><?php the_permalink_rss(); ?></link>
 				<pubDate><?php echo esc_html( mysql2date( 'D, d M Y H:i:s +0000', get_post_time( 'Y-m-d H:i:s', true ), false ) ); ?></pubDate>
-				<dc:creator><?php the_author(); ?></dc:creator>
+				<?php if ( function_exists( 'coauthors' ) ) : ?>
+					<?php coauthors( '</dc:creator><dc:creator>', '</dc:creator><dc:creator>', '<dc:creator>', '</dc:creator>' ); ?>
+				<?php else : ?>
+					<dc:creator><?php the_author(); ?></dc:creator>
+				<?php endif; ?>
 				<guid isPermaLink="false"><?php esc_html( the_guid() ); ?></guid>
 				<description><![CDATA[<?php the_excerpt_rss(); ?>]]></description>
 				<content:encoded><![CDATA[<?php include( 'article.php' ); ?>]]></content:encoded>
@@ -48,4 +52,4 @@ echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) )
 		<?php endwhile; ?>
 	<?php endif; ?>
 </channel>
-</rss><?php exit; ?>
+</rss>
