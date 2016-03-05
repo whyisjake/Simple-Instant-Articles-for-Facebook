@@ -662,6 +662,11 @@ class Simple_FB_Instant_Articles {
 			$figure   = $dom->createElement( 'figure' );
 			$top_node = $node;
 
+			// Let's add the reaction data. This will allow for likes/comments on the images.
+			$figurefeedback = $dom->createAttribute('data-feedback');
+			$figurefeedback->value = apply_filters( 'simple_fb_reaction', 'fb:likes,fb:comments' );
+			$figure->appendChild( $figurefeedback );
+
 			// If image node is not a direct child of the body, we need to move it there.
 			// Recurse up the tree looking for highest level parent/grandparent node.
 			while ( $top_node->parentNode && 'body' !== $top_node->parentNode->nodeName ) {
