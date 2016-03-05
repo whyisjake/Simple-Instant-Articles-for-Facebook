@@ -28,7 +28,9 @@ Add support for Facebook Instant Articles to your WordPress site. This plugin cr
 * Adding upstream changes from the Human Made team, props dashaluna, mattheu, jetlej, and AramZS.
 * Extended the HumanMade branch into a universally usable plugin, maintaining backwards compatibility with previous versions. [#39](https://github.com/whyisjake/Simple-Instant-Articles-for-Facebook/pull/39) - props [AramZS](https://github.com/AramZS)
 *Allow for endpoint on article links to be used for query vars or not at all enhancement [#37](https://github.com/whyisjake/Simple-Instant-Articles-for-Facebook/pull/39) - props [AramZS](https://github.com/AramZS)
-* Updated format for kicker [#35] - props [jetlej](https://profiles.wordpress.org/jetlej)
+* Updated format for kicker [#35](https://github.com/whyisjake/Simple-Instant-Articles-for-Facebook/pull/35) - props [jetlej](https://profiles.wordpress.org/jetlej)
+* Better README [#41](https://github.com/whyisjake/Simple-Instant-Articles-for-Facebook/pull/41)
+* Add the reaction stuff to images. [#40](https://github.com/whyisjake/Simple-Instant-Articles-for-Facebook/pull/40)
 
 = 0.5.0 =
 * Initial Release
