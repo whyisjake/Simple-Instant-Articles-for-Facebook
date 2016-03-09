@@ -21,7 +21,6 @@ class Simple_FB_Instant_Articles {
 	 */
 	private $token = 'fb';
 
-
 	/**
 	 * Image Size - 2048x2048 recommended resolution.
 	 * @see https://developers.facebook.com/docs/instant-articles/reference/image
@@ -224,9 +223,6 @@ class Simple_FB_Instant_Articles {
 
 		// Try and fix misc shortcodes.
 		$this->sandbox_shortcode_output( 'protected-iframe' );
-
-		// Shortcodes - custom galleries.
-		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
 
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
@@ -946,7 +942,6 @@ class Simple_FB_Instant_Articles {
 function simple_fb_instant_articles( $file, $version ) {
 	return Simple_FB_Instant_Articles::instance( $file, $version );
 }
-
 
 /**
  * These functions are included to assure backwards compatability
