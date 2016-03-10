@@ -10,6 +10,12 @@ Author URI: http://jakespurlock.com
 class Simple_FB_Instant_Articles {
 
 	/**
+	 * Image Size - 2048x2048 recommended resolution.
+	 * @see https://developers.facebook.com/docs/instant-articles/reference/image
+	 */
+	public $image_size = array( 2048, 2048 );
+
+	/**
 	 * The one instance of Simple_FB_Instant_Articles.
 	 *
 	 * @var Simple_FB_Instant_Articles
@@ -17,15 +23,14 @@ class Simple_FB_Instant_Articles {
 	private static $instance;
 
 	/**
+	 * Template path.
+	 */
+	private $template_path;
+
+	/**
 	 * Endpoint query var.
 	 */
 	private $token = 'fb';
-
-	/**
-	 * Image Size - 2048x2048 recommended resolution.
-	 * @see https://developers.facebook.com/docs/instant-articles/reference/image
-	 */
-	public $image_size = array( 2048, 2048 );
 
 	/**
 	 * Instantiate or return the one Simple_FB_Instant_Articles instance.
@@ -42,11 +47,6 @@ class Simple_FB_Instant_Articles {
 
 		return self::$instance;
 	}
-
-	/**
-	 * Template path.
-	 */
-	private $template_path;
 
 	/**
 	 * Initiate actions.
