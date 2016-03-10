@@ -21,7 +21,6 @@ class Simple_FB_Instant_Articles {
 	 */
 	private $token = 'fb';
 
-
 	/**
 	 * Image Size - 2048x2048 recommended resolution.
 	 * @see https://developers.facebook.com/docs/instant-articles/reference/image
@@ -30,6 +29,9 @@ class Simple_FB_Instant_Articles {
 
 	/**
 	 * Instantiate or return the one Simple_FB_Instant_Articles instance.
+	 *
+	 * @param string|null $file    Full path with filename of the main plugin file.
+	 * @param string      $version Version number of the plugin.
 	 *
 	 * @return Simple_FB_Instant_Articles
 	 */
@@ -42,14 +44,15 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
-	 * Template Path.
+	 * Template path.
 	 */
 	private $template_path;
 
 	/**
 	 * Initiate actions.
 	 *
-	 * @return Simple_FB_Instant_Articles
+	 * @param string $file    Full path with filename of the main plugin file.
+	 * @param string $version Version number of the plugin.
 	 */
 	public function __construct( $file, $version ) {
 
@@ -68,7 +71,7 @@ class Simple_FB_Instant_Articles {
 		$this->file          = $file;
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
 		$this->home_url      = trailingslashit( home_url() );
-		$this->endpoint = apply_filters( 'simple_fb_article_endpoint', 'fb-instant');
+		$this->endpoint      = apply_filters( 'simple_fb_article_endpoint', 'fb-instant' );
 	}
 
 	/**
@@ -77,7 +80,7 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	public function init() {
-		if ( $this->is_redirectable_endpoint() ){
+		if ( $this->is_redirectable_endpoint() ) {
 			add_rewrite_endpoint( $this->endpoint, EP_PERMALINK );
 		}
 		// Do these work? They don't seem to work.
@@ -98,9 +101,12 @@ class Simple_FB_Instant_Articles {
 		}
 	}
 
-	/** Check if the endpoint is valid to be assigned a redirect, or non-existent/query var */
-	function is_redirectable_endpoint(){
-		if ('' === $this->endpoint || 0 == strpos($this->endpoint, '?') ){
+	/**
+	 * Check if the endpoint is valid to be assigned a redirect,
+	 * or non-existent/query var.
+	 */
+	public function is_redirectable_endpoint() {
+		if ( '' === $this->endpoint || 0 == strpos( $this->endpoint, '?' ) ) {
 			return false;
 		} else {
 			return true;
@@ -118,7 +124,7 @@ class Simple_FB_Instant_Articles {
 	/**
 	 * Based on the post ID, render the Instant Articles page.
 	 *
-	 * @param  int   $post_id Post ID.
+	 * @param int $post_id Post ID.
 	 *
 	 * @return void
 	 */
@@ -147,12 +153,11 @@ class Simple_FB_Instant_Articles {
 		add_feed( $feed_slug, array( $this, 'feed_template' ) );
 	}
 
-
 	/**
 	 * Set WP query variables for FB IA feed, so we can customise
 	 * what posts are considered for the feed.
 	 *
-	 * Was once pre_get_posts
+	 * Was once pre_get_posts.
 	 *
 	 * @param $query WP_Query object.
 	 */
@@ -177,14 +182,14 @@ class Simple_FB_Instant_Articles {
 	public function feed_template() {
 		global $wp_query;
 
-		// Prevent 404 on feed
+		// Prevent 404 on feed.
 		$wp_query->is_404 = false;
 		status_header( 200 );
 
-		$file_name = 'feed.php';
+		$file_name          = 'feed.php';
 		$user_template_file = apply_filters( 'simple_fb_feed_template_file', trailingslashit( get_template_directory() ) . $file_name );
 
-		// Load user feed template if it exists, otherwise use plugin template
+		// Load user feed template if it exists, otherwise use plugin template.
 		if ( file_exists( $user_template_file ) ) {
 			$template = $user_template_file;
 		} else {
@@ -193,7 +198,6 @@ class Simple_FB_Instant_Articles {
 
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_before_feed' );
-
 
 		if ( 0 === validate_file( $template ) ) {
 			require( $template );
@@ -209,7 +213,7 @@ class Simple_FB_Instant_Articles {
 	 * Hooked in just before the content is rendered in both feeds and single post view
 	 * for Facebook IA only.
 	 *
-	 * Was once pre_render
+	 * Was once pre_render.
 	 *
 	 * This function is added to the following actions:
 	 * 1) simple_fb_pre_render
@@ -252,8 +256,16 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_social_embed' ), 1000, 2 );
 	}
 
+	/**
+	 * Returns post URL to be used in FB IA feed.
+	 * Post URL that renders current post in the FB IA format.
+	 *
+	 * @param string $link Post URL.
+	 *
+	 * @return string      Post URL used in FB IA feed.
+	 */
 	public function rss_permalink( $link ) {
-		if ( '' !== $this->endpoint ){
+		if ( '' !== $this->endpoint ) {
 			return trailingslashit( $link ) . $this->endpoint;
 		} else {
 			return $link;
@@ -263,10 +275,10 @@ class Simple_FB_Instant_Articles {
 	/**
 	 * Gallery Shortcode.
 	 *
-	 * @param  array     $atts       Array of attributes passed to shortcode.
-	 * @param  string    $content    The content passed to the shortcode.
+	 * @param array  $atts    Array of attributes passed to shortcode.
+	 * @param string $content The content passed to the shortcode.
 	 *
-	 * @return string                The generated content.
+	 * @return string         The generated content.
 	 */
 	public function gallery_shortcode( $atts, $content = '' ) {
 
@@ -321,10 +333,10 @@ class Simple_FB_Instant_Articles {
 	 * Overwrite jetpack native shortcode.
 	 * Add the script for each shortcode. Convert in FB IA markup.
 	 *
-	 * @param array  $atts    Array of attributes passed to shortcode.
+	 * @param array $atts Array of attributes passed to shortcode.
 	 *
-	 * @return string|void    FB IA formatted polldaddy markup.
-	 *                        Nothing if polldaddy functionality doesn't exist.
+	 * @return string|void FB IA formatted polldaddy markup.
+	 *                     Nothing if polldaddy functionality doesn't exist.
 	 */
 	public function polldaddy_shortcode( $atts ) {
 
@@ -418,7 +430,7 @@ class Simple_FB_Instant_Articles {
 		) );
 
 		if ( preg_match( "/$regex_bits/", $url, $matches ) ) {
-			$class  = 'op-social';
+			$class = 'op-social';
 
 			// Add JS file to embed markup.
 			if ( false !== strpos( $matches[0], 'instagram' ) ) {
@@ -469,7 +481,7 @@ class Simple_FB_Instant_Articles {
 			$this->unwrap_node( $iframe->parentNode );
 		}
 
-		// Remove P and <br> tags from brightcove embed.
+		// Remove <br> and <p> tags from brightcove embed.
 		foreach ( $xpath->query( '//div[contains(@class, \'brightcove-embed\')]' ) as $brightcove ) {
 
 			$br_nodes = $brightcove->parentNode->getElementsByTagName( 'br' );
@@ -482,7 +494,6 @@ class Simple_FB_Instant_Articles {
 			while ( $p_nodes->length > 0 ) {
 				$this->unwrap_node( $p_nodes->item( 0 ) );
 			}
-
 		}
 
 		// Remove brightcove width/height params.
@@ -491,7 +502,6 @@ class Simple_FB_Instant_Articles {
 				$node->parentNode->removeChild( $node );
 			}
 		}
-
 	}
 
 	/**
@@ -500,11 +510,11 @@ class Simple_FB_Instant_Articles {
 	 *
 	 * Ref: https://developers.facebook.com/docs/plugins/embedded-posts
 	 *
-	 * @param string   $html    HTML markup to be embeded into post content.
-	 * @param string   $url     The attempted embed URL.
-	 * @param array    $attr    An array of shortcode attributes.
+	 * @param string $html HTML markup to be embeded into post content.
+	 * @param string $url  The attempted embed URL.
+	 * @param array  $attr An array of shortcode attributes.
 	 *
-	 * @return string           Facebook embed code with required script.
+	 * @return string      Facebook embed code with required script.
 	 */
 	public function reformat_facebook_embed( $html, $url, $attr ) {
 
@@ -663,7 +673,7 @@ class Simple_FB_Instant_Articles {
 			$top_node = $node;
 
 			// Let's add the reaction data. This will allow for likes/comments on the images.
-			$figurefeedback = $dom->createAttribute('data-feedback');
+			$figurefeedback        = $dom->createAttribute( 'data-feedback' );
 			$figurefeedback->value = apply_filters( 'simple_fb_reaction', 'fb:likes,fb:comments' );
 			$figure->appendChild( $figurefeedback );
 
@@ -710,7 +720,6 @@ class Simple_FB_Instant_Articles {
 			foreach ( $list as $node ) {
 				$node->parentNode->removeChild( $node );
 			}
-
 		}
 
 		// If we found anything, run this again.
@@ -718,7 +727,6 @@ class Simple_FB_Instant_Articles {
 		if ( $found ) {
 			$this->cleanup_empty_nodes( $dom, $xpath );
 		}
-
 	}
 
 	/**
@@ -798,13 +806,14 @@ class Simple_FB_Instant_Articles {
 	public function get_omniture_code( $post_id ) {
 
 		$omniture_data = array(
-			'cobrand_vendor'   => 'facebookinstantarticle',
-			'assetid'          => $post_id,
-			'pathName'         => get_permalink( $post_id )
+			'cobrand_vendor' => 'facebookinstantarticle',
+			'assetid'        => $post_id,
+			'pathName'       => get_permalink( $post_id ),
 		);
 
-		$omniture_data = apply_filters('simple_fb_omniture_data', $omniture_data);
-		if ( empty( $omniture_data['url'] ) ){
+		$omniture_data = apply_filters( 'simple_fb_omniture_data', $omniture_data );
+
+		if ( empty( $omniture_data['url'] ) ) {
 			return;
 		}
 
@@ -819,7 +828,7 @@ class Simple_FB_Instant_Articles {
 	 * This functionality is mostly a duplicate of parts/single/format-video.
 	 *
 	 * @param  string $content Post content.
-	 * @param  mixed  $post_id Post id.
+	 * @param  mixed  $post_id Post ID.
 	 *
 	 * @return string Post content.
 	 */
@@ -848,6 +857,7 @@ class Simple_FB_Instant_Articles {
 	 * Used to handle generic shortcodes that we don't really want to mess with might be broken.
 	 *
 	 * @param  string $shortcode_tag Shortcode.
+	 *
 	 * @return void
 	 */
 	protected function sandbox_shortcode_output( $shortcode_tag ) {
@@ -860,7 +870,7 @@ class Simple_FB_Instant_Articles {
 		$old_callback = $shortcode_tags[ $shortcode_tag ];
 
 		$shortcode_tags[ $shortcode_tag ] = function() use ( $old_callback ) {
-			$r = '<figure class="op-interactive"><iframe>';
+			$r  = '<figure class="op-interactive"><iframe>';
 			$r .= call_user_func_array( $old_callback, func_get_args() );
 			$r .= '</iframe></figure>';
 			return $r;
@@ -906,7 +916,6 @@ class Simple_FB_Instant_Articles {
 
 		// Remove the now empty node.
 		$node->parentNode->removeChild( $node );
-
 	}
 
 	/**
@@ -920,11 +929,12 @@ class Simple_FB_Instant_Articles {
 	 */
 	protected function render_template( $template_name, $data = array() ) {
 
-		$template_name = str_replace( '.php', '', $template_name );
-		$user_template_file = apply_filters('simple_fb_template_'.$template_name, $template_name);
+		$template_name      = str_replace( '.php', '', $template_name );
+		$user_template_file = apply_filters( 'simple_fb_template_' . $template_name, $template_name );
 		$user_template_file = str_replace( '.php', '', $user_template_file );
-		if ( file_exists( $user_template_file . '.php') ) {
-			$template_path = $user_template_file.'.php';
+
+		if ( file_exists( $user_template_file . '.php' ) ) {
+			$template_path = $user_template_file . '.php';
 		} else {
 			$template_path = trailingslashit( $this->template_path ) . $template_name . '.php';
 		}
@@ -941,36 +951,44 @@ class Simple_FB_Instant_Articles {
 /**
  * Instantiate or return the one Simple_FB_Instant_Articles instance.
  *
+ * @param string $file    Full path with filename of the main plugin file.
+ * @param string $version Version number of the plugin.
+ *
  * @return Simple_FB_Instant_Articles
  */
 function simple_fb_instant_articles( $file, $version ) {
 	return Simple_FB_Instant_Articles::instance( $file, $version );
 }
 
-
 /**
- * These functions are included to assure backwards compatability
+ * These functions are included to assure backwards compatibility.
  */
-
 
 /**
  * Generate the caption for a post thumbnail.
+ *
  * @return string Post content, with the simple-fb-caption filter tacked onto it.
  */
 function simple_fb_thumbnail_caption() {
+
 	$post_id    = get_the_id();
 	$thumb_id   = get_post_thumbnail_id( $post_id );
 	$thumb_post = get_post( $thumb_id );
 	$caption    = apply_filters( 'simple-fb-caption', $thumb_post->post_excerpt );
+
 	return $caption;
 }
+
 /**
  * Build the header for the story.
- * @return string header
+ *
+ * @return string Header.
  */
 function simple_fb_header_figure() {
+
 	$caption = sprintf( '<figcaption>%s</figcaption>', simple_fb_thumbnail_caption() );
 	$content = sprintf( '<figure>%s%s</figure>', get_the_post_thumbnail( get_the_id(), 'full' ), $caption );
+
 	return apply_filters( 'simple_fb_header_figure', $content );
 }
 
