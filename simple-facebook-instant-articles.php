@@ -41,6 +41,7 @@ class Simple_FB_Instant_Articles {
 	 * @return Simple_FB_Instant_Articles
 	 */
 	public static function instance( $file = null, $version = '' ) {
+
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self( $file, $version );
 		}
@@ -80,6 +81,7 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	public function init() {
+
 		if ( $this->is_redirectable_endpoint() ) {
 			add_rewrite_endpoint( $this->endpoint, EP_PERMALINK );
 		}
@@ -92,6 +94,7 @@ class Simple_FB_Instant_Articles {
 	 * Add the template redirect.
 	 */
 	public function add_actions() {
+
 		if ( ! is_singular() ) {
 			return;
 		}
@@ -106,6 +109,7 @@ class Simple_FB_Instant_Articles {
 	 * or non-existent/query var.
 	 */
 	public function is_redirectable_endpoint() {
+
 		if ( '' === $this->endpoint || 0 == strpos( $this->endpoint, '?' ) ) {
 			return false;
 		} else {
@@ -117,6 +121,7 @@ class Simple_FB_Instant_Articles {
 	 * Redirect the template for the Instant Article post.
 	 */
 	public function template_redirect() {
+
 		$this->render( get_queried_object_id() );
 		exit;
 	}
@@ -149,6 +154,7 @@ class Simple_FB_Instant_Articles {
 	 * @return void
 	 */
 	public function add_feed() {
+
 		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
 		add_feed( $feed_slug, array( $this, 'feed_template' ) );
 	}
@@ -265,6 +271,7 @@ class Simple_FB_Instant_Articles {
 	 * @return string      Post URL used in FB IA feed.
 	 */
 	public function rss_permalink( $link ) {
+
 		if ( '' !== $this->endpoint ) {
 			return trailingslashit( $link ) . $this->endpoint;
 		} else {
@@ -957,6 +964,7 @@ class Simple_FB_Instant_Articles {
  * @return Simple_FB_Instant_Articles
  */
 function simple_fb_instant_articles( $file, $version ) {
+
 	return Simple_FB_Instant_Articles::instance( $file, $version );
 }
 
