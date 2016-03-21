@@ -100,7 +100,7 @@ class Simple_FB_Instant_Articles {
 
 	/** Check if the endpoint is valid to be assigned a redirect, or non-existent/query var */
 	function is_redirectable_endpoint(){
-		if ('' === $this->endpoint || 0 == strpos($this->endpoint, '?') ){
+		if ('' === $this->endpoint || 0 === strpos($this->endpoint, '?') ){
 			return false;
 		} else {
 			return true;
