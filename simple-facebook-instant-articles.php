@@ -809,6 +809,14 @@ class Simple_FB_Instant_Articles {
 		return $this->render_template( 'script-omniture', array( 'omniture_data' => $omniture_data ) );
 	}
 
+	public function get_fbia_ad(){
+		salon_ad_controller()->ad_view(array(
+			'width'		=> 	'300',
+			'height'	=>	'250',
+			
+		));
+	}
+
 	/**
 	 * Prepend full width media.
 	 *
