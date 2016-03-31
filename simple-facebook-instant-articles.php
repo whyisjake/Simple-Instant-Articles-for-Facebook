@@ -47,6 +47,11 @@ class Simple_FB_Instant_Articles {
 	private $template_path;
 
 	/**
+	 * Endpoint query var
+	 */
+	private $endpoint;
+
+	/**
 	 * Initiate actions.
 	 *
 	 * @return Simple_FB_Instant_Articles
@@ -68,7 +73,7 @@ class Simple_FB_Instant_Articles {
 		$this->file          = $file;
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
 		$this->home_url      = trailingslashit( home_url() );
-		$this->endpoint = apply_filters( 'simple_fb_article_endpoint', 'fb-instant');
+		$this->endpoint      = apply_filters( 'simple_fb_article_endpoint', 'fb-instant' );
 	}
 
 	/**
