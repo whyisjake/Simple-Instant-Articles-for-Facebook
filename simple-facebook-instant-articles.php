@@ -811,8 +811,8 @@ class Simple_FB_Instant_Articles {
 			'pathName'         => get_permalink( $post_id )
 		);
 
-		$omniture_data = apply_filters('simple_fb_omniture_data', $omniture_data);
-		if ( empty( $omniture_data['url'] ) ){
+		$omniture_data = apply_filters('simple_fb_omniture_data', $omniture_data );
+		if ( empty( $omniture_data['url'] ) ) {
 			return;
 		}
 
