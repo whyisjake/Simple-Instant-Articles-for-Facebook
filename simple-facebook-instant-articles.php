@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Simple Facebook Instant Articles
-Version: 0.5.1
+Version: 0.5.2
 Description: Add support to Facebook Instant Articles
 Author: Jake Spurlock, Human Made Limited
 Author URI: http://jakespurlock.com
