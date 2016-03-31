@@ -50,6 +50,16 @@ class Simple_FB_Instant_Articles {
 	}
 
 	/**
+	 * Template Path.
+	 */
+	private $template_path;
+
+	/**
+	 * Endpoint query var
+	 */
+	private $endpoint;
+
+	/**
 	 * Initiate actions.
 	 *
 	 * @param string $file    Full path with filename of the main plugin file.
@@ -109,11 +119,10 @@ class Simple_FB_Instant_Articles {
 	 * or non-existent/query var.
 	 */
 	public function is_redirectable_endpoint() {
-
-		if ( '' === $this->endpoint || 0 == strpos( $this->endpoint, '?' ) ) {
-			return false;
-		} else {
+		if ( '' === $this->endpoint || false === strpos( $this->endpoint, '?' ) ) {
 			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -142,8 +151,8 @@ class Simple_FB_Instant_Articles {
 
 			$template = apply_filters( 'simple_fb_article_template_file', $this->template_path . '/article.php' );
 
-			if ( 0 === validate_file( $template ) ) {
-				require( $template );
+			if ( 0 === validate_file( $template ) && file_exists( $template ) ) {
+				include( $template );
 			}
 		}
 	}
@@ -205,8 +214,8 @@ class Simple_FB_Instant_Articles {
 		// Any functions hooked in here must NOT output any data or else feed will break.
 		do_action( 'simple_fb_before_feed' );
 
-		if ( 0 === validate_file( $template ) ) {
-			require( $template );
+		if ( 0 === validate_file( $template ) && file_exists( $template ) ) {
+			include( $template );
 		}
 
 		// Any functions hooked in here must NOT output any data or else feed will break.
@@ -251,32 +260,12 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_filter( 'the_content', array( $this, 'append_analytics_code' ), 1100 );
 
-		// Post URL for the feed.
-		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
-
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_nodes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_social_embed' ), 1000, 2 );
-	}
-
-	/**
-	 * Returns post URL to be used in FB IA feed.
-	 * Post URL that renders current post in the FB IA format.
-	 *
-	 * @param string $link Post URL.
-	 *
-	 * @return string      Post URL used in FB IA feed.
-	 */
-	public function rss_permalink( $link ) {
-
-		if ( '' !== $this->endpoint ) {
-			return trailingslashit( $link ) . $this->endpoint;
-		} else {
-			return $link;
-		}
 	}
 
 	/**
@@ -322,12 +311,16 @@ class Simple_FB_Instant_Articles {
 		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : null;
 
 		if ( ! $attachment_id ) {
-			return;
+			return '';
 		}
 
 		// Get image caption.
 		$reg_ex  = preg_match( '#^<img.*?\/>(.*)$#', trim( $content ), $matches );
 		$caption = isset( $matches[1] ) ? trim( $matches[1] ) : '';
+
+		if ( empty( $caption ) ) {
+			$caption = get_post_field( 'post_excerpt', $attachment_id );
+		}
 
 		ob_start();
 		$this->render_image_markup( $attachment_id, $caption );
@@ -348,7 +341,7 @@ class Simple_FB_Instant_Articles {
 	public function polldaddy_shortcode( $atts ) {
 
 		if ( ! class_exists( 'PolldaddyShortcode' ) ) {
-			return;
+			return '';
 		}
 
 		$polldaddy = new PolldaddyShortcode();
@@ -373,16 +366,21 @@ class Simple_FB_Instant_Articles {
 	 * @param int|string $src     Image ID or source to output in FB IA format.
 	 * @param string     $caption Image caption to display in FB IA format.
 	 */
-	public function render_image_markup( $src, $caption = '' ) {
+	public function render_image_markup( $image_id, $caption = '' ) {
+
+		global $fb_instant_image_id, $fb_instant_caption, $fb_instant_src;
+		$fb_instant_image_id = $image_id;
+		$fb_instant_caption  = $caption;
 
 		// Handle passing image ID.
-		if ( is_numeric( $src ) ) {
-			$image = wp_get_attachment_image_src( $src, $this->image_size );
+		if ( is_numeric( $image_id ) ) {
+			$image = wp_get_attachment_image_src( $image_id, $this->image_size );
 			$src   = $image ? $image[0] : null;
+			$fb_instant_src = $src;
 		}
 
 		if ( empty( $src ) ) {
-			return;
+			return '';
 		}
 
 		$template = trailingslashit( $this->template_path ) . 'image.php';
@@ -402,6 +400,8 @@ class Simple_FB_Instant_Articles {
 
 		if ( $attachment_post && $attachment_post->post_excerpt ) {
 			return trim( $attachment_post->post_excerpt );
+		} else {
+			return '';
 		}
 	}
 
@@ -819,7 +819,6 @@ class Simple_FB_Instant_Articles {
 		);
 
 		$omniture_data = apply_filters( 'simple_fb_omniture_data', $omniture_data );
-
 		if ( empty( $omniture_data['url'] ) ) {
 			return;
 		}
