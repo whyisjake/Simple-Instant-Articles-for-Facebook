@@ -35,7 +35,7 @@ echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) )
 	<?php do_action( 'rss2_head' ); // Add RSS2 headers ?>
 
 	<?php if ( have_posts() ) : ?>
-		<?php while ( have_posts() ) : the_post(); ?>
+		<?php while ( have_posts() ) : the_post(); do_action( 'simple_fb_pre_render', get_the_id() ); ?>
 			<item>
 				<title><?php esc_html( the_title_rss() ); ?></title>
 				<link><?php the_permalink_rss(); ?></link>
