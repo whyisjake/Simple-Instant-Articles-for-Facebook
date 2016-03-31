@@ -139,8 +139,8 @@ class Simple_FB_Instant_Articles {
 
 			$template = apply_filters( 'simple_fb_article_template_file', $this->template_path . '/article.php' );
 
-			if ( 0 === validate_file( $template ) ) {
-				require( $template );
+			if ( 0 === validate_file( $template ) && file_exists( $template ) ) {
+				include( $template );
 			}
 		}
 	}
@@ -203,8 +203,8 @@ class Simple_FB_Instant_Articles {
 		do_action( 'simple_fb_before_feed' );
 
 
-		if ( 0 === validate_file( $template ) ) {
-			require( $template );
+		if ( 0 === validate_file( $template ) && file_exists( $template ) ) {
+			include( $template );
 		}
 
 		// Any functions hooked in here must NOT output any data or else feed will break.
