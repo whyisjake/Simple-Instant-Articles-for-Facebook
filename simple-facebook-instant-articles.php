@@ -300,7 +300,7 @@ class Simple_FB_Instant_Articles {
 		$attachment_id = isset( $atts['id'] ) ? (int) str_replace( 'attachment_', '', $atts['id'] ) : null;
 
 		if ( ! $attachment_id ) {
-			return;
+			return '';
 		}
 
 		// Get image caption.
@@ -330,7 +330,7 @@ class Simple_FB_Instant_Articles {
 	public function polldaddy_shortcode( $atts ) {
 
 		if ( ! class_exists( 'PolldaddyShortcode' ) ) {
-			return;
+			return '';
 		}
 
 		$polldaddy = new PolldaddyShortcode();
@@ -389,6 +389,8 @@ class Simple_FB_Instant_Articles {
 
 		if ( $attachment_post && $attachment_post->post_excerpt ) {
 			return trim( $attachment_post->post_excerpt );
+		} else {
+			return '';
 		}
 	}
 
