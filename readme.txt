@@ -4,7 +4,7 @@ Tags: social,
 Donate link: http://jakespurlock.com/donate
 Requires at least: 3.0.1
 Tested up to: 3.4
-Stable tag: 4.3
+Stable tag: 4.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,6 +23,10 @@ Add support for Facebook Instant Articles to your WordPress site. This plugin cr
 1. If you want to test the layout of the articles, you can do by appending `/fb-instant` to the end of single posts.
 
 == Changelog ==
+
+= 0.5.2 =
+* MOAR filters.
+* Code styling fixes.
 
 = 0.5.1 =
 * Adding upstream changes from the Human Made team, props dashaluna, mattheu, jetlej, and AramZS.
