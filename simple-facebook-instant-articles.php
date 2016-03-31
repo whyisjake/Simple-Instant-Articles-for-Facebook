@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: Simple Facebook Instant Articles
-Version: 0.5.1
-Description: Add support to Facebook Instant Articles
+Version: 0.5.2
+Description: Easily add support for Facebook Instant Articles to your WordPress site.
 Author: Jake Spurlock, Human Made Limited
 Author URI: http://jakespurlock.com
 */
