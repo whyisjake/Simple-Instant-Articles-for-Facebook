@@ -1,9 +1,9 @@
 === Simple Facebook Instant Articles ===
 Contributors: whyisjake, humanmade, mattheu, dashaluna, AramZS, jetlej
-Tags: social,
+Tags: social, Facebook, feed, 
 Donate link: http://jakespurlock.com/donate
 Requires at least: 3.0.1
-Tested up to: 3.4
+Tested up to: 4.5
 Stable tag: 4.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
