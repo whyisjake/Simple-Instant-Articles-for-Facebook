@@ -103,12 +103,15 @@ class Simple_FB_Instant_Articles {
 		}
 	}
 
-	/** Check if the endpoint is valid to be assigned a redirect, or non-existent/query var */
-	function is_redirectable_endpoint(){
-		if ('' === $this->endpoint || 0 == strpos($this->endpoint, '?') ){
-			return false;
-		} else {
+	/**
+	 * Check if the endpoint is valid to be assigned a redirect, or non-existent/query var
+	 * @return boolean
+	 */
+	function is_redirectable_endpoint() {
+		if ( '' === $this->endpoint || false === strpos( $this->endpoint, '?' ) ) {
 			return true;
+		} else {
+			return false;
 		}
 	}
 
