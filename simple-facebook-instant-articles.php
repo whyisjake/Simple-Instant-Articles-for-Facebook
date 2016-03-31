@@ -983,4 +983,4 @@ function simple_fb_header_figure() {
 }
 
 // Kick off the plugin on init.
-simple_fb_instant_articles( __FILE__, '0.5.0' );
+simple_fb_instant_articles( __FILE__, '0.5.2' );
