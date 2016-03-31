@@ -249,23 +249,12 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'the_content', array( $this, 'reformat_post_content' ), 1000 );
 		add_filter( 'the_content', array( $this, 'append_analytics_code' ), 1100 );
 
-		// Post URL for the feed.
-		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
-
 		// Render post content into FB IA format - using DOM object.
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_nodes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_social_embed' ), 1000, 2 );
-	}
-
-	public function rss_permalink( $link ) {
-		if ( '' !== $this->endpoint ){
-			return trailingslashit( $link ) . $this->endpoint;
-		} else {
-			return $link;
-		}
 	}
 
 	/**
