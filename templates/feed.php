@@ -26,11 +26,11 @@ echo '<?xml version="1.0" encoding="' . esc_attr( get_option( 'blog_charset' ) )
 
 <channel>
 	<title><?php echo esc_html( wp_title() ); ?></title>
-	<atom:link href="<?php esc_url( self_link() ); ?>" rel="self" type="application/rss+xml" />
+	<atom:link href="<?php self_link(); ?>" rel="self" type="application/rss+xml" />
 	<link><?php echo esc_url( apply_filters( 'simple_fb_home_url', home_url() ) ) ?></link>
-	<description><?php echo esc_html( bloginfo( 'description' ) ); ?></description>
+	<description><?php echo bloginfo( 'description' ); ?></description>
 	<lastBuildDate><?php echo esc_html( mysql2date( 'D, d M Y H:i:s +0000', get_lastpostmodified( 'GMT' ), false ) ); ?></lastBuildDate>
-	<language><?php echo esc_html( bloginfo( 'language' ) ); ?></language>
+	<language><?php echo bloginfo( 'language' ); ?></language>
 
 	<?php do_action( 'rss2_head' ); // Add RSS2 headers ?>
 
