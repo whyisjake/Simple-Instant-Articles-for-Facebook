@@ -307,6 +307,10 @@ class Simple_FB_Instant_Articles {
 		$reg_ex  = preg_match( '#^<img.*?\/>(.*)$#', trim( $content ), $matches );
 		$caption = isset( $matches[1] ) ? trim( $matches[1] ) : '';
 
+		if ( empty( $caption ) ) {
+			$caption = get_post_field( 'post_excerpt', $attachment_id );
+		}
+
 		ob_start();
 		$this->render_image_markup( $attachment_id, $caption );
 		return ob_get_clean();
