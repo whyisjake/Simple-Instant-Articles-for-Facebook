@@ -235,6 +235,9 @@ class Simple_FB_Instant_Articles {
 		// Post URL for the feed.
 		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
 
+		// Shortcodes - custom galleries.
+		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
+
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
 		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
@@ -827,7 +830,7 @@ class Simple_FB_Instant_Articles {
 
 		return $this->render_template( 'script-omniture', array( 'omniture_data' => $omniture_data ) );
 	}
-	
+
 	/**
 	 * Prepend full width media.
 	 *
