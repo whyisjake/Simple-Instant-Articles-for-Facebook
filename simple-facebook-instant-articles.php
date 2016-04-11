@@ -72,7 +72,7 @@ class Simple_FB_Instant_Articles {
 		$this->file          = $file;
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
 		$this->home_url      = trailingslashit( home_url() );
-		$this->endpoint      = apply_filters( 'simple_fb_article_endpoint', 'fb-instant' );
+		$this->endpoint      = apply_filters( 'simple_fb_article_endpoint', '' );
 	}
 
 	/**
@@ -232,6 +232,9 @@ class Simple_FB_Instant_Articles {
 		// Try and fix misc shortcodes.
 		$this->sandbox_shortcode_output( 'protected-iframe' );
 
+		// Post URL for the feed.
+		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
+
 		// Render social embeds into FB IA format.
 		add_filter( 'embed_handler_html', array( $this, 'reformat_social_embed' ), 10, 3 );
 		add_filter( 'embed_oembed_html', array( $this, 'reformat_social_embed' ), 10, 4 );
@@ -251,6 +254,14 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_nodes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_social_embed' ), 1000, 2 );
+	}
+
+	public function rss_permalink( $link ) {
+		if ( '' !== $this->endpoint ){
+			return trailingslashit( $link ) . $this->endpoint;
+		} else {
+			return $link;
+		}
 	}
 
 	/**
