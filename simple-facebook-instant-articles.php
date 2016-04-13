@@ -21,7 +21,6 @@ class Simple_FB_Instant_Articles {
 	 */
 	private $token = 'fb';
 
-
 	/**
 	 * Image Size - 2048x2048 recommended resolution.
 	 * @see https://developers.facebook.com/docs/instant-articles/reference/image
@@ -73,7 +72,7 @@ class Simple_FB_Instant_Articles {
 		$this->file          = $file;
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
 		$this->home_url      = trailingslashit( home_url() );
-		$this->endpoint      = apply_filters( 'simple_fb_article_endpoint', 'fb-instant' );
+		$this->endpoint      = apply_filters( 'simple_fb_article_endpoint', '' );
 	}
 
 	/**
@@ -233,6 +232,9 @@ class Simple_FB_Instant_Articles {
 		// Try and fix misc shortcodes.
 		$this->sandbox_shortcode_output( 'protected-iframe' );
 
+		// Post URL for the feed.
+		add_filter( 'the_permalink_rss', array( $this, 'rss_permalink' ) );
+
 		// Shortcodes - custom galleries.
 		add_shortcode( 'sigallery', array( $this, 'api_galleries_shortcode' ) );
 
@@ -255,6 +257,14 @@ class Simple_FB_Instant_Articles {
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_nodes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_headings' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'fix_social_embed' ), 1000, 2 );
+	}
+
+	public function rss_permalink( $link ) {
+		if ( '' !== $this->endpoint ){
+			return trailingslashit( $link ) . $this->endpoint;
+		} else {
+			return $link;
+		}
 	}
 
 	/**
@@ -954,7 +964,6 @@ class Simple_FB_Instant_Articles {
 function simple_fb_instant_articles( $file, $version ) {
 	return Simple_FB_Instant_Articles::instance( $file, $version );
 }
-
 
 /**
  * These functions are included to assure backwards compatability
