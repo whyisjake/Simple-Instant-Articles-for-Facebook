@@ -170,7 +170,7 @@ class Simple_FB_Instant_Articles {
 
 		if ( $query->is_main_query() && $query->is_feed( $feed_slug ) ) {
 
-			$query->set( 'posts_per_page', intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 25 ) ) ) );
+			$query->set( 'posts_per_rss', intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss' ) ) ) );
 			$query->set( 'orderby', 'modified' );
 
 			do_action( 'simple_fb_pre_get_posts', $query );
