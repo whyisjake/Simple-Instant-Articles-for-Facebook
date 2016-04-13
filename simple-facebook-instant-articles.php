@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Simple Facebook Instant Articles
-Version: 0.5.2
+Version: 0.5.3
 Description: Add support to Facebook Instant Articles
 Author: Jake Spurlock, Human Made Limited
 Author URI: http://jakespurlock.com
@@ -170,7 +170,7 @@ class Simple_FB_Instant_Articles {
 
 		if ( $query->is_main_query() && $query->is_feed( $feed_slug ) ) {
 
-			$query->set( 'posts_per_rss', intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss', 25 ) ) ) );
+			$query->set( 'posts_per_rss', intval( apply_filters( 'simple_fb_posts_per_rss', get_option( 'posts_per_rss' ) ) ) );
 			$query->set( 'orderby', 'modified' );
 
 			do_action( 'simple_fb_pre_get_posts', $query );
@@ -983,4 +983,4 @@ function simple_fb_header_figure() {
 }
 
 // Kick off the plugin on init.
-simple_fb_instant_articles( __FILE__, '0.5.2' );
+simple_fb_instant_articles( __FILE__, '0.5.3' );
