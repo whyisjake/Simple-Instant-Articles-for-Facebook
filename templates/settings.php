@@ -8,8 +8,7 @@ class Simple_FB_Instant_Articles_Options extends Simple_FB_Instant_Articles {
 	/**
 	 * Start up
 	 */
-	public function __construct()
-	{
+	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_plugin_page' ) );
 		add_action( 'admin_init', array( $this, 'page_init' ) );
 	}
@@ -17,8 +16,7 @@ class Simple_FB_Instant_Articles_Options extends Simple_FB_Instant_Articles {
 	/**
 	 * Add options page
 	 */
-	public function add_plugin_page()
-	{
+	public function add_plugin_page() {
 		// This page will be under "Settings"
 		add_options_page(
 			'Simple Facebook Instant Articles Settings',
@@ -32,8 +30,7 @@ class Simple_FB_Instant_Articles_Options extends Simple_FB_Instant_Articles {
 	/**
 	 * Options page callback
 	 */
-	public function create_admin_page()
-	{
+	public function create_admin_page() {
 		// Set class property
 		$this->options = get_option( 'fb_instant' );
 		?>
@@ -54,8 +51,7 @@ class Simple_FB_Instant_Articles_Options extends Simple_FB_Instant_Articles {
 	/**
 	 * Register and add settings
 	 */
-	public function page_init()
-	{
+	public function page_init() {
 		register_setting(
 			'fb_instant_group', // Option group
 			'fb_instant', // Option name
@@ -84,8 +80,7 @@ class Simple_FB_Instant_Articles_Options extends Simple_FB_Instant_Articles {
 	 *
 	 * @param array $input Contains all settings fields as array keys
 	 */
-	public function sanitize( $input )
-	{
+	public function sanitize( $input ) {
 		$new_input = array();
 		if( isset( $input['page_id_number'] ) )
 			$new_input['page_id_number'] = absint( $input['page_id_number'] );
@@ -99,16 +94,14 @@ class Simple_FB_Instant_Articles_Options extends Simple_FB_Instant_Articles {
 	/**
 	 * Print the Section text
 	 */
-	public function print_section_info()
-	{
+	public function print_section_info() {
 		printf( 'Hello! Welcome to Simple Instant Articles for Facebook. First things first, if you are wondering where to find the RSS feed, you can <a href="%s">find it here</a>. If you need to add your publisher ID to the head of the document, you can do that here:', esc_url( home_url( 'feed/' . apply_filters( 'simple_fb_feed_slug', 'fb' ) ) ) );
 	}
 
 	/**
 	 * Get the settings option array and print one of its values
 	 */
-	public function page_id_number_callback()
-	{
+	public function page_id_number_callback() {
 		printf(
 			'<input type="text" id="page_id_number" name="fb_instant[page_id_number]" value="%s" />',
 			isset( $this->options['page_id_number'] ) ? esc_attr( $this->options['page_id_number']) : ''
