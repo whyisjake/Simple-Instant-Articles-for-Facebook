@@ -587,12 +587,12 @@ class Simple_FB_Instant_Articles {
 		// Parse post content to generate DOM document.
 		// Use loadHTML as it doesn't need to be well-formed to load.
 		// Charset meta tag required to ensure it correctly detects the encoding.
-		$dom->loadHTML( sprintf(
+		$dom->loadHTML( mb_convert_encoding( sprintf(
 			'<html><head><meta http-equiv="Content-Type" content="%s" charset="%s"/></head><body>%s</body></html>',
 			get_bloginfo( 'html_type' ),
 			get_bloginfo( 'charset' ),
 			$post_content
-		) );
+		), 'HTML-ENTITIES', get_bloginfo( 'charset' ) ) );
 
 		libxml_use_internal_errors( $old_value );
 
