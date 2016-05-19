@@ -7,6 +7,8 @@ Author: Jake Spurlock, Human Made Limited
 Author URI: http://jakespurlock.com
 */
 
+include_once 'templates/settings.php';
+
 class Simple_FB_Instant_Articles {
 
 	/**
@@ -61,7 +63,9 @@ class Simple_FB_Instant_Articles {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'add_feed' ) );
 		add_action( 'wp', array( $this, 'add_actions' ) );
+		add_action( 'wp_loaded', array( $this, 'flush_rules' ) );
 		add_action( 'pre_get_posts', array( $this, 'customise_feed_query' ) );
+		add_action( 'wp_head', array( $this, 'add_publisher_id_to_head' ) );
 
 		// Render post content into FB IA format.
 		add_action( 'simple_fb_pre_render', array( $this, 'setup_content_mods' ) );
@@ -74,6 +78,34 @@ class Simple_FB_Instant_Articles {
 		$this->template_path = trailingslashit( $this->dir ) . 'templates/';
 		$this->home_url      = trailingslashit( home_url() );
 		$this->endpoint      = apply_filters( 'simple_fb_article_endpoint', 'fb-instant' );
+		$this->options       = get_option( 'fb_instant' );
+	}
+
+	/**
+	 * The register activation hook should flush the rewrite rules, in the event
+	 * that it doesn't let's go ahead and flush the rules.
+	 *
+	 * @return void
+	 */
+	public function flush_rules() {
+	    $rules = get_option( 'rewrite_rules' );
+	    if ( ! isset( $rules['(' . $this->endpoint . ')/(\d*)$'] ) ) {
+	        global $wp_rewrite; $wp_rewrite->flush_rules();
+	    }
+	}
+
+	/**
+	 * Facebook wants the published ID added to the head of the document. For larger
+	 * publishers, this is likely already done, but let's provide an option for those
+	 * that haven't added it.
+	 *
+	 * @return void
+	 */
+	public function add_publisher_id_to_head() {
+		$page_id = isset( $this->options['page_id_number'] ) ? esc_attr( $this->options['page_id_number']) : '';
+		if ( ! empty( $page_id ) ) {
+			printf( '<meta property="fb:pages" content="%s" />', $page_id );
+		}
 	}
 
 	/**
