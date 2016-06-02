@@ -739,12 +739,12 @@ class Simple_FB_Instant_Articles {
 		// Get all images that are not children of figure already.
 		foreach ( $xpath->query( '//img[not(parent::figure)][contains(@class,"wp-smiley")]' ) as $node ) {
 
-			// Get the original smilie code as the array key
+			// Get the original smilie code as the array key.
 			$smilie = $node->getAttribute( 'alt' );
 
-			// If it maps to an image and we can map it to an emoji instead lets do it
+			// If it maps to an image and we can map it to an emoji instead lets do it.
 			if ( isset( $wpsmiliestrans[ $smilie ] ) && false !== strpos( $wpsmiliestrans[ $smilie ], '.png' ) ) {
-				switch( $wpsmiliestrans[ $smilie ] ) {
+				switch ( $wpsmiliestrans[ $smilie ] ) {
 					case 'frownie.png':
 						$smilie = "\xF0\x9F\x98\x9E";
 						break;
@@ -755,7 +755,7 @@ class Simple_FB_Instant_Articles {
 						$smilie = "\xF0\x9F\x99\x84";
 						break;
 					case 'mrgreen.png':
-						$smilie = "\xF0\x9F\x90\xB8\x09"; // Frog face
+						$smilie = "\xF0\x9F\x90\xB8\x09"; // Frog face, closest thing to a green smiley!
 						break;
 				}
 			}
