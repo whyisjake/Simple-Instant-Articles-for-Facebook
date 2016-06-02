@@ -760,7 +760,7 @@ class Simple_FB_Instant_Articles {
 				}
 			}
 
-			// Replace the img tag
+			// Replace the img tag.
 			$emoji = $dom->createTextNode( $smilie );
 			$node->parentNode->replaceChild( $emoji, $node );
 		}
