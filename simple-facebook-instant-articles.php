@@ -426,7 +426,7 @@ class Simple_FB_Instant_Articles {
 		) );
 
 		if ( preg_match( "/$regex_bits/", $url, $matches ) ) {
-			$class  = 'op-social';
+			$class  = 'op-interactive';
 
 			// Add JS file to embed markup.
 			if ( false !== strpos( $matches[0], 'instagram' ) ) {
