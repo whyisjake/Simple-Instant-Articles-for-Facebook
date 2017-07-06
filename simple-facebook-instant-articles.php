@@ -63,7 +63,6 @@ class Simple_FB_Instant_Articles {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'init', array( $this, 'add_feed' ) );
 		add_action( 'wp', array( $this, 'add_actions' ) );
-		add_action( 'wp_loaded', array( $this, 'flush_rules' ) );
 		add_action( 'pre_get_posts', array( $this, 'customise_feed_query' ) );
 		add_action( 'wp_head', array( $this, 'add_publisher_id_to_head' ) );
 
@@ -79,19 +78,6 @@ class Simple_FB_Instant_Articles {
 		$this->home_url      = trailingslashit( home_url() );
 		$this->endpoint      = apply_filters( 'simple_fb_article_endpoint', 'fb-instant' );
 		$this->options       = get_option( 'fb_instant' );
-	}
-
-	/**
-	 * The register activation hook should flush the rewrite rules, in the event
-	 * that it doesn't let's go ahead and flush the rules.
-	 *
-	 * @return void
-	 */
-	public function flush_rules() {
-	    $rules = get_option( 'rewrite_rules' );
-	    if ( ! isset( $rules['(' . $this->endpoint . ')/(\d*)$'] ) ) {
-	        global $wp_rewrite; $wp_rewrite->flush_rules();
-	    }
 	}
 
 	/**
@@ -282,6 +268,7 @@ class Simple_FB_Instant_Articles {
 		add_filter( 'the_content', array( $this, 'append_analytics_code' ), 1100 );
 
 		// Render post content into FB IA format - using DOM object.
+		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_emoji' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_pull_quotes' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'render_images' ), 10, 2 );
 		add_action( 'simple_fb_reformat_post_content', array( $this, 'cleanup_empty_nodes' ), 10, 2 );
@@ -722,6 +709,46 @@ class Simple_FB_Instant_Articles {
 			}
 
 			$figure->appendChild( $node );
+		}
+	}
+
+	/**
+	 * Replaces image based wp-smilies with either their emoji equivalent
+	 * or the original text otherwise you get full width smilies.
+	 *
+	 * @param \DOMDocument $dom
+	 * @param \DOMXPath    $xpath
+	 */
+	public function render_emoji( \DOMDocument &$dom, \DOMXPath &$xpath ) {
+		global $wpsmiliestrans;
+
+		// Get all images that are not children of figure already.
+		foreach ( $xpath->query( '//img[not(parent::figure)][contains(@class,"wp-smiley")]' ) as $node ) {
+
+			// Get the original smilie code as the array key.
+			$smilie = $node->getAttribute( 'alt' );
+
+			// If it maps to an image and we can map it to an emoji instead lets do it.
+			if ( isset( $wpsmiliestrans[ $smilie ] ) && false !== strpos( $wpsmiliestrans[ $smilie ], '.png' ) ) {
+				switch ( $wpsmiliestrans[ $smilie ] ) {
+					case 'frownie.png':
+						$smilie = "\xF0\x9F\x98\x9E";
+						break;
+					case 'simple-smile.png':
+						$smilie = "\xF0\x9F\x98\x83";
+						break;
+					case 'rolleyes.png':
+						$smilie = "\xF0\x9F\x99\x84";
+						break;
+					case 'mrgreen.png':
+						$smilie = "\xF0\x9F\x90\xB8\x09"; // Frog face, closest thing to a green smiley!
+						break;
+				}
+			}
+
+			// Replace the img tag.
+			$emoji = $dom->createTextNode( $smilie );
+			$node->parentNode->replaceChild( $emoji, $node );
 		}
 	}
 
