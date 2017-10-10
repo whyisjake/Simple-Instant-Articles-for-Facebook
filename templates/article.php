@@ -6,9 +6,11 @@
 <!doctype html>
 <html lang="en" prefix="op: http://media.facebook.com/op#">
 <head>
+	<?php do_action( 'simple_fb_before_the_head' ); ?>
 	<meta property="op:markup_version" content="v1.0">
 	<meta property="fb:use_automatic_ad_placement" content="true">
 	<link rel="canonical" href="<?php the_permalink(); ?>">
+	<?php do_action( 'simple_fb_after_the_head' ); ?>
 </head>
 <body>
 	<article>
