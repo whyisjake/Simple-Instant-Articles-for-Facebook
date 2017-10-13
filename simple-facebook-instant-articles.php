@@ -170,7 +170,16 @@ class Simple_FB_Instant_Articles {
 	 */
 	public function add_feed() {
 		$feed_slug = apply_filters( 'simple_fb_feed_slug', $this->token );
-		add_feed( $feed_slug, array( $this, 'feed_template' ) );
+
+		// register multiple feeds if simple_fb_feed_slug returns an array.
+		// feed queries can be differentiated via the customise_feed_query action
+		if (is_array($feed_slug)) {
+			foreach ($feed_slug as $slug) {
+				add_feed( $slug, array( $this, 'feed_template' ) );
+			}
+		} else {
+			add_feed( $feed_slug, array( $this, 'feed_template' ) );
+		}
 	}
 
 
