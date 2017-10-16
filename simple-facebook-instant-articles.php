@@ -380,28 +380,27 @@ class Simple_FB_Instant_Articles {
 	/**
 	 * Outputs image markup in FB IA format.
 	 *
-	 * @param int|string $src     Image ID or source to output in FB IA format.
-	 * @param string     $caption Image caption to display in FB IA format.
+	 * @param int    $image_id Image ID or source to output in FB IA format.
+	 * @param string $caption  Image caption to display in FB IA format.
 	 */
 	public function render_image_markup( $image_id, $caption = '' ) {
 
-		global $fb_instant_image_id, $fb_instant_caption, $fb_instant_src;
-		$fb_instant_image_id = $image_id;
-		$fb_instant_caption  = $caption;
-
-		// Handle passing image ID.
-		if ( is_numeric( $image_id ) ) {
-			$image = wp_get_attachment_image_src( $image_id, $this->image_size );
-			$src   = $image ? $image[0] : null;
-			$fb_instant_src = $src;
+		if ( !is_numeric( $image_id ) ) {
+			return;
 		}
+
+		$image = wp_get_attachment_image_src( $image_id, $this->image_size );
+		$src   = $image ? $image[0] : null;
 
 		if ( empty( $src ) ) {
-			return '';
+			return;
 		}
 
-		$template = trailingslashit( $this->template_path ) . 'image.php';
-		require( $template );
+		echo $this->render_template('image', array(
+			'fb_instant_image_id' => $image_id,
+			'fb_instant_caption' => $caption,
+			'fb_instant_src' => $src
+		));
 	}
 
 	/**
